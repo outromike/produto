@@ -109,10 +109,10 @@ export async function uploadProducts(formData: FormData): Promise<{ error?: stri
             allProducts = allProducts.concat(productsJVL);
         }
 
-        // Path to save the new JSON file
-        const filePath = path.join(process.cwd(), 'src', 'data', 'products1.json');
+        // Path to save the JSON file, overwriting the existing one.
+        const filePath = path.join(process.cwd(), 'src', 'data', 'products.json');
         
-        // Write the combined data to the new file
+        // Write the combined data to the file
         await fs.writeFile(filePath, JSON.stringify(allProducts, null, 2), 'utf-8');
 
     } catch (error) {
