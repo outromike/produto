@@ -17,7 +17,6 @@ import { login } from "@/app/login/actions";
 import { useState, useTransition } from "react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { AlertCircle } from "lucide-react";
-import { useRouter } from "next/navigation";
 
 const formSchema = z.object({
   username: z.string().min(1, { message: "Username is required." }),
@@ -27,7 +26,6 @@ const formSchema = z.object({
 export function LoginForm() {
   const [error, setError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
-  const router = useRouter();
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -45,8 +43,9 @@ export function LoginForm() {
         setError(result.error);
         form.reset();
       } else if (result?.success) {
-        router.push('/products');
-        router.refresh(); // Forces a refresh to ensure session is read
+        // Redirecting using window.location to ensure a full page reload,
+        // which helps in picking up the new session state correctly.
+        window.location.href = '/products';
       }
     });
   }
