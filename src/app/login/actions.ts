@@ -12,7 +12,7 @@ export async function login(credentials: User): Promise<{ error?: string }> {
   }
   
   await setSession(user);
-  redirect('/products');
+  redirect('/dashboard');
 }
 
 export async function logout() {

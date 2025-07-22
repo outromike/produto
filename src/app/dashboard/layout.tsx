@@ -4,8 +4,10 @@ import { redirect } from 'next/navigation';
 
 export default async function DashboardLayout({
   children,
+  products,
 }: {
-  children: React.ReactNode
+  children: React.ReactNode;
+  products: React.ReactNode;
 }) {
   const session = await getSession();
   if (!session?.user) {
@@ -17,5 +19,5 @@ export default async function DashboardLayout({
       <Header user={session.user} />
       <main className="flex-1">{children}</main>
     </div>
-  )
+  );
 }
