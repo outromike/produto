@@ -20,9 +20,9 @@ import { uploadFiles } from "@/app/upload/actions";
 import { Card, CardContent } from "../ui/card";
 
 const formSchema = z.object({
-  itjFile: z.instanceof(FileList).optional(),
-  jvlFile: z.instanceof(FileList).optional(),
-}).refine(data => data.itjFile?.length || data.jvlFile?.length, {
+  itjFile: z.any().optional(),
+  jvlFile: z.any().optional(),
+}).refine(data => (data.itjFile && data.itjFile.length > 0) || (data.jvlFile && data.jvlFile.length > 0), {
     message: "Please upload at least one file.",
     path: ["itjFile"], // Show error under the first field
 });
