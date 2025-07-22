@@ -7,6 +7,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { getProductSuggestions, ProductSuggestionsOutput } from '@/ai/flows/product-suggestions';
 import { Lightbulb, Loader2 } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from '../ui/alert';
+import Link from 'next/link';
+import { cn } from '@/lib/utils';
 
 interface AiSuggestionsProps {
     product: Product;
@@ -59,9 +61,13 @@ export function AiSuggestions({ product }: AiSuggestionsProps) {
                         {suggestions.suggestions.length > 0 ? (
                             <>
                                 <h4 className="font-semibold text-foreground">Alternativas Recomendadas:</h4>
-                                <ul className="list-disc space-y-2 pl-5 text-sm text-muted-foreground">
-                                    {suggestions.suggestions.map((s, i) => (
-                                        <li key={i}>{s}</li>
+                                <ul className="list-disc space-y-1 pl-5 text-sm">
+                                    {suggestions.suggestions.map((s) => (
+                                        <li key={s.sku}>
+                                            <Link href={`/products/${s.sku}`} className="text-muted-foreground hover:text-primary hover:underline underline-offset-4">
+                                                {s.description} (SKU: {s.sku})
+                                            </Link>
+                                        </li>
                                     ))}
                                 </ul>
                             </>

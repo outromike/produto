@@ -25,13 +25,22 @@ const ProductSuggestionsInputSchema = z.object({
 });
 export type ProductSuggestionsInput = z.infer<typeof ProductSuggestionsInputSchema>;
 
+const SuggestionSchema = z.object({
+  sku: z.string().describe('O SKU do produto sugerido.'),
+  description: z.string().describe('A descrição do produto sugerido.'),
+});
+
 const ProductSuggestionsOutputSchema = z.object({
-  suggestions: z.array(
-    z.string().describe('Uma lista de produtos alternativos ou similares sugeridos.')
-  ).describe('Uma lista de produtos alternativos ou similares sugeridos, ou uma lista vazia se nenhuma sugestão puder ser encontrada.'),
+  suggestions: z
+    .array(SuggestionSchema)
+    .describe(
+      'Uma lista de produtos alternativos ou similares sugeridos, incluindo SKU e descrição.'
+    ),
   alternativeSearchOptions: z
     .string()
-    .describe('Se nenhuma sugestão puder ser encontrada, este campo fornece opções de pesquisa alternativas para o usuário.'),
+    .describe(
+      'Se nenhuma sugestão puder ser encontrada, este campo fornece opções de pesquisa alternativas para o usuário.'
+    ),
 });
 export type ProductSuggestionsOutput = z.infer<typeof ProductSuggestionsOutputSchema>;
 
@@ -51,6 +60,7 @@ const productSuggestionsPrompt = ai.definePrompt({
   Categoria do Produto: {{{productCategory}}}
   Unidade do Produto: {{{productUnit}}}
 
+  Para cada sugestão, forneça o SKU e a descrição do produto.
   Se você não conseguir encontrar nenhuma sugestão relevante com base nas informações disponíveis, retorne uma lista vazia para sugestões e ofereça opções de pesquisa alternativas no campo alternativeSearchOptions.
 `,
 });
