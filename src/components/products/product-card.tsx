@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { cn } from '@/lib/utils';
-import { Check, Copy, Weight, Box, ScanLine, Building, Ruler } from 'lucide-react';
+import { Check, Copy, Weight, Box, ScanLine, Building, Ruler, Package, Inbox } from 'lucide-react';
 
 interface ProductCardProps {
   product: Product;
@@ -49,16 +49,16 @@ export function ProductCard({ product }: ProductCardProps) {
             <span>{product.unit}</span>
           </div>
           <div className="flex items-center gap-2">
-            <Box className="h-4 w-4" />
+            <Inbox className="h-4 w-4" />
             <span>{product.packaging}</span>
           </div>
           <div className="flex items-center gap-2">
             <Weight className="h-4 w-4" />
-            <span>{product.weight} kg</span>
+            <span>{product.grossWeight} kg</span>
           </div>
           <div className="flex items-center gap-2">
-            <Ruler className="h-4 w-4" />
-            <span>{product.dimensions}</span>
+            <Package className="h-4 w-4" />
+            <span>{product.quantity} {product.measurementUnit}</span>
           </div>
         </div>
         <Separator />

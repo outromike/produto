@@ -4,7 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableRow } from "@/components/ui/table";
 import { cn } from "@/lib/utils";
-import { Building, Box, Weight, Ruler, ScanLine, Tag } from "lucide-react";
+import { Building, Box, Weight, Ruler, ScanLine, Tag, Package, Inbox, Layers } from "lucide-react";
 import { AiSuggestions } from "@/components/products/ai-suggestions";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
@@ -45,6 +45,10 @@ export default async function ProductDetailPage({ params }: { params: { sku: str
               <Table>
                 <TableBody>
                   <TableRow>
+                    <TableCell className="font-medium"><Tag className="inline-block mr-2 h-4 w-4 text-muted-foreground" />Item</TableCell>
+                    <TableCell className="font-mono">{product.item}</TableCell>
+                  </TableRow>
+                   <TableRow>
                     <TableCell className="font-medium"><Tag className="inline-block mr-2 h-4 w-4 text-muted-foreground" />SKU</TableCell>
                     <TableCell className="font-mono">{product.sku}</TableCell>
                   </TableRow>
@@ -57,20 +61,32 @@ export default async function ProductDetailPage({ params }: { params: { sku: str
                     <TableCell>{product.unit}</TableCell>
                   </TableRow>
                   <TableRow>
-                    <TableCell className="font-medium"><Box className="inline-block mr-2 h-4 w-4 text-muted-foreground" />Packaging</TableCell>
+                    <TableCell className="font-medium"><Inbox className="inline-block mr-2 h-4 w-4 text-muted-foreground" />Packaging</TableCell>
                     <TableCell>{product.packaging}</TableCell>
                   </TableRow>
+                   <TableRow>
+                    <TableCell className="font-medium"><Package className="inline-block mr-2 h-4 w-4 text-muted-foreground" />Quantity</TableCell>
+                    <TableCell>{product.quantity} {product.measurementUnit}</TableCell>
+                  </TableRow>
                   <TableRow>
-                    <TableCell className="font-medium"><Weight className="inline-block mr-2 h-4 w-4 text-muted-foreground" />Weight</TableCell>
-                    <TableCell>{product.weight} kg</TableCell>
+                    <TableCell className="font-medium"><Weight className="inline-block mr-2 h-4 w-4 text-muted-foreground" />Net Weight</TableCell>
+                    <TableCell>{product.netWeight} kg</TableCell>
+                  </TableRow>
+                   <TableRow>
+                    <TableCell className="font-medium"><Weight className="inline-block mr-2 h-4 w-4 text-muted-foreground" />Gross Weight</TableCell>
+                    <TableCell>{product.grossWeight} kg</TableCell>
                   </TableRow>
                    <TableRow>
                     <TableCell className="font-medium"><Ruler className="inline-block mr-2 h-4 w-4 text-muted-foreground" />Dimensions</TableCell>
                     <TableCell>{product.dimensions}</TableCell>
                   </TableRow>
                   <TableRow>
-                    <TableCell className="font-medium"><Ruler className="inline-block mr-2 h-4 w-4 text-muted-foreground" />Volume</TableCell>
+                    <TableCell className="font-medium"><Box className="inline-block mr-2 h-4 w-4 text-muted-foreground" />Volume</TableCell>
                     <TableCell>{product.volume} m³</TableCell>
+                  </TableRow>
+                  <TableRow>
+                    <TableCell className="font-medium"><Layers className="inline-block mr-2 h-4 w-4 text-muted-foreground" />Palletization</TableCell>
+                    <TableCell>{product.palletization.base} base / {product.palletization.height} height</TableCell>
                   </TableRow>
                 </TableBody>
               </Table>
