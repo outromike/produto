@@ -1,4 +1,4 @@
-import { getProductBySku } from "@/lib/products";
+import { getProductBySku, getProducts } from "@/lib/products";
 import { notFound } from "next/navigation";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button";
 
 export default async function ProductDetailPage({ params }: { params: { sku: string } }) {
   const product = await getProductBySku(params.sku);
+  const allProducts = await getProducts();
 
   if (!product) {
     notFound();
@@ -94,7 +95,7 @@ export default async function ProductDetailPage({ params }: { params: { sku: str
           </Card>
         </div>
         <div className="lg:col-span-2">
-            <AiSuggestions product={product} />
+            <AiSuggestions product={product} allProducts={allProducts} />
         </div>
       </div>
     </div>

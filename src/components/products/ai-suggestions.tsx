@@ -8,13 +8,13 @@ import { getProductSuggestions, ProductSuggestionsOutput } from '@/ai/flows/prod
 import { Lightbulb, Loader2 } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from '../ui/alert';
 import Link from 'next/link';
-import { cn } from '@/lib/utils';
 
 interface AiSuggestionsProps {
     product: Product;
+    allProducts: Product[];
 }
 
-export function AiSuggestions({ product }: AiSuggestionsProps) {
+export function AiSuggestions({ product, allProducts }: AiSuggestionsProps) {
     const [suggestions, setSuggestions] = useState<ProductSuggestionsOutput | null>(null);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
@@ -28,6 +28,7 @@ export function AiSuggestions({ product }: AiSuggestionsProps) {
                 productDescription: product.description,
                 productCategory: product.category,
                 productUnit: product.unit,
+                allProducts: allProducts,
             });
             setSuggestions(result);
         } catch (err) {
@@ -49,7 +50,7 @@ export function AiSuggestions({ product }: AiSuggestionsProps) {
                 </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-                <Button onClick={handleGetSuggestions} disabled={isLoading} className="w-full">
+                <Button onClick={handleGetSuggestions} disabled={isLoading || allProducts.length === 0} className="w-full">
                     {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
                     {isLoading ? "Analisando..." : "Obter Sugestões"}
                 </Button>

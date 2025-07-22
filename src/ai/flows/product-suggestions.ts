@@ -11,6 +11,7 @@
 
 import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
+import { Product } from '@/types';
 
 const ProductSuggestionsInputSchema = z.object({
   productDescription: z
@@ -22,6 +23,7 @@ const ProductSuggestionsInputSchema = z.object({
   productUnit: z
     .string()
     .describe('A unidade (ITJ ou JVL) do produto para a qual as sugestões são necessárias.'),
+  allProducts: z.array(z.any()).describe('A lista completa de todos os produtos para a IA pesquisar.'),
 });
 export type ProductSuggestionsInput = z.infer<typeof ProductSuggestionsInputSchema>;
 
@@ -54,13 +56,18 @@ const productSuggestionsPrompt = ai.definePrompt({
   output: {schema: ProductSuggestionsOutputSchema},
   prompt: `Você é um assistente de IA que ajuda os usuários a encontrar produtos alternativos ou similares com base no produto que eles estão visualizando no momento.
 
-  Forneça uma lista de sugestões de produtos alternativos com base nos seguintes atributos do produto:
+  A seguir está a lista completa de todos os produtos disponíveis no inventário:
+  {{#each allProducts}}
+  - SKU: {{sku}}, Descrição: {{description}}, Categoria: {{category}}, Unidade: {{unit}}
+  {{/each}}
+
+  Forneça uma lista de 3 a 5 sugestões de produtos alternativos da lista acima com base nos seguintes atributos do produto que o usuário está visualizando:
 
   Descrição do Produto: {{{productDescription}}}
   Categoria do Produto: {{{productCategory}}}
   Unidade do Produto: {{{productUnit}}}
 
-  Para cada sugestão, forneça o SKU e a descrição do produto.
+  Para cada sugestão, forneça o SKU e a descrição exatos do produto como aparecem na lista de inventário.
   Se você não conseguir encontrar nenhuma sugestão relevante com base nas informações disponíveis, retorne uma lista vazia para sugestões e ofereça opções de pesquisa alternativas no campo alternativeSearchOptions.
 `,
 });
