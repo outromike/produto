@@ -20,9 +20,13 @@ import { uploadFiles } from "@/app/upload/actions";
 import { Card, CardContent } from "../ui/card";
 
 const formSchema = z.object({
-  itjFile: z.instanceof(FileList).refine(files => files?.length === 1, "Cad_ITJ.csv is required."),
-  jvlFile: z.instanceof(FileList).refine(files => files?.length === 1, "Cad_JVL.csv is required."),
+  itjFile: z.instanceof(FileList).optional(),
+  jvlFile: z.instanceof(FileList).optional(),
+}).refine(data => data.itjFile?.length || data.jvlFile?.length, {
+    message: "Please upload at least one file.",
+    path: ["itjFile"], // Show error under the first field
 });
+
 
 export function UploadForm() {
   const [isPending, startTransition] = useTransition();
@@ -42,8 +46,12 @@ export function UploadForm() {
   const onSubmit = (values: z.infer<typeof formSchema>) => {
     setResult(null);
     const formData = new FormData();
-    formData.append("itjFile", values.itjFile[0]);
-    formData.append("jvlFile", values.jvlFile[0]);
+    if (values.itjFile?.[0]) {
+      formData.append("itjFile", values.itjFile[0]);
+    }
+    if (values.jvlFile?.[0]) {
+      formData.append("jvlFile", values.jvlFile[0]);
+    }
 
     startTransition(async () => {
       const response = await uploadFiles(formData);

@@ -8,30 +8,32 @@ export async function uploadFiles(formData: FormData): Promise<{ success?: strin
   const itjFile = formData.get('itjFile') as File | null;
   const jvlFile = formData.get('jvlFile') as File | null;
 
-  if (!itjFile || !jvlFile) {
-    return { error: 'Both files are required.' };
-  }
-  
-  if (itjFile.name !== 'Cad_ITJ.csv' || jvlFile.name !== 'Cad_JVL.csv') {
-      return { error: 'Incorrect file names. Please upload "Cad_ITJ.csv" and "Cad_JVL.csv".' };
+  if (!itjFile?.size && !jvlFile?.size) {
+    return { error: 'Please upload at least one file.' };
   }
 
   try {
     const dataDir = path.join(process.cwd(), 'src', 'data');
-    
-    // Ensure the data directory exists
     await fs.mkdir(dataDir, { recursive: true });
 
-    const itjBuffer = Buffer.from(await itjFile.arrayBuffer());
-    await fs.writeFile(path.join(dataDir, 'Cad_ITJ.csv'), itjBuffer);
+    let successMessages: string[] = [];
 
-    const jvlBuffer = Buffer.from(await jvlFile.arrayBuffer());
-    await fs.writeFile(path.join(dataDir, 'Cad_JVL.csv'), jvlBuffer);
+    if (itjFile?.size) {
+      const itjBuffer = Buffer.from(await itjFile.arrayBuffer());
+      await fs.writeFile(path.join(dataDir, 'Cad_ITJ.csv'), itjBuffer);
+      successMessages.push('Itajaí (ITJ) data updated.');
+    }
+
+    if (jvlFile?.size) {
+      const jvlBuffer = Buffer.from(await jvlFile.arrayBuffer());
+      await fs.writeFile(path.join(dataDir, 'Cad_JVL.csv'), jvlBuffer);
+      successMessages.push('Joinville (JVL) data updated.');
+    }
     
     // Invalidate the cache for the products page to force a reload of data
     revalidatePath('/products', 'page');
 
-    return { success: 'Files uploaded and product data updated successfully!' };
+    return { success: successMessages.join(' ') };
   } catch (error) {
     console.error('File upload error:', error);
     return { error: 'An unexpected error occurred while saving the files.' };
