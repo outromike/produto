@@ -12,16 +12,21 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { User } from "@/types";
+import { logout } from "@/app/login/actions";
 import { LogOut, User as UserIcon } from "lucide-react";
+import { useTransition } from "react";
 
 interface UserNavProps {
     user: User | undefined;
 }
 
 export function UserNav({ user }: UserNavProps) {
+    const [isPending, startTransition] = useTransition();
+    
     const handleLogout = () => {
-        // Since we're disabling login, a full page reload to the login screen is fine.
-        window.location.href = '/login';
+        startTransition(async () => {
+            await logout();
+        });
     }
 
   return (
@@ -43,7 +48,7 @@ export function UserNav({ user }: UserNavProps) {
           </div>
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
-        <DropdownMenuItem onSelect={handleLogout}>
+        <DropdownMenuItem onSelect={(e) => { e.preventDefault(); handleLogout();}} disabled={isPending}>
           <LogOut className="mr-2 h-4 w-4" />
           <span>Sair</span>
         </DropdownMenuItem>

@@ -46,7 +46,7 @@ export function UploadForm() {
   const itjFileRef = form.register("itjFile");
   const jvlFileRef = form.register("jvlFile");
 
-  async function onSubmit(values: z.infer<typeof formSchema>) {
+  function onSubmit(values: z.infer<typeof formSchema>) {
     setResult(null);
     const formData = new FormData();
     if (values.itjFile?.[0]) {
@@ -61,9 +61,11 @@ export function UploadForm() {
       setResult(uploadResult);
       if (uploadResult.success) {
         form.reset();
-        setTimeout(() => {
-            router.push('/products');
-        }, 2000); // Wait 2 seconds before redirecting
+        // We need to use router.push which is a soft navigation.
+        // A hard navigation (like window.location.href) would lose the session state
+        // before the server has a chance to re-render with the new data.
+        router.push('/products');
+        router.refresh(); // This ensures the product list is updated
       }
     });
   }
