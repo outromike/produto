@@ -23,6 +23,8 @@ export function ProductTable({ products, categories }: ProductTableProps) {
     classification: 'all',
     packaging: 'all',
   });
+  const [queryInput, setQueryInput] = useState('');
+
 
   const handleFilterChange = (key: string, value: string) => {
     setFilters((prev) => ({ ...prev, [key]: value }));
@@ -64,9 +66,7 @@ export function ProductTable({ products, categories }: ProductTableProps) {
         classification: 'all',
         packaging: 'all',
     });
-    // Need to reset the input fields manually if they are not controlled components tied to the state directly
-    const searchInput = document.getElementById('search') as HTMLInputElement;
-    if(searchInput) searchInput.value = '';
+    setQueryInput('');
   };
 
   return (
@@ -82,7 +82,11 @@ export function ProductTable({ products, categories }: ProductTableProps) {
         <Input
           id="search"
           placeholder="Buscar por SKU, descrição..."
-          onChange={(e) => handleSearch(e.target.value)}
+          value={queryInput}
+          onChange={(e) => {
+            setQueryInput(e.target.value);
+            handleSearch(e.target.value);
+          }}
           className="lg:col-span-2"
         />
         <Select onValueChange={(value) => handleFilterChange('category', value)} value={filters.category}>
