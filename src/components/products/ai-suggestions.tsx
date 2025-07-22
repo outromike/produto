@@ -1,0 +1,82 @@
+"use client";
+
+import { useState } from 'react';
+import { Product } from "@/types";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { getProductSuggestions, ProductSuggestionsOutput } from '@/ai/flows/product-suggestions';
+import { Lightbulb, Loader2 } from 'lucide-react';
+import { Alert, AlertDescription, AlertTitle } from '../ui/alert';
+
+interface AiSuggestionsProps {
+    product: Product;
+}
+
+export function AiSuggestions({ product }: AiSuggestionsProps) {
+    const [suggestions, setSuggestions] = useState<ProductSuggestionsOutput | null>(null);
+    const [isLoading, setIsLoading] = useState(false);
+    const [error, setError] = useState<string | null>(null);
+
+    const handleGetSuggestions = async () => {
+        setIsLoading(true);
+        setError(null);
+        setSuggestions(null);
+        try {
+            const result = await getProductSuggestions({
+                productDescription: product.description,
+                productCategory: product.category,
+                productUnit: product.unit,
+            });
+            setSuggestions(result);
+        } catch (err) {
+            setError("Failed to get AI suggestions. Please try again later.");
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    return (
+        <Card className="sticky top-20">
+            <CardHeader>
+                <div className="flex items-center gap-2">
+                    <Lightbulb className="h-6 w-6 text-yellow-400" />
+                    <CardTitle className="font-headline">AI Suggestions</CardTitle>
+                </div>
+                <CardDescription>
+                    Find similar or alternative products.
+                </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+                <Button onClick={handleGetSuggestions} disabled={isLoading} className="w-full">
+                    {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+                    {isLoading ? "Analyzing..." : "Get Suggestions"}
+                </Button>
+
+                {error && <Alert variant="destructive"><AlertDescription>{error}</AlertDescription></Alert>}
+
+                {suggestions && (
+                    <div className="space-y-4 rounded-lg border bg-muted/50 p-4">
+                        {suggestions.suggestions.length > 0 ? (
+                            <>
+                                <h4 className="font-semibold text-foreground">Recommended Alternatives:</h4>
+                                <ul className="list-disc space-y-2 pl-5 text-sm text-muted-foreground">
+                                    {suggestions.suggestions.map((s, i) => (
+                                        <li key={i}>{s}</li>
+                                    ))}
+                                </ul>
+                            </>
+                        ) : (
+                             <Alert>
+                                <AlertTitle>No direct matches found.</AlertTitle>
+                                <AlertDescription className="mt-2">
+                                    <p className="font-semibold">Alternative Search Options:</p>
+                                    <p>{suggestions.alternativeSearchOptions}</p>
+                                </AlertDescription>
+                            </Alert>
+                        )}
+                    </div>
+                )}
+            </CardContent>
+        </Card>
+    );
+}

@@ -1,0 +1,13 @@
+SKU,DESCRICAO,CATEGORIA,PESO_KG,VOLUME_M3,DIMENSOES_CM,EAN,EMBALAGEM,CURVA_ABC
+JVL-001,Liquidificador Power Max 1000W,Eletroportáteis,2.5,0.03,25x20x30,8890123456789,UNIDADE,A
+JVL-002,Batedeira Planetária Premium,Eletroportáteis,4,0.05,35x25x35,8890123456790,UNIDADE,B
+JVL-003,Fritadeira Air Fryer 5L Digital,Eletroportáteis,5.5,0.06,40x40x35,8890123456791,UNIDADE,A
+JVL-004,Cafeteira Expresso Automática,Eletroportáteis,3,0.04,30x20x35,8890123456792,UNIDADE,A
+JVL-005,Aspirador de Pó Vertical,Utilidades,2.2,0.02,20x15x110,8890123456793,UNIDADE,C
+JVL-006,Ferro de Passar a Vapor,Utilidades,1.5,0.01,28x12x15,8890123456794,UNIDADE,B
+JVL-007,Sanduicheira e Grill,Eletroportáteis,1.8,0.015,25x22x10,8890123456795,UNIDADE,C
+JVL-008,Mixer 3 em 1,Eletroportáteis,1.2,0.01,20x10x10,8890123456796,UNIDADE,B
+JVL-009,Panela de Pressão Elétrica 6L,Panelas,4.8,0.05,33x33x35,8890123456797,UNIDADE,A
+JVL-010,Umidificador de Ar Ultrassônico,Saúde e Bem-estar,1.1,0.02,18x18x30,8890123456798,UNIDADE,B
+JVL-011,Chaleira Elétrica Inox 1.8L,Eletroportáteis,0.9,0.012,22x18x25,8890123456799,UNIDADE,C
+JVL-012,Forno Elétrico de Bancada 44L,Fornos,8,0.1,55x45x35,8890123456800,UNIDADE,A
