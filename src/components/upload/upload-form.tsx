@@ -1,6 +1,8 @@
+
 "use client";
 
 import { useState, useTransition } from "react";
+import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -18,6 +20,8 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { AlertCircle, CheckCircle, Loader2 } from "lucide-react";
 import { uploadFiles } from "@/app/upload/actions";
 import { Card, CardContent } from "../ui/card";
+import { useToast } from "@/hooks/use-toast";
+
 
 const formSchema = z.object({
   itjFile: z.any().optional(),
@@ -30,7 +34,9 @@ const formSchema = z.object({
 
 export function UploadForm() {
   const [isPending, startTransition] = useTransition();
-  const [result, setResult] = useState<{ success?: string; error?: string } | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const router = useRouter();
+  const { toast } = useToast();
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -44,7 +50,7 @@ export function UploadForm() {
   const jvlFileRef = form.register("jvlFile");
 
   const onSubmit = (values: z.infer<typeof formSchema>) => {
-    setResult(null);
+    setError(null);
     const formData = new FormData();
     if (values.itjFile?.[0]) {
       formData.append("itjFile", values.itjFile[0]);
@@ -55,9 +61,17 @@ export function UploadForm() {
 
     startTransition(async () => {
       const response = await uploadFiles(formData);
-      setResult(response);
+      if (response.error) {
+        setError(response.error);
+      }
       if (response.success) {
-        form.reset();
+        toast({
+            title: "Upload Successful!",
+            description: "The product list has been updated.",
+            variant: "default",
+        })
+        router.push('/products');
+        router.refresh(); // Forces a refresh of the server-side data
       }
     });
   };
@@ -67,20 +81,11 @@ export function UploadForm() {
       <CardContent className="pt-6">
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-            {result?.error && (
+            {error && (
               <Alert variant="destructive">
                 <AlertCircle className="h-4 w-4" />
                 <AlertTitle>Upload Failed</AlertTitle>
-                <AlertDescription>{result.error}</AlertDescription>
-              </Alert>
-            )}
-            {result?.success && (
-              <Alert variant="default" className="bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-700">
-                <CheckCircle className="h-4 w-4 text-green-600 dark:text-green-400" />
-                <AlertTitle>Upload Successful!</AlertTitle>
-                <AlertDescription className="text-green-800 dark:text-green-300">
-                  {result.success} The product list has been updated.
-                </AlertDescription>
+                <AlertDescription>{error}</AlertDescription>
               </Alert>
             )}
             <FormField
@@ -111,7 +116,7 @@ export function UploadForm() {
             />
             <Button type="submit" className="w-full" disabled={isPending}>
               {isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              {isPending ? "Uploading..." : "Upload Files"}
+              {isPending ? "Uploading..." : "Upload Files & View Products"}
             </Button>
           </form>
         </Form>
