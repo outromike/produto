@@ -77,8 +77,10 @@ export function UploadForm() {
             {result?.success && (
               <Alert variant="default" className="bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-700">
                 <CheckCircle className="h-4 w-4 text-green-600 dark:text-green-400" />
-                <AlertTitle>Upload Successful</AlertTitle>
-                <AlertDescription className="text-green-800 dark:text-green-300">{result.success}</AlertDescription>
+                <AlertTitle>Upload Successful!</AlertTitle>
+                <AlertDescription className="text-green-800 dark:text-green-300">
+                  {result.success} The product list has been updated.
+                </AlertDescription>
               </Alert>
             )}
             <FormField

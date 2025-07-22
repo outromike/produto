@@ -2,8 +2,14 @@ import { promises as fs } from 'fs';
 import path from 'path';
 import { Product } from '@/types';
 
+// Let's use `unstable_noStore` to prevent caching of product data.
+// This ensures that after uploading new CSV files, the changes are reflected immediately.
+import { unstable_noStore as noStore } from 'next/cache';
+
+
 function parseCSV(csv: string): Omit<Product, 'unit'>[] {
   const lines = csv.trim().split('\n');
+  if (lines.length < 2) return []; // Return empty if no data rows
   const headers = lines[0].toLowerCase().split(',').map(h => h.trim());
   
   const EAN_HEADER_INDEX = headers.indexOf('ean');
@@ -29,29 +35,33 @@ function parseCSV(csv: string): Omit<Product, 'unit'>[] {
       packaging: values[EMBALAGEM_HEADER_INDEX] as 'UNIDADE' | 'MASTER',
       classification: values[CURVA_ABC_HEADER_INDEX] as 'A' | 'B' | 'C',
     };
-  });
+  }).filter(p => p.sku); // Filter out rows that might be empty
 }
 
 async function loadProductsForUnit(unit: 'ITJ' | 'JVL'): Promise<Product[]> {
   const filePath = path.join(process.cwd(), 'src', 'data', `Cad_${unit}.csv`);
-  const csvData = await fs.readFile(filePath, 'utf-8');
-  const parsedData = parseCSV(csvData);
-  return parsedData.map((p) => ({ ...p, unit }));
+  try {
+    const csvData = await fs.readFile(filePath, 'utf-8');
+    const parsedData = parseCSV(csvData);
+    return parsedData.map((p) => ({ ...p, unit }));
+  } catch (error) {
+    // If the file doesn't exist, return an empty array.
+    // This can happen before the first upload.
+    return [];
+  }
 }
 
-let allProducts: Product[] | null = null;
-
 export async function getProducts(): Promise<Product[]> {
-  if (allProducts) {
-    return allProducts;
-  }
+  // This function will now be dynamically executed on every request,
+  // ensuring we always get the latest data from the CSV files.
+  noStore();
   
   const [itjProducts, jvlProducts] = await Promise.all([
     loadProductsForUnit('ITJ'),
     loadProductsForUnit('JVL'),
   ]);
 
-  allProducts = [...itjProducts, ...jvlProducts];
+  const allProducts = [...itjProducts, ...jvlProducts];
   return allProducts;
 }
 
