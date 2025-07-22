@@ -1,0 +1,51 @@
+
+[
+  {
+    "sku": "SKU001",
+    "description": "Produto Exemplo 1",
+    "category": "Categoria A",
+    "weight": 1.5,
+    "volume": 0.02,
+    "dimensions": "10x20x10",
+    "barcode": "789000000001",
+    "packaging": "UNIDADE",
+    "classification": "A",
+    "unit": "ITJ"
+  },
+  {
+    "sku": "SKU002",
+    "description": "Produto Exemplo 2",
+    "category": "Categoria B",
+    "weight": 2.0,
+    "volume": 0.05,
+    "dimensions": "15x25x15",
+    "barcode": "789000000002",
+    "packaging": "MASTER",
+    "classification": "B",
+    "unit": "ITJ"
+  },
+  {
+    "sku": "SKU003",
+    "description": "Produto Exemplo 3",
+    "category": "Categoria A",
+    "weight": 0.8,
+    "volume": 0.01,
+    "dimensions": "5x10x5",
+    "barcode": "789000000003",
+    "packaging": "UNIDADE",
+    "classification": "C",
+    "unit": "JVL"
+  },
+  {
+    "sku": "SKU004",
+    "description": "Produto Exemplo 4",
+    "category": "Categoria C",
+    "weight": 5.0,
+    "volume": 0.1,
+    "dimensions": "30x40x20",
+    "barcode": "789000000004",
+    "packaging": "MASTER",
+    "classification": "A",
+    "unit": "JVL"
+  }
+]

@@ -1,9 +1,8 @@
 import { UserNav } from "@/components/layout/user-nav";
 import { ThemeToggle } from "@/components/layout/theme-toggle";
-import { PackageSearch, Upload } from "lucide-react";
+import { PackageSearch } from "lucide-react";
 import Link from "next/link";
 import { User } from "@/types";
-import { Button } from "../ui/button";
 
 interface HeaderProps {
     user: User | undefined;
@@ -17,12 +16,6 @@ export function Header({ user }: HeaderProps) {
         <span>Product Lookup</span>
       </Link>
       <div className="ml-auto flex items-center gap-4">
-        <Button variant="outline" asChild>
-            <Link href="/upload">
-                <Upload className="mr-2 h-4 w-4" />
-                Upload CSVs
-            </Link>
-        </Button>
         <ThemeToggle />
         <UserNav user={user} />
       </div>
