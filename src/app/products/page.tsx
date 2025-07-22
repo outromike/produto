@@ -40,7 +40,7 @@ export default async function ProductsPage({
     page * PRODUCTS_PER_PAGE
   );
   
-  const uniqueCategories = [...new Set(allProducts.map(p => p.category))];
+  const uniqueCategories = [...new Set(allProducts.map(p => p.category))].filter(Boolean);
 
   return (
     <div className="container mx-auto px-4 py-8 md:px-6">
