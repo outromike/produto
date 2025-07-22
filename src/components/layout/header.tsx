@@ -1,6 +1,6 @@
 import { UserNav } from "@/components/layout/user-nav";
 import { ThemeToggle } from "@/components/layout/theme-toggle";
-import { PackageSearch, Upload, Table } from "lucide-react";
+import { PackageSearch, Upload, Table, LayoutDashboard } from "lucide-react";
 import Link from "next/link";
 import { User } from "@/types";
 import { Button } from "../ui/button";
@@ -16,7 +16,13 @@ export function Header({ user }: HeaderProps) {
         <PackageSearch className="h-6 w-6 text-primary" />
         <span>Consulta de Produtos</span>
       </Link>
-      <div className="ml-auto flex items-center gap-4">
+      <nav className="ml-auto flex items-center gap-2">
+         <Button variant="outline" size="sm" asChild>
+            <Link href="/dashboard">
+              <LayoutDashboard className="mr-2 h-4 w-4"/>
+              Dashboard
+            </Link>
+          </Button>
         <Button variant="outline" size="sm" asChild>
             <Link href="/products/table">
               <Table className="mr-2 h-4 w-4"/>
@@ -33,7 +39,7 @@ export function Header({ user }: HeaderProps) {
         )}
         <ThemeToggle />
         <UserNav user={user} />
-      </div>
+      </nav>
     </header>
   );
 }
