@@ -4,7 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableRow } from "@/components/ui/table";
 import { cn } from "@/lib/utils";
-import { Building, Box, Weight, Rulers, ScanLine, Tag } from "lucide-react";
+import { Building, Box, Weight, Ruler, ScanLine, Tag } from "lucide-react";
 import { AiSuggestions } from "@/components/products/ai-suggestions";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
@@ -65,11 +65,11 @@ export default async function ProductDetailPage({ params }: { params: { sku: str
                     <TableCell>{product.weight} kg</TableCell>
                   </TableRow>
                    <TableRow>
-                    <TableCell className="font-medium"><Rulers className="inline-block mr-2 h-4 w-4 text-muted-foreground" />Dimensions</TableCell>
+                    <TableCell className="font-medium"><Ruler className="inline-block mr-2 h-4 w-4 text-muted-foreground" />Dimensions</TableCell>
                     <TableCell>{product.dimensions}</TableCell>
                   </TableRow>
                   <TableRow>
-                    <TableCell className="font-medium"><Rulers className="inline-block mr-2 h-4 w-4 text-muted-foreground" />Volume</TableCell>
+                    <TableCell className="font-medium"><Ruler className="inline-block mr-2 h-4 w-4 text-muted-foreground" />Volume</TableCell>
                     <TableCell>{product.volume} m³</TableCell>
                   </TableRow>
                 </TableBody>

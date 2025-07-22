@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { cn } from '@/lib/utils';
-import { Check, Copy, Weight, Box, ScanLine, Building, Rulers } from 'lucide-react';
+import { Check, Copy, Weight, Box, ScanLine, Building, Ruler } from 'lucide-react';
 
 interface ProductCardProps {
   product: Product;
@@ -57,7 +57,7 @@ export function ProductCard({ product }: ProductCardProps) {
             <span>{product.weight} kg</span>
           </div>
           <div className="flex items-center gap-2">
-            <Rulers className="h-4 w-4" />
+            <Ruler className="h-4 w-4" />
             <span>{product.dimensions}</span>
           </div>
         </div>
