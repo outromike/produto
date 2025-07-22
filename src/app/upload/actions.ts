@@ -5,6 +5,7 @@ import { promises as fs } from 'fs';
 import path from 'path';
 import { Product } from '@/types';
 import { redirect } from 'next/navigation';
+import { getSession } from '@/lib/auth';
 
 // Helper to find header index with multiple possible names
 const findHeaderIndex = (headerRow: string[], possibleNames: string[]): number => {
@@ -85,6 +86,11 @@ const parseCSV = (csvContent: string, unit: 'ITJ' | 'JVL'): Product[] => {
 };
 
 export async function uploadProducts(formData: FormData): Promise<{ error?: string }> {
+    const session = await getSession();
+    if (session?.user?.username !== 'admin') {
+        return { error: 'Acesso negado. Apenas administradores podem fazer upload de arquivos.' };
+    }
+
     const fileITJ = formData.get('fileITJ') as File | null;
     const fileJVL = formData.get('fileJVL') as File | null;
 

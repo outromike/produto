@@ -17,12 +17,14 @@ export function Header({ user }: HeaderProps) {
         <span>Consulta de Produtos</span>
       </Link>
       <div className="ml-auto flex items-center gap-4">
-        <Button variant="outline" size="sm" asChild>
-          <Link href="/upload">
-            <Upload className="mr-2 h-4 w-4"/>
-            Upload de CSV
-          </Link>
-        </Button>
+        {user?.username === 'admin' && (
+          <Button variant="outline" size="sm" asChild>
+            <Link href="/upload">
+              <Upload className="mr-2 h-4 w-4"/>
+              Upload de CSV
+            </Link>
+          </Button>
+        )}
         <ThemeToggle />
         <UserNav user={user} />
       </div>
