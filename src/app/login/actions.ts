@@ -4,7 +4,7 @@ import { redirect } from 'next/navigation';
 import { setSession, findUserByCredentials, destroySession } from '@/lib/auth';
 import { User } from '@/types';
 
-export async function login(credentials: User): Promise<{ error?: string, success?: boolean }> {
+export async function login(credentials: User): Promise<{ error?: string }> {
   const user = findUserByCredentials(credentials);
 
   if (!user) {
@@ -12,7 +12,7 @@ export async function login(credentials: User): Promise<{ error?: string, succes
   }
   
   await setSession(user);
-  return { success: true };
+  redirect('/products');
 }
 
 export async function logout() {

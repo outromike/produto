@@ -16,7 +16,8 @@ import { Input } from "@/components/ui/input";
 import { login } from "@/app/login/actions";
 import { useState, useTransition } from "react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { AlertCircle } from "lucide-react";
+import { AlertCircle, Loader2 } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 const formSchema = z.object({
   username: z.string().min(1, { message: "O nome de usuário é obrigatório." }),
@@ -26,6 +27,7 @@ const formSchema = z.object({
 export function LoginForm() {
   const [error, setError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
+  const router = useRouter();
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -42,10 +44,6 @@ export function LoginForm() {
       if (result?.error) {
         setError(result.error);
         form.reset();
-      } else if (result?.success) {
-        // Redirecting using window.location to ensure a full page reload,
-        // which helps in picking up the new session state correctly.
-        window.location.href = '/products';
       }
     });
   }
@@ -87,7 +85,7 @@ export function LoginForm() {
           )}
         />
         <Button type="submit" className="w-full" disabled={isPending}>
-          {isPending ? "Entrando..." : "Entrar"}
+          {isPending ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" />Entrando...</> : "Entrar"}
         </Button>
       </form>
     </Form>
