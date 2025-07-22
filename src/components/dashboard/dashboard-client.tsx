@@ -3,7 +3,7 @@
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from '@/components/ui/chart';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
-import { Package, Building, Layers } from 'lucide-react';
+import { Package, Building, Layers, Inbox } from 'lucide-react';
 
 interface DashboardData {
   totalProducts: number;
@@ -11,7 +11,7 @@ interface DashboardData {
   productsInItj: number;
   productsInJvl: number;
   categoryChartData: { name: string; value: number }[];
-  classificationChartData: { name: string; value: number, fill: string }[];
+  packagingChartData: { name: string; value: number, fill: string }[];
 }
 
 interface DashboardClientProps {
@@ -25,7 +25,7 @@ export function DashboardClient({ data }: DashboardClientProps) {
         productsInItj,
         productsInJvl,
         categoryChartData,
-        classificationChartData,
+        packagingChartData,
     } = data;
 
   return (
@@ -99,8 +99,8 @@ export function DashboardClient({ data }: DashboardClientProps) {
         </Card>
         <Card>
           <CardHeader>
-            <CardTitle>Distribuição por Classe ABC</CardTitle>
-            <CardDescription>Percentual de produtos em cada classe.</CardDescription>
+            <CardTitle>Produtos por Tipo de Embalagem</CardTitle>
+            <CardDescription>Distribuição de produtos por tipo de embalagem.</CardDescription>
           </CardHeader>
           <CardContent className="flex items-center justify-center">
             <ChartContainer config={{}} className="h-[300px] w-full max-w-[400px]">
@@ -111,7 +111,7 @@ export function DashboardClient({ data }: DashboardClientProps) {
                     content={<ChartTooltipContent hideLabel />}
                   />
                   <Pie
-                    data={classificationChartData}
+                    data={packagingChartData}
                     dataKey="value"
                     nameKey="name"
                     cx="50%"
@@ -122,7 +122,7 @@ export function DashboardClient({ data }: DashboardClientProps) {
                     labelLine={false}
                     label={({ name, percent }) => `${name} (${(percent * 100).toFixed(0)}%)`}
                   >
-                    {classificationChartData.map((entry, index) => (
+                    {packagingChartData.map((entry, index) => (
                       <Cell key={`cell-${index}`} fill={entry.fill} />
                     ))}
                   </Pie>

@@ -19,17 +19,16 @@ export default async function DashboardPage() {
     .sort((a, b) => b.value - a.value)
     .slice(0, 10);
 
-  const classificationCounts = products.reduce((acc, product) => {
-     if (product.classification && ['A', 'B', 'C'].includes(product.classification)) {
-        acc[product.classification] = (acc[product.classification] || 0) + 1;
-    }
+  const packagingCounts = products.reduce((acc, product) => {
+    const packagingType = product.packaging || "Não definido";
+    acc[packagingType] = (acc[packagingType] || 0) + 1;
     return acc;
   }, {} as Record<string, number>);
 
-  const classificationChartData = Object.entries(classificationCounts).map(([name, value]) => ({
-    name: `Classe ${name}`,
+  const packagingChartData = Object.entries(packagingCounts).map(([name, value], index) => ({
+    name,
     value,
-    fill: name === 'A' ? 'hsl(var(--chart-2))' : name === 'B' ? 'hsl(var(--chart-4))' : 'hsl(var(--chart-1))',
+    fill: `hsl(var(--chart-${(index % 5) + 1}))`,
   }));
 
   const dashboardData = {
@@ -38,7 +37,7 @@ export default async function DashboardPage() {
     productsInItj,
     productsInJvl,
     categoryChartData,
-    classificationChartData,
+    packagingChartData,
   };
 
   return <DashboardClient data={dashboardData} />;
