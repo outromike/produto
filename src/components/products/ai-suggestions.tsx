@@ -29,7 +29,7 @@ export function AiSuggestions({ product }: AiSuggestionsProps) {
             });
             setSuggestions(result);
         } catch (err) {
-            setError("Failed to get AI suggestions. Please try again later.");
+            setError("Falha ao obter sugestões de IA. Por favor, tente novamente mais tarde.");
         } finally {
             setIsLoading(false);
         }
@@ -40,16 +40,16 @@ export function AiSuggestions({ product }: AiSuggestionsProps) {
             <CardHeader>
                 <div className="flex items-center gap-2">
                     <Lightbulb className="h-6 w-6 text-yellow-400" />
-                    <CardTitle className="font-headline">AI Suggestions</CardTitle>
+                    <CardTitle className="font-headline">Sugestões da IA</CardTitle>
                 </div>
                 <CardDescription>
-                    Find similar or alternative products.
+                    Encontre produtos similares ou alternativos.
                 </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
                 <Button onClick={handleGetSuggestions} disabled={isLoading} className="w-full">
                     {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
-                    {isLoading ? "Analyzing..." : "Get Suggestions"}
+                    {isLoading ? "Analisando..." : "Obter Sugestões"}
                 </Button>
 
                 {error && <Alert variant="destructive"><AlertDescription>{error}</AlertDescription></Alert>}
@@ -58,7 +58,7 @@ export function AiSuggestions({ product }: AiSuggestionsProps) {
                     <div className="space-y-4 rounded-lg border bg-muted/50 p-4">
                         {suggestions.suggestions.length > 0 ? (
                             <>
-                                <h4 className="font-semibold text-foreground">Recommended Alternatives:</h4>
+                                <h4 className="font-semibold text-foreground">Alternativas Recomendadas:</h4>
                                 <ul className="list-disc space-y-2 pl-5 text-sm text-muted-foreground">
                                     {suggestions.suggestions.map((s, i) => (
                                         <li key={i}>{s}</li>
@@ -67,9 +67,9 @@ export function AiSuggestions({ product }: AiSuggestionsProps) {
                             </>
                         ) : (
                              <Alert>
-                                <AlertTitle>No direct matches found.</AlertTitle>
+                                <AlertTitle>Nenhuma correspondência direta encontrada.</AlertTitle>
                                 <AlertDescription className="mt-2">
-                                    <p className="font-semibold">Alternative Search Options:</p>
+                                    <p className="font-semibold">Opções de pesquisa alternativas:</p>
                                     <p>{suggestions.alternativeSearchOptions}</p>
                                 </AlertDescription>
                             </Alert>

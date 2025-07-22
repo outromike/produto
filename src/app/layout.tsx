@@ -8,8 +8,8 @@ const inter = Inter({ subsets: ['latin'], variable: '--font-inter' });
 const spaceGrotesk = Space_Grotesk({ subsets: ['latin'], variable: '--font-space-grotesk' });
 
 export const metadata: Metadata = {
-  title: 'Product Lookup',
-  description: 'Look up products from CSV files.',
+  title: 'Consulta de Produtos',
+  description: 'Consulte produtos de arquivos CSV.',
 };
 
 export default function RootLayout({
@@ -18,7 +18,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang="pt-BR" suppressHydrationWarning>
       <body className={`${inter.variable} ${spaceGrotesk.variable} font-body antialiased`}>
         <ThemeProvider
           attribute="class"

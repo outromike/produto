@@ -37,7 +37,7 @@ export function ProductCard({ product }: ProductCardProps) {
                 <Link href={`/products/${product.sku}`}>{product.description}</Link>
             </CardTitle>
             <Badge variant="outline" className={cn("whitespace-nowrap", classificationColors[product.classification])}>
-                Class {product.classification}
+                Classe {product.classification}
             </Badge>
         </div>
         <CardDescription>{product.category}</CardDescription>
@@ -65,7 +65,7 @@ export function ProductCard({ product }: ProductCardProps) {
         <div className="space-y-2">
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
                 <ScanLine className="h-4 w-4" />
-                <span>Barcode (EAN)</span>
+                <span>Código de Barras (EAN)</span>
             </div>
             <div className="flex items-center gap-2">
                 <p className="font-mono text-sm text-foreground flex-grow break-all">{product.barcode}</p>
@@ -77,7 +77,7 @@ export function ProductCard({ product }: ProductCardProps) {
       </CardContent>
       <CardFooter>
         <Button asChild variant="outline" className="w-full">
-            <Link href={`/products/${product.sku}`}>View Details</Link>
+            <Link href={`/products/${product.sku}`}>Ver Detalhes</Link>
         </Button>
       </CardFooter>
     </Card>

@@ -53,8 +53,8 @@ export default async function ProductsPage({
                 <ProductGrid products={paginatedProducts} />
             ) : (
                 <div className="flex flex-col items-center justify-center rounded-lg border-2 border-dashed border-muted-foreground/30 bg-muted/20 py-20 text-center">
-                    <h3 className="text-xl font-bold tracking-tight text-foreground">No Products Found</h3>
-                    <p className="text-muted-foreground">Try adjusting your search or filter criteria.</p>
+                    <h3 className="text-xl font-bold tracking-tight text-foreground">Nenhum produto encontrado</h3>
+                    <p className="text-muted-foreground">Tente ajustar seus critérios de busca ou filtro.</p>
                 </div>
             )}
             {totalPages > 1 && (

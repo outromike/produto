@@ -36,7 +36,7 @@ export function UserNav({ user }: UserNavProps) {
       <DropdownMenuContent className="w-56" align="end" forceMount>
         <DropdownMenuLabel className="font-normal">
           <div className="flex flex-col space-y-1">
-            <p className="text-sm font-medium leading-none">Signed in as</p>
+            <p className="text-sm font-medium leading-none">Logado como</p>
             <p className="text-xs leading-none text-muted-foreground">
               {user?.username}
             </p>
@@ -45,7 +45,7 @@ export function UserNav({ user }: UserNavProps) {
         <DropdownMenuSeparator />
         <DropdownMenuItem onSelect={handleLogout}>
           <LogOut className="mr-2 h-4 w-4" />
-          <span>Log out</span>
+          <span>Sair</span>
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

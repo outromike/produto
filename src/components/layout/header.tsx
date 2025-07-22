@@ -13,7 +13,7 @@ export function Header({ user }: HeaderProps) {
     <header className="sticky top-0 z-50 flex h-16 items-center gap-4 border-b bg-background/80 px-4 backdrop-blur md:px-6">
       <Link href="/products" className="flex items-center gap-2 font-headline text-lg font-semibold">
         <PackageSearch className="h-6 w-6 text-primary" />
-        <span>Product Lookup</span>
+        <span>Consulta de Produtos</span>
       </Link>
       <div className="ml-auto flex items-center gap-4">
         <ThemeToggle />

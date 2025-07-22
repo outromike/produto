@@ -8,7 +8,7 @@ export async function login(credentials: User): Promise<{ error?: string, succes
   const user = findUserByCredentials(credentials);
 
   if (!user) {
-    return { error: 'Invalid username or password.' };
+    return { error: 'Usuário ou senha inválidos.' };
   }
   
   await setSession(user);

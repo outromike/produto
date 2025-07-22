@@ -19,8 +19,8 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { AlertCircle } from "lucide-react";
 
 const formSchema = z.object({
-  username: z.string().min(1, { message: "Username is required." }),
-  password: z.string().min(1, { message: "Password is required." }),
+  username: z.string().min(1, { message: "O nome de usuário é obrigatório." }),
+  password: z.string().min(1, { message: "A senha é obrigatória." }),
 });
 
 export function LoginForm() {
@@ -56,7 +56,7 @@ export function LoginForm() {
         {error && (
             <Alert variant="destructive">
                 <AlertCircle className="h-4 w-4" />
-                <AlertTitle>Login Failed</AlertTitle>
+                <AlertTitle>Falha no Login</AlertTitle>
                 <AlertDescription>{error}</AlertDescription>
             </Alert>
         )}
@@ -65,9 +65,9 @@ export function LoginForm() {
           name="username"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Username</FormLabel>
+              <FormLabel>Usuário</FormLabel>
               <FormControl>
-                <Input placeholder="e.g., admin" {...field} />
+                <Input placeholder="ex: admin" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -78,7 +78,7 @@ export function LoginForm() {
           name="password"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Password</FormLabel>
+              <FormLabel>Senha</FormLabel>
               <FormControl>
                 <Input type="password" placeholder="••••••••" {...field} />
               </FormControl>
@@ -87,7 +87,7 @@ export function LoginForm() {
           )}
         />
         <Button type="submit" className="w-full" disabled={isPending}>
-          {isPending ? "Signing In..." : "Sign In"}
+          {isPending ? "Entrando..." : "Entrar"}
         </Button>
       </form>
     </Form>

@@ -26,7 +26,7 @@ export default async function ProductDetailPage({ params }: { params: { sku: str
     <div className="container mx-auto max-w-4xl px-4 py-8 md:px-6">
       <div className="mb-4">
         <Button variant="outline" asChild>
-          <Link href="/products">← Back to all products</Link>
+          <Link href="/products">← Voltar para todos os produtos</Link>
         </Button>
       </div>
       <div className="grid gap-8 lg:grid-cols-5">
@@ -36,7 +36,7 @@ export default async function ProductDetailPage({ params }: { params: { sku: str
               <div className="flex justify-between items-start gap-4">
                 <CardTitle className="text-2xl font-headline">{product.description}</CardTitle>
                 <Badge variant="outline" className={cn("whitespace-nowrap text-base", classificationColors[product.classification])}>
-                    Class {product.classification}
+                    Classe {product.classification}
                 </Badge>
               </div>
               <CardDescription>{product.category}</CardDescription>
@@ -53,31 +53,31 @@ export default async function ProductDetailPage({ params }: { params: { sku: str
                     <TableCell className="font-mono">{product.sku}</TableCell>
                   </TableRow>
                   <TableRow>
-                    <TableCell className="font-medium"><ScanLine className="inline-block mr-2 h-4 w-4 text-muted-foreground" />Barcode (EAN)</TableCell>
+                    <TableCell className="font-medium"><ScanLine className="inline-block mr-2 h-4 w-4 text-muted-foreground" />Código de Barras (EAN)</TableCell>
                     <TableCell className="font-mono">{product.barcode}</TableCell>
                   </TableRow>
                   <TableRow>
-                    <TableCell className="font-medium"><Building className="inline-block mr-2 h-4 w-4 text-muted-foreground" />Unit</TableCell>
+                    <TableCell className="font-medium"><Building className="inline-block mr-2 h-4 w-4 text-muted-foreground" />Unidade</TableCell>
                     <TableCell>{product.unit}</TableCell>
                   </TableRow>
                   <TableRow>
-                    <TableCell className="font-medium"><Inbox className="inline-block mr-2 h-4 w-4 text-muted-foreground" />Packaging</TableCell>
+                    <TableCell className="font-medium"><Inbox className="inline-block mr-2 h-4 w-4 text-muted-foreground" />Embalagem</TableCell>
                     <TableCell>{product.packaging}</TableCell>
                   </TableRow>
                    <TableRow>
-                    <TableCell className="font-medium"><Package className="inline-block mr-2 h-4 w-4 text-muted-foreground" />Quantity</TableCell>
+                    <TableCell className="font-medium"><Package className="inline-block mr-2 h-4 w-4 text-muted-foreground" />Quantidade</TableCell>
                     <TableCell>{product.quantity} {product.measurementUnit}</TableCell>
                   </TableRow>
                   <TableRow>
-                    <TableCell className="font-medium"><Weight className="inline-block mr-2 h-4 w-4 text-muted-foreground" />Net Weight</TableCell>
+                    <TableCell className="font-medium"><Weight className="inline-block mr-2 h-4 w-4 text-muted-foreground" />Peso Líquido</TableCell>
                     <TableCell>{product.netWeight} kg</TableCell>
                   </TableRow>
                    <TableRow>
-                    <TableCell className="font-medium"><Weight className="inline-block mr-2 h-4 w-4 text-muted-foreground" />Gross Weight</TableCell>
+                    <TableCell className="font-medium"><Weight className="inline-block mr-2 h-4 w-4 text-muted-foreground" />Peso Bruto</TableCell>
                     <TableCell>{product.grossWeight} kg</TableCell>
                   </TableRow>
                    <TableRow>
-                    <TableCell className="font-medium"><Ruler className="inline-block mr-2 h-4 w-4 text-muted-foreground" />Dimensions</TableCell>
+                    <TableCell className="font-medium"><Ruler className="inline-block mr-2 h-4 w-4 text-muted-foreground" />Dimensões</TableCell>
                     <TableCell>{product.dimensions}</TableCell>
                   </TableRow>
                   <TableRow>
@@ -85,8 +85,8 @@ export default async function ProductDetailPage({ params }: { params: { sku: str
                     <TableCell>{product.volume} m³</TableCell>
                   </TableRow>
                   <TableRow>
-                    <TableCell className="font-medium"><Layers className="inline-block mr-2 h-4 w-4 text-muted-foreground" />Palletization</TableCell>
-                    <TableCell>{product.palletization.base} base / {product.palletization.height} height</TableCell>
+                    <TableCell className="font-medium"><Layers className="inline-block mr-2 h-4 w-4 text-muted-foreground" />Paletização</TableCell>
+                    <TableCell>{product.palletization.base} lastro / {product.palletization.height} altura</TableCell>
                   </TableRow>
                 </TableBody>
               </Table>
