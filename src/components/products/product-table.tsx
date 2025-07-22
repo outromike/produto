@@ -131,8 +131,8 @@ export function ProductTable({ products, categories }: ProductTableProps) {
           </TableHeader>
           <TableBody>
             {filteredProducts.length > 0 ? (
-                filteredProducts.map((product) => (
-                    <TableRow key={`${product.sku}-${product.unit}`}>
+                filteredProducts.map((product, index) => (
+                    <TableRow key={`${product.sku}-${product.unit}-${index}`}>
                     <TableCell className="font-mono">{product.sku}</TableCell>
                     <TableCell className="font-medium">{product.description}</TableCell>
                     <TableCell>{product.category}</TableCell>
