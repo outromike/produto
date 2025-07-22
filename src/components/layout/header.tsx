@@ -1,6 +1,6 @@
 import { UserNav } from "@/components/layout/user-nav";
 import { ThemeToggle } from "@/components/layout/theme-toggle";
-import { PackageSearch, Upload } from "lucide-react";
+import { PackageSearch, Upload, Table } from "lucide-react";
 import Link from "next/link";
 import { User } from "@/types";
 import { Button } from "../ui/button";
@@ -17,6 +17,12 @@ export function Header({ user }: HeaderProps) {
         <span>Consulta de Produtos</span>
       </Link>
       <div className="ml-auto flex items-center gap-4">
+        <Button variant="outline" size="sm" asChild>
+            <Link href="/products/table">
+              <Table className="mr-2 h-4 w-4"/>
+              Ver em Tabela
+            </Link>
+          </Button>
         {user?.username === 'admin' && (
           <Button variant="outline" size="sm" asChild>
             <Link href="/upload">
