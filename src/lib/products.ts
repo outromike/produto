@@ -2,15 +2,17 @@ import { promises as fs } from 'fs';
 import path from 'path';
 import { Product } from '@/types';
 
-// Let's use `unstable_noStore` to prevent caching of product data.
-// This ensures that after uploading new CSV files, the changes are reflected immediately.
+// This is the key change: `unstable_noStore` forces dynamic rendering
+// and ensures the CSV files are re-read on every request.
 import { unstable_noStore as noStore } from 'next/cache';
 
 
 function parseCSV(csv: string): Omit<Product, 'unit'>[] {
   const lines = csv.trim().split('\n');
   if (lines.length < 2) return []; // Return empty if no data rows
-  const headers = lines[0].toLowerCase().split(',').map(h => h.trim());
+  
+  // Use a case-insensitive trim for headers
+  const headers = lines[0].toLowerCase().split(',').map(h => h.trim().replace(/"/g, ''));
   
   const EAN_HEADER_INDEX = headers.indexOf('ean');
   const SKU_HEADER_INDEX = headers.indexOf('sku');
@@ -23,7 +25,7 @@ function parseCSV(csv: string): Omit<Product, 'unit'>[] {
   const CURVA_ABC_HEADER_INDEX = headers.indexOf('curva_abc');
 
   return lines.slice(1).map((line) => {
-    const values = line.split(',');
+    const values = line.split(',').map(v => v.trim().replace(/"/g, ''));
     return {
       sku: values[SKU_HEADER_INDEX],
       description: values[DESCRICAO_HEADER_INDEX],
@@ -35,7 +37,7 @@ function parseCSV(csv: string): Omit<Product, 'unit'>[] {
       packaging: values[EMBALAGEM_HEADER_INDEX] as 'UNIDADE' | 'MASTER',
       classification: values[CURVA_ABC_HEADER_INDEX] as 'A' | 'B' | 'C',
     };
-  }).filter(p => p.sku); // Filter out rows that might be empty
+  }).filter(p => p.sku && p.sku.length > 0); // Filter out rows that might be empty or invalid
 }
 
 async function loadProductsForUnit(unit: 'ITJ' | 'JVL'): Promise<Product[]> {
@@ -45,15 +47,16 @@ async function loadProductsForUnit(unit: 'ITJ' | 'JVL'): Promise<Product[]> {
     const parsedData = parseCSV(csvData);
     return parsedData.map((p) => ({ ...p, unit }));
   } catch (error) {
-    // If the file doesn't exist, return an empty array.
-    // This can happen before the first upload.
+    // If the file doesn't exist, which is possible before the first upload,
+    // we return an empty array to avoid crashing the app.
+    console.warn(`Warning: Could not load file for unit ${unit}. It may not exist yet. Error: ${error}`);
     return [];
   }
 }
 
 export async function getProducts(): Promise<Product[]> {
-  // This function will now be dynamically executed on every request,
-  // ensuring we always get the latest data from the CSV files.
+  // By calling noStore(), we ensure this function's result is never cached.
+  // It will run on every request, re-reading the CSV files from disk.
   noStore();
   
   const [itjProducts, jvlProducts] = await Promise.all([
@@ -66,6 +69,7 @@ export async function getProducts(): Promise<Product[]> {
 }
 
 export async function getProductBySku(sku: string): Promise<Product | undefined> {
+  // noStore() is called in getProducts(), so we don't need it here again.
   const products = await getProducts();
   return products.find((p) => p.sku === sku);
 }
