@@ -1,6 +1,5 @@
 import { getIronSession, IronSession } from 'iron-session';
 import { cookies } from 'next/headers';
-import type { NextRequest } from 'next/server';
 import { SessionPayload, User } from '@/types';
 import users from '@/data/users.json';
 
@@ -12,9 +11,9 @@ const sessionOptions = {
   },
 };
 
-export async function getSession(req?: NextRequest): Promise<IronSession<SessionPayload> | null> {
+export async function getSession(): Promise<IronSession<SessionPayload> | null> {
     try {
-        const session = await getIronSession<SessionPayload>(req ? req : { cookies: cookies() } as any, sessionOptions);
+        const session = await getIronSession<SessionPayload>(cookies(), sessionOptions);
         if (!session.user) {
             return null;
         }
