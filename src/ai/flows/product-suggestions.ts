@@ -15,23 +15,23 @@ import {z} from 'genkit';
 const ProductSuggestionsInputSchema = z.object({
   productDescription: z
     .string()
-    .describe('The description of the product for which suggestions are needed.'),
+    .describe('A descrição do produto para o qual as sugestões são necessárias.'),
   productCategory: z
     .string()
-    .describe('The category of the product for which suggestions are needed.'),
+    .describe('A categoria do produto para o qual as sugestões são necessárias.'),
   productUnit: z
     .string()
-    .describe('The unit (ITJ or JVL) of the product for which suggestions are needed.'),
+    .describe('A unidade (ITJ ou JVL) do produto para a qual as sugestões são necessárias.'),
 });
 export type ProductSuggestionsInput = z.infer<typeof ProductSuggestionsInputSchema>;
 
 const ProductSuggestionsOutputSchema = z.object({
   suggestions: z.array(
-    z.string().describe('A list of suggested alternative or similar products.')
-  ).describe('A list of suggested alternative or similar products, or an empty list if no suggestions could be found.'),
+    z.string().describe('Uma lista de produtos alternativos ou similares sugeridos.')
+  ).describe('Uma lista de produtos alternativos ou similares sugeridos, ou uma lista vazia se nenhuma sugestão puder ser encontrada.'),
   alternativeSearchOptions: z
     .string()
-    .describe('If no suggestions could be found, this field provides alternative search options for the user.'),
+    .describe('Se nenhuma sugestão puder ser encontrada, este campo fornece opções de pesquisa alternativas para o usuário.'),
 });
 export type ProductSuggestionsOutput = z.infer<typeof ProductSuggestionsOutputSchema>;
 
@@ -43,15 +43,15 @@ const productSuggestionsPrompt = ai.definePrompt({
   name: 'productSuggestionsPrompt',
   input: {schema: ProductSuggestionsInputSchema},
   output: {schema: ProductSuggestionsOutputSchema},
-  prompt: `You are an AI assistant helping users find alternative or similar products based on the product they are currently viewing.
+  prompt: `Você é um assistente de IA que ajuda os usuários a encontrar produtos alternativos ou similares com base no produto que eles estão visualizando no momento.
 
-  Provide a list of alternative product suggestions based on the following product attributes:
+  Forneça uma lista de sugestões de produtos alternativos com base nos seguintes atributos do produto:
 
-  Product Description: {{{productDescription}}}
-  Product Category: {{{productCategory}}}
-  Product Unit: {{{productUnit}}}
+  Descrição do Produto: {{{productDescription}}}
+  Categoria do Produto: {{{productCategory}}}
+  Unidade do Produto: {{{productUnit}}}
 
-  If you cannot find any relevant suggestions based on the available information, return an empty list for suggestions and offer alternative search options in the alternativeSearchOptions field.
+  Se você não conseguir encontrar nenhuma sugestão relevante com base nas informações disponíveis, retorne uma lista vazia para sugestões e ofereça opções de pesquisa alternativas no campo alternativeSearchOptions.
 `,
 });
 
