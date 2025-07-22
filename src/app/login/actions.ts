@@ -1,3 +1,4 @@
+// src/app/login/actions.ts
 "use server";
 
 import { redirect } from 'next/navigation';
@@ -12,7 +13,7 @@ export async function login(credentials: User): Promise<{ error?: string }> {
   }
   
   await setSession(user);
-  redirect('/dashboard');
+  redirect('/products');
 }
 
 export async function logout() {
