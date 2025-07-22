@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 import { getIronSession } from 'iron-session';
 import { SessionPayload } from './types';
+import { cookies } from 'next/headers';
 
 const sessionOptions = {
   password: process.env.SECRET_COOKIE_PASSWORD || 'complex_password_at_least_32_characters_long',
@@ -13,8 +14,14 @@ const sessionOptions = {
 
 async function getSessionFromMiddleware(request: NextRequest) {
     try {
-        const session = await getIronSession<SessionPayload>(request.cookies as any, sessionOptions);
+        // Correctly get the session from the request cookies.
+        const session = await getIronSession<SessionPayload>(cookies(), sessionOptions);
         if (!session.user) {
+            return null;
+        }
+        // Check for session expiration
+        if (new Date() > new Date(session.expires)) {
+            session.destroy();
             return null;
         }
         return session;

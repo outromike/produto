@@ -3,5 +3,6 @@
   { "username": "admin", "password": "password123" },
   { "username": "user", "password": "password" },
   { "username": "itj", "password": "itj" },
-  { "username": "jvl", "password": "jvl" }
+  { "username": "jvl", "password": "jvl" },
+  { "username": "mike", "password": "123" }
 ]
