@@ -65,7 +65,7 @@ export function AiSuggestions({ product, allProducts }: AiSuggestionsProps) {
                                 <ul className="list-disc space-y-1 pl-5 text-sm">
                                     {suggestions.suggestions.map((s) => (
                                         <li key={s.sku}>
-                                            <Link href={`/products/${s.sku}`} className="text-muted-foreground hover:text-primary hover:underline underline-offset-4">
+                                            <Link href={`/dashboard/products/${s.sku}`} className="text-muted-foreground hover:text-primary hover:underline underline-offset-4">
                                                 {s.description} (SKU: {s.sku})
                                             </Link>
                                         </li>

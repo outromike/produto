@@ -4,10 +4,8 @@ import { redirect } from 'next/navigation';
 
 export default async function DashboardLayout({
   children,
-  products,
 }: {
   children: React.ReactNode;
-  products: React.ReactNode;
 }) {
   const session = await getSession();
   if (!session?.user) {

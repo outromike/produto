@@ -13,7 +13,7 @@ export async function login(credentials: User): Promise<{ error?: string }> {
   }
   
   await setSession(user);
-  redirect('/products');
+  redirect('/dashboard/products');
 }
 
 export async function logout() {

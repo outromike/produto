@@ -34,7 +34,7 @@ export function ProductCard({ product }: ProductCardProps) {
       <CardHeader>
         <div className="flex justify-between items-start gap-4">
             <CardTitle className="font-headline text-lg hover:text-primary">
-                <Link href={`/products/${product.sku}`}>{product.description}</Link>
+                <Link href={`/dashboard/products/${product.sku}`}>{product.description}</Link>
             </CardTitle>
             <Badge variant="outline" className={cn("whitespace-nowrap", classificationColors[product.classification])}>
                 Classe {product.classification}
@@ -77,7 +77,7 @@ export function ProductCard({ product }: ProductCardProps) {
       </CardContent>
       <CardFooter>
         <Button asChild variant="outline" className="w-full">
-            <Link href={`/products/${product.sku}`}>Ver Detalhes</Link>
+            <Link href={`/dashboard/products/${product.sku}`}>Ver Detalhes</Link>
         </Button>
       </CardFooter>
     </Card>
