@@ -12,8 +12,10 @@ export async function login(credentials: Pick<User, 'username' | 'password'>): P
     return { error: 'Usuário ou senha inválidos.' };
   }
   
+  // A função setSession agora lida com o cookie criptografado
   await setSession(user);
 
+  // Redirecionamento é feito aqui, no lado do servidor.
   redirect('/dashboard');
 }
 

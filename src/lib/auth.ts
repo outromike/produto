@@ -8,8 +8,10 @@ import path from 'path';
 import { promises as fs } from 'fs';
 
 const sessionOptions = {
-  password: process.env.SECRET_COOKIE_PASSWORD || 'complex_password_at_least_32_characters_long',
-  cookieName: 'product-lookup-session',
+  password: process.env.SECRET_COOKIE_PASSWORD || 'complex_password_at_least_32_characters_long_for_dev',
+  cookieName: 'elgin-app-session',
+  // O cookie seguro é crucial para produção!
+  // Em desenvolvimento (HTTP), 'secure' deve ser false.
   cookieOptions: {
     secure: process.env.NODE_ENV === 'production',
   },
@@ -21,16 +23,14 @@ export async function getSession(): Promise<IronSession<SessionPayload>> {
 }
 
 export async function setSession(user: User): Promise<void> {
-  const session = await getIronSession<SessionPayload>(cookies(), sessionOptions);
-  // Remove password before saving to session
+  const session = await getSession();
   const { password, ...userWithoutPassword } = user;
   session.user = userWithoutPassword;
-  session.expires = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours
   await session.save();
 }
 
 export async function destroySession() {
-  const session = await getIronSession<SessionPayload>(cookies(), sessionOptions);
+  const session = await getSession();
   session.destroy();
 }
 

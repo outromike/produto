@@ -11,14 +11,14 @@ export default async function DashboardLayout({
 }) {
   const session = await getSession();
 
-  // Se não houver sessão, redireciona para a página de login.
-  if (!session?.user) {
+  // Se não houver sessão ou usuário na sessão, redireciona para a página de login.
+  if (!session.user) {
     redirect('/login');
   }
   
   return (
     <div className="flex min-h-screen w-full flex-col">
-      <Header />
+      <Header user={session.user} />
       <main className="flex-1 bg-background">{children}</main>
     </div>
   );
