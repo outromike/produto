@@ -28,8 +28,9 @@ export default async function UploadPage() {
                 <AlertDescription>
                     <ul className="list-disc pl-5 space-y-1 mt-2">
                         <li>Certifique-se de que os arquivos estão no formato CSV.</li>
-                        <li>O sistema identificará as colunas automaticamente com base nos cabeçalhos que você forneceu.</li>
-                        <li>Os dados existentes serão substituídos pelos novos dados dos arquivos enviados.</li>
+                        <li>O sistema identificará as colunas automaticamente com base nos cabeçalhos.</li>
+                        <li>Os produtos da mesma unidade (ITJ ou JVL) no arquivo antigo serão substituídos pelos novos.</li>
+                        <li>Se você enviar apenas um arquivo, os dados da outra unidade serão preservados.</li>
                     </ul>
                 </AlertDescription>
             </Alert>

@@ -1,12 +1,12 @@
-
 "use server";
 
+import { promises as fs } from 'fs';
+import path from 'path';
 import { Product } from '@/types';
 import { redirect } from 'next/navigation';
 import { getSession } from '@/lib/auth';
-import { getDbConnection, setupDatabase } from '@/lib/db';
-import { Connection } from 'mysql2/promise';
 
+// Helper to find header index with multiple possible names
 const findHeaderIndex = (headerRow: string[], possibleNames: string[]): number => {
     for (const name of possibleNames) {
         const index = headerRow.findIndex(header => header.trim().toLowerCase() === name.toLowerCase());
@@ -19,6 +19,7 @@ const parseCSV = (csvContent: string, unit: 'ITJ' | 'JVL'): Product[] => {
     const lines = csvContent.trim().split(/\r\n|\n/);
     if (lines.length < 2) return [];
 
+    // Auto-detect delimiter
     const delimiter = lines[0].includes(';') ? ';' : ',';
     
     const headerRow = lines[0].split(delimiter).map(h => h.replace(/"/g, ''));
@@ -79,40 +80,8 @@ const parseCSV = (csvContent: string, unit: 'ITJ' | 'JVL'): Product[] => {
             unit,
         };
         return product;
-    }).filter(p => p.sku && p.description);
+    }).filter(p => p.sku && p.description); // Filter out any empty rows
 };
-
-async function insertProductsIntoDb(db: Connection, products: Product[]) {
-    if (products.length === 0) return;
-
-    const query = `
-        INSERT INTO products (sku, item, description, category, netWeight, grossWeight, volume, dimensions, palletizationHeight, palletizationBase, barcode, packaging, measurementUnit, quantity, classification, unit)
-        VALUES ?
-        ON DUPLICATE KEY UPDATE
-        item = VALUES(item),
-        description = VALUES(description),
-        category = VALUES(category),
-        netWeight = VALUES(netWeight),
-        grossWeight = VALUES(grossWeight),
-        volume = VALUES(volume),
-        dimensions = VALUES(dimensions),
-        palletizationHeight = VALUES(palletizationHeight),
-        palletizationBase = VALUES(palletizationBase),
-        barcode = VALUES(barcode),
-        packaging = VALUES(packaging),
-        measurementUnit = VALUES(measurementUnit),
-        quantity = VALUES(quantity),
-        classification = VALUES(classification);
-    `;
-
-    const values = products.map(p => [
-        p.sku, p.item, p.description, p.category, p.netWeight, p.grossWeight, p.volume,
-        p.dimensions, p.palletization.height, p.palletization.base, p.barcode,
-        p.packaging, p.measurementUnit, p.quantity, p.classification, p.unit
-    ]);
-
-    await db.query(query, [values]);
-}
 
 export async function uploadProducts(formData: FormData): Promise<{ error?: string }> {
     const session = await getSession();
@@ -126,37 +95,54 @@ export async function uploadProducts(formData: FormData): Promise<{ error?: stri
     if (!fileITJ && !fileJVL) {
         return { error: 'Pelo menos um arquivo (ITJ ou JVL) deve ser enviado.' };
     }
-    
-    let db;
+
+    let allProducts: Product[] = [];
+
     try {
-        db = await getDbConnection();
-        if (!db) {
-            return { error: 'A conexão com o banco de dados não está configurada. Verifique suas variáveis de ambiente.' };
+        // Tenta ler o arquivo JSON existente para mesclar os dados
+        const filePath = path.join(process.cwd(), 'src', 'data', 'products.json');
+        let existingProducts: Product[] = [];
+        try {
+            const currentData = await fs.readFile(filePath, 'utf-8');
+            existingProducts = JSON.parse(currentData);
+        } catch (e) {
+            // Arquivo não existe ou está vazio, o que é normal na primeira vez
         }
 
-        await setupDatabase(); // Garante que a infraestrutura do BD esteja pronta
-        
         if (fileITJ && fileITJ.size > 0) {
             const bufferITJ = Buffer.from(await fileITJ.arrayBuffer());
             const contentITJ = bufferITJ.toString('utf-8');
             const productsITJ = parseCSV(contentITJ, 'ITJ');
-            await insertProductsIntoDb(db, productsITJ);
+            // Remove produtos antigos da unidade ITJ antes de adicionar os novos
+            existingProducts = existingProducts.filter(p => p.unit !== 'ITJ');
+            allProducts = existingProducts.concat(productsITJ);
         }
 
         if (fileJVL && fileJVL.size > 0) {
             const bufferJVL = Buffer.from(await fileJVL.arrayBuffer());
             const contentJVL = bufferJVL.toString('utf-8');
             const productsJVL = parseCSV(contentJVL, 'JVL');
-            await insertProductsIntoDb(db, productsJVL);
+             // Se já houver produtos de ITJ, mescla. Senão, começa do zero.
+            if (allProducts.length > 0) {
+                 allProducts = allProducts.filter(p => p.unit !== 'JVL');
+                 allProducts = allProducts.concat(productsJVL);
+            } else {
+                 existingProducts = existingProducts.filter(p => p.unit !== 'JVL');
+                 allProducts = existingProducts.concat(productsJVL);
+            }
         }
+        
+        // Escreve os dados combinados e atualizados no arquivo
+        await fs.writeFile(filePath, JSON.stringify(allProducts, null, 2), 'utf-8');
 
     } catch (error) {
-        console.error('File processing or database error:', error);
+        console.error('File processing error:', error);
         if (error instanceof Error) {
-            return { error: `Ocorreu um erro: ${error.message}` };
+            return { error: `Ocorreu um erro ao processar os arquivos: ${error.message}` };
         }
         return { error: 'Ocorreu um erro desconhecido ao processar os arquivos.' };
     }
     
+    // Redireciona para a página de produtos após o upload bem-sucedido
     redirect('/dashboard/products');
 }

@@ -1,6 +1,8 @@
 import { getIronSession, IronSession } from 'iron-session';
 import { cookies } from 'next/headers';
 import { SessionPayload, User } from '@/types';
+import path from 'path';
+import { promises as fs } from 'fs';
 
 const sessionOptions = {
   password: process.env.SECRET_COOKIE_PASSWORD || 'complex_password_at_least_32_characters_long',
@@ -35,8 +37,19 @@ export async function destroySession() {
   session.destroy();
 }
 
-export function findUserByCredentials(credentials: User): User | undefined {
-    const users: User[] = require('@/data/users.json');
+async function getUsers(): Promise<User[]> {
+    const filePath = path.join(process.cwd(), 'src', 'data', 'users.json');
+    try {
+        const jsonData = await fs.readFile(filePath, 'utf-8');
+        return JSON.parse(jsonData);
+    } catch (error) {
+        console.error("Error reading users.json:", error);
+        return [];
+    }
+}
+
+export async function findUserByCredentials(credentials: User): Promise<User | undefined> {
+    const users = await getUsers();
     return users.find(
       (u) => u.username === credentials.username && u.password === credentials.password
     );

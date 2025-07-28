@@ -16,6 +16,6 @@ export async function getProducts(): Promise<Product[]> {
 }
 
 export async function getProductBySku(sku: string): Promise<Product | undefined> {
-    const allProducts = await getProducts();
-    return allProducts.find(p => p.sku === sku);
+    const products = await getProducts();
+    return products.find(product => product.sku === sku);
 }

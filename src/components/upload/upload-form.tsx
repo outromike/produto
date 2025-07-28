@@ -17,7 +17,6 @@ import { useState, useTransition } from "react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { AlertCircle, Loader2 } from "lucide-react";
 import { uploadProducts } from "@/app/upload/actions";
-import { useRouter } from "next/navigation";
 
 const formSchema = z.object({
   fileITJ: z.custom<File | undefined>().optional(),
@@ -30,7 +29,6 @@ const formSchema = z.object({
 export function UploadForm() {
   const [error, setError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
-  const router = useRouter();
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),

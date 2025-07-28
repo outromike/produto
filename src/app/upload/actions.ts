@@ -47,8 +47,7 @@ const parseCSV = (csvContent: string, unit: 'ITJ' | 'JVL'): Product[] => {
     };
 
     if (headerMapping.sku === -1 || headerMapping.description === -1) {
-        console.error("CSV parsing failed: Missing required headers (SKU or Description).");
-        return [];
+        throw new Error("CSV parsing failed: Missing required headers (SKU or Description).");
     }
 
     return dataRows.map(line => {
@@ -101,7 +100,7 @@ export async function uploadProducts(formData: FormData): Promise<{ error?: stri
     let allProducts: Product[] = [];
 
     try {
-        // Tenta ler o arquivo JSON existente para mesclar os dados, se necessário
+        // Tenta ler o arquivo JSON existente para mesclar os dados
         const filePath = path.join(process.cwd(), 'src', 'data', 'products.json');
         let existingProducts: Product[] = [];
         try {
@@ -139,7 +138,10 @@ export async function uploadProducts(formData: FormData): Promise<{ error?: stri
 
     } catch (error) {
         console.error('File processing error:', error);
-        return { error: 'Ocorreu um erro ao processar os arquivos. Verifique o console para mais detalhes.' };
+        if (error instanceof Error) {
+            return { error: `Ocorreu um erro ao processar os arquivos: ${error.message}` };
+        }
+        return { error: 'Ocorreu um erro desconhecido ao processar os arquivos.' };
     }
     
     // Redireciona para a página de produtos após o upload bem-sucedido

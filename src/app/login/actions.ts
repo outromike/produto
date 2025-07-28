@@ -6,7 +6,7 @@ import { setSession, findUserByCredentials, destroySession } from '@/lib/auth';
 import { User } from '@/types';
 
 export async function login(credentials: User): Promise<{ error?: string }> {
-  const user = findUserByCredentials(credentials);
+  const user = await findUserByCredentials(credentials);
 
   if (!user) {
     return { error: 'Usuário ou senha inválidos.' };
