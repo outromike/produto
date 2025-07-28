@@ -13,21 +13,44 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { MoreHorizontal } from "lucide-react";
-
+import { Checkbox } from "@/components/ui/checkbox";
 
 interface ScheduleTableProps {
   schedules: ReturnSchedule[];
   onEdit: (schedule: ReturnSchedule) => void;
   onDelete: (schedule: ReturnSchedule) => void;
+  selectedSchedules: string[];
+  setSelectedSchedules: (ids: string[]) => void;
 }
 
-export function ScheduleTable({ schedules, onEdit, onDelete }: ScheduleTableProps) {
+export function ScheduleTable({ schedules, onEdit, onDelete, selectedSchedules, setSelectedSchedules }: ScheduleTableProps) {
+  
+  const handleSelectAll = (checked: boolean) => {
+    setSelectedSchedules(checked ? schedules.map(s => s.id) : []);
+  };
+
+  const handleSelectOne = (id: string, checked: boolean) => {
+    if (checked) {
+      setSelectedSchedules([...selectedSchedules, id]);
+    } else {
+      setSelectedSchedules(selectedSchedules.filter(sId => sId !== id));
+    }
+  };
+
+  const isAllSelected = schedules.length > 0 && selectedSchedules.length === schedules.length;
 
   return (
     <div className="rounded-lg border">
       <Table>
         <TableHeader>
           <TableRow>
+            <TableHead padding="checkbox" className="w-12">
+              <Checkbox
+                checked={isAllSelected}
+                onCheckedChange={handleSelectAll}
+                aria-label="Selecionar todos"
+              />
+            </TableHead>
             <TableHead>Data</TableHead>
             <TableHead>Transportadora</TableHead>
             <TableHead>Cliente</TableHead>
@@ -43,7 +66,14 @@ export function ScheduleTable({ schedules, onEdit, onDelete }: ScheduleTableProp
         <TableBody>
           {schedules.length > 0 ? (
             schedules.map((schedule) => (
-              <TableRow key={schedule.id}>
+              <TableRow key={schedule.id} data-state={selectedSchedules.includes(schedule.id) && "selected"}>
+                 <TableCell padding="checkbox">
+                  <Checkbox
+                    checked={selectedSchedules.includes(schedule.id)}
+                    onCheckedChange={(checked) => handleSelectOne(schedule.id, !!checked)}
+                    aria-label={`Selecionar agendamento ${schedule.id}`}
+                  />
+                </TableCell>
                 <TableCell className="font-medium whitespace-nowrap">{format(new Date(schedule.date), 'dd/MM/yyyy')}</TableCell>
                 <TableCell>{schedule.carrier}</TableCell>
                 <TableCell>{schedule.customer}</TableCell>
@@ -77,7 +107,7 @@ export function ScheduleTable({ schedules, onEdit, onDelete }: ScheduleTableProp
             ))
           ) : (
             <TableRow>
-              <TableCell colSpan={10} className="h-24 text-center">
+              <TableCell colSpan={11} className="h-24 text-center">
                 Nenhum agendamento encontrado para este período.
               </TableCell>
             </TableRow>
@@ -87,4 +117,3 @@ export function ScheduleTable({ schedules, onEdit, onDelete }: ScheduleTableProp
     </div>
   );
 }
-

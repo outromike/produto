@@ -24,7 +24,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 const formSchema = z.object({
   date: z.string().min(1, "A data é obrigatória."),
   carrier: z.string().min(1, "A transportadora é obrigatória."),
-  // Os campos de remessa e nfd agora são textareas e podem conter múltiplas linhas
   outgoingShipment: z.string().optional(),
   salesNote: z.string().optional(),
   nfd: z.string().min(1, "Pelo menos uma NFD é obrigatória."),
@@ -83,7 +82,6 @@ export function ScheduleForm({ setOpen, initialData }: ScheduleFormProps) {
   });
 
   const onSubmit = async (data: ScheduleFormValues) => {
-    // Se 'initialData' existe, estamos editando. A edição em lote não é suportada.
     if (initialData) {
         const result = await updateSchedule(initialData.id, data);
         if (result.success) {
@@ -93,10 +91,9 @@ export function ScheduleForm({ setOpen, initialData }: ScheduleFormProps) {
             toast({ title: "Erro", description: result.error || "Não foi possível atualizar o agendamento.", variant: "destructive" });
         }
     } else {
-        // Lógica para criação em lote
         const result = await addSchedule(data);
         if (result.success) {
-            const count = data.nfd.trim().split('\n').length;
+            const count = data.nfd.trim().split(/\s+/).filter(Boolean).length;
             toast({ title: "Sucesso!", description: `${count} agendamento(s) criado(s) com sucesso.` });
             form.reset();
             setOpen(false);
@@ -141,7 +138,6 @@ export function ScheduleForm({ setOpen, initialData }: ScheduleFormProps) {
                 </FormItem>
             )}/>
             
-            {/* Campos que aceitam múltiplos valores */}
              <FormField control={form.control} name="nfd" render={({ field }) => (
                 <FormItem>
                     <FormLabel className="flex items-center gap-2">
@@ -150,7 +146,7 @@ export function ScheduleForm({ setOpen, initialData }: ScheduleFormProps) {
                     </FormLabel>
                     <FormControl>
                         <Textarea 
-                            placeholder="Cole uma ou mais NFDs, uma por linha." 
+                            placeholder="Cole uma ou mais NFDs, separadas por espaço ou quebra de linha." 
                             {...field}
                             rows={initialData ? 1 : 3}
                         />

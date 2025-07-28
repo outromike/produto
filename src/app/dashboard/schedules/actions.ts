@@ -33,8 +33,8 @@ export async function addSchedule(data: Omit<ReturnSchedule, 'id' | 'createdAt'>
   try {
     const allSchedules = await getSchedules();
     
-    const nfds = data.nfd.trim().split('\n').map(nfd => nfd.trim()).filter(Boolean);
-    const remessas = data.outgoingShipment.trim().split('\n').map(r => r.trim());
+    const nfds = data.nfd.trim().split(/\s+/).map(nfd => nfd.trim()).filter(Boolean);
+    const remessas = data.outgoingShipment?.trim().split(/\s+/).map(r => r.trim()) || [];
 
     if (nfds.length === 0) {
       return { success: false, error: "Nenhuma NFD válida foi fornecida." };
@@ -99,3 +99,21 @@ export async function deleteSchedule(id: string): Promise<{ success: boolean; er
     return { success: false, error: "Não foi possível excluir o agendamento." };
   }
 }
+
+export async function deleteSchedules(ids: string[]): Promise<{ success: boolean; error?: string }> {
+    try {
+      const schedules = await getSchedules();
+      const updatedSchedules = schedules.filter(s => !ids.includes(s.id));
+  
+      if (schedules.length === updatedSchedules.length) {
+          return { success: false, error: "Nenhum agendamento correspondente aos IDs fornecidos foi encontrado para exclusão." };
+      }
+  
+      await saveSchedules(updatedSchedules);
+      return { success: true };
+    } catch (error) {
+      console.error("Failed to delete schedules:", error);
+      return { success: false, error: "Não foi possível excluir os agendamentos selecionados." };
+    }
+  }
+
