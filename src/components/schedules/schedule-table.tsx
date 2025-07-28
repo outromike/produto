@@ -5,15 +5,15 @@ import { ReturnSchedule } from "@/types";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { format } from 'date-fns';
 import { Button } from "@/components/ui/button";
-import { Pencil, Trash2, CheckCircle2 } from "lucide-react";
+import { Pencil, Trash2, CheckCircle2, Clock, MoreHorizontal } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { MoreHorizontal } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 interface ScheduleTableProps {
   schedules: ReturnSchedule[];
@@ -86,11 +86,31 @@ export function ScheduleTable({ schedules, onEdit, onDelete, selectedSchedules, 
                 <TableCell>{schedule.productState}</TableCell>
                 <TableCell>{schedule.invoiceVolume}</TableCell>
                 <TableCell>
-                  {conferencedNfds.has(schedule.nfd) && (
-                    <div className="flex items-center justify-center">
-                      <CheckCircle2 className="h-5 w-5 text-green-500" />
-                    </div>
-                  )}
+                   <div className="flex items-center justify-center">
+                    {conferencedNfds.has(schedule.nfd) ? (
+                      <TooltipProvider>
+                        <Tooltip>
+                          <TooltipTrigger>
+                            <CheckCircle2 className="h-5 w-5 text-green-500" />
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            <p>Recebimento conferido</p>
+                          </TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
+                    ) : (
+                       <TooltipProvider>
+                        <Tooltip>
+                          <TooltipTrigger>
+                            <Clock className="h-5 w-5 text-yellow-500" />
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            <p>Aguardando conferência</p>
+                          </TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
+                    )}
+                  </div>
                 </TableCell>
                 <TableCell className="text-right">
                     <DropdownMenu>

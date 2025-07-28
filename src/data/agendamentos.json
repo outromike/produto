@@ -28,5 +28,20 @@
     "invoiceVolume": 1,
     "id": "1753719293366-0",
     "createdAt": "2025-07-28T16:14:53.366Z"
+  },
+  {
+    "date": "2025-07-28",
+    "carrier": "AND",
+    "outgoingShipment": "2",
+    "salesNote": "2",
+    "nfd": "2",
+    "customer": "1",
+    "bdv": "2",
+    "ov": "2",
+    "returnReason": "Extravio",
+    "productState": "Descarte",
+    "invoiceVolume": 2,
+    "id": "1753722864018-0",
+    "createdAt": "2025-07-28T17:14:24.018Z"
   }
 ]
