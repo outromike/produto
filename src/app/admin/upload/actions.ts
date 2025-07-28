@@ -86,51 +86,38 @@ const parseProductCSV = (csvContent: string, unit: 'ITJ' | 'JVL'): Product[] => 
 export async function uploadFiles(formData: FormData): Promise<{ error?: string }> {
     const fileITJ = formData.get('fileITJ') as File | null;
     const fileJVL = formData.get('fileJVL') as File | null;
-    const fileAgendamento = formData.get('fileAgendamento') as File | null;
-    let productsUpdated = false;
-    let schedulesUpdated = false;
 
-    if (!fileITJ && !fileJVL && !fileAgendamento) {
-        return { error: 'Pelo menos um arquivo deve ser enviado.' };
+    if (!fileITJ && !fileJVL) {
+        return { error: 'Pelo menos um arquivo (ITJ ou JVL) deve ser enviado.' };
     }
 
     try {
-        if (fileITJ || fileJVL) {
-            const filePath = path.join(process.cwd(), 'src', 'data', 'products.json');
-            let existingProducts: Product[] = [];
-            try {
-                const currentData = await fs.readFile(filePath, 'utf-8');
-                existingProducts = JSON.parse(currentData);
-            } catch (e) {
-                // Arquivo não existe ou está vazio
-            }
-            
-            let allProducts: Product[] = [...existingProducts];
+        const filePath = path.join(process.cwd(), 'src', 'data', 'products.json');
+        let existingProducts: Product[] = [];
+        try {
+            const currentData = await fs.readFile(filePath, 'utf-8');
+            existingProducts = JSON.parse(currentData);
+        } catch (e) {
+            // Arquivo não existe ou está vazio
+        }
+        
+        let allProducts: Product[] = [...existingProducts];
 
-            if (fileITJ && fileITJ.size > 0) {
-                const bufferITJ = Buffer.from(await fileITJ.arrayBuffer());
-                const contentITJ = bufferITJ.toString('utf-8');
-                const productsITJ = parseProductCSV(contentITJ, 'ITJ');
-                allProducts = allProducts.filter(p => p.unit !== 'ITJ').concat(productsITJ);
-            }
-
-            if (fileJVL && fileJVL.size > 0) {
-                const bufferJVL = Buffer.from(await fileJVL.arrayBuffer());
-                const contentJVL = bufferJVL.toString('utf-8');
-                const productsJVL = parseProductCSV(contentJVL, 'JVL');
-                allProducts = allProducts.filter(p => p.unit !== 'JVL').concat(productsJVL);
-            }
-            
-            await fs.writeFile(filePath, JSON.stringify(allProducts, null, 2), 'utf-8');
-            productsUpdated = true;
+        if (fileITJ && fileITJ.size > 0) {
+            const bufferITJ = Buffer.from(await fileITJ.arrayBuffer());
+            const contentITJ = bufferITJ.toString('utf-8');
+            const productsITJ = parseProductCSV(contentITJ, 'ITJ');
+            allProducts = allProducts.filter(p => p.unit !== 'ITJ').concat(productsITJ);
         }
 
-        if (fileAgendamento && fileAgendamento.size > 0) {
-             const scheduleFilePath = path.join(process.cwd(), 'src', 'data', 'agendamentos.json');
-             // Por enquanto, apenas salva um JSON vazio para confirmar o recebimento
-             await fs.writeFile(scheduleFilePath, JSON.stringify([], null, 2), 'utf-8');
-             schedulesUpdated = true;
+        if (fileJVL && fileJVL.size > 0) {
+            const bufferJVL = Buffer.from(await fileJVL.arrayBuffer());
+            const contentJVL = bufferJVL.toString('utf-8');
+            const productsJVL = parseProductCSV(contentJVL, 'JVL');
+            allProducts = allProducts.filter(p => p.unit !== 'JVL').concat(productsJVL);
         }
+        
+        await fs.writeFile(filePath, JSON.stringify(allProducts, null, 2), 'utf-8');
 
     } catch (error) {
         console.error('File processing error:', error);

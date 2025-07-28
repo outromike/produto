@@ -19,29 +19,21 @@ export default async function UploadPage() {
       </div>
        <Card>
         <CardHeader>
-          <CardTitle>Upload de Arquivos</CardTitle>
+          <CardTitle>Upload de Planilhas de Produtos</CardTitle>
           <CardDescription>
-            Faça o upload dos arquivos CSV para atualizar a base de dados de produtos ou agendamentos.
+            Faça o upload dos arquivos CSV para as unidades de Itajaí (ITJ) e Joinville (JVL) para atualizar a base de dados.
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
             <Alert>
                 <Info className="h-4 w-4" />
-                <AlertTitle>Instruções para Produtos</AlertTitle>
+                <AlertTitle>Instruções</AlertTitle>
                 <AlertDescription>
                     <ul className="list-disc pl-5 space-y-1 mt-2">
-                        <li>Certifique-se de que os arquivos de produtos estão no formato CSV.</li>
+                        <li>Certifique-se de que os arquivos estão no formato CSV.</li>
+                        <li>O sistema identificará as colunas automaticamente com base nos cabeçalhos.</li>
                         <li>Os produtos da mesma unidade (ITJ ou JVL) no arquivo antigo serão substituídos pelos novos.</li>
-                        <li>Se você enviar apenas um arquivo de produto, os dados da outra unidade serão preservados.</li>
-                    </ul>
-                </AlertDescription>
-            </Alert>
-             <Alert>
-                <Info className="h-4 w-4" />
-                <AlertTitle>Instruções para Agendamentos</AlertTitle>
-                <AlertDescription>
-                    <ul className="list-disc pl-5 space-y-1 mt-2">
-                         <li>Envie o arquivo de agendamentos de devolução em formato CSV.</li>
+                        <li>Se você enviar apenas um arquivo, os dados da outra unidade serão preservados.</li>
                     </ul>
                 </AlertDescription>
             </Alert>

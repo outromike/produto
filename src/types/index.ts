@@ -1,6 +1,5 @@
 
 
-
 export type Product = {
   sku: string;
   item: string; // From 'Item'
@@ -34,9 +33,4 @@ export type SessionPayload = {
     role: 'admin' | 'user';
   };
   expires: Date;
-};
-
-// Placeholder for return schedule data structure
-export type ReturnSchedule = {
-  [key: string]: any;
 };
