@@ -8,18 +8,26 @@ import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { format, parseISO } from "date-fns";
 import { ConferenceModal } from "./conference-modal";
+import { CheckCircle2 } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 interface ConferenceClientProps {
   initialSchedules: ReturnSchedule[];
   carrierName: string;
+  initialConferencedNfds: string[];
 }
 
-export function ConferenceClient({ initialSchedules, carrierName }: ConferenceClientProps) {
+export function ConferenceClient({ initialSchedules, carrierName, initialConferencedNfds }: ConferenceClientProps) {
   const [schedules, setSchedules] = useState(initialSchedules);
   const [selectedSchedule, setSelectedSchedule] = useState<ReturnSchedule | null>(null);
+  const [completedNfds, setCompletedNfds] = useState<Set<string>>(new Set(initialConferencedNfds));
 
   const totalNotes = schedules.length;
   const totalVolume = schedules.reduce((sum, s) => sum + s.invoiceVolume, 0);
+
+  const handleConferenceSaved = (nfd: string) => {
+    setCompletedNfds(prev => new Set(prev).add(nfd));
+  };
 
   return (
     <>
@@ -82,8 +90,20 @@ export function ConferenceClient({ initialSchedules, carrierName }: ConferenceCl
                 </TableHeader>
                 <TableBody>
                   {schedules.map(schedule => (
-                    <TableRow key={schedule.id} onClick={() => setSelectedSchedule(schedule)} className="cursor-pointer hover:bg-muted/50">
-                      <TableCell className="font-mono font-semibold">{schedule.nfd}</TableCell>
+                    <TableRow 
+                      key={schedule.id} 
+                      onClick={() => setSelectedSchedule(schedule)} 
+                      className={cn(
+                        "cursor-pointer hover:bg-muted/50",
+                        completedNfds.has(schedule.nfd) && "bg-green-500/10 text-muted-foreground hover:bg-green-500/20"
+                      )}
+                    >
+                      <TableCell className="font-mono font-semibold">
+                        <div className="flex items-center gap-2">
+                          {completedNfds.has(schedule.nfd) && <CheckCircle2 className="h-4 w-4 text-green-500" />}
+                          <span>{schedule.nfd}</span>
+                        </div>
+                      </TableCell>
                       <TableCell>{schedule.customer}</TableCell>
                       <TableCell>{schedule.returnReason}</TableCell>
                       <TableCell>{schedule.invoiceVolume}</TableCell>
@@ -103,8 +123,8 @@ export function ConferenceClient({ initialSchedules, carrierName }: ConferenceCl
         isOpen={!!selectedSchedule}
         onClose={() => setSelectedSchedule(null)}
         schedule={selectedSchedule}
+        onConferenceSaved={handleConferenceSaved}
       />
     </>
   );
 }
-

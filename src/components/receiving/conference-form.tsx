@@ -36,9 +36,10 @@ type ConferenceFormValues = z.infer<typeof formSchema>;
 interface ConferenceFormProps {
   schedule: ReturnSchedule;
   onFinish: () => void;
+  onConferenceSaved: (nfd: string) => void;
 }
 
-export function ConferenceForm({ schedule, onFinish }: ConferenceFormProps) {
+export function ConferenceForm({ schedule, onFinish, onConferenceSaved }: ConferenceFormProps) {
   const [isPending, startTransition] = useTransition();
   const [productQuery, setProductQuery] = useState("");
   const [suggestions, setSuggestions] = useState<Product[]>([]);
@@ -74,7 +75,8 @@ export function ConferenceForm({ schedule, onFinish }: ConferenceFormProps) {
 
   const handleProductSelect = (product: Product) => {
     form.setValue("product", { sku: product.sku, description: product.description });
-    setProductQuery(`${product.sku} - ${product.description}`);
+    setProductQuery('');
+    setSuggestions([]);
     setIsPopoverOpen(false);
   };
 
@@ -92,6 +94,7 @@ export function ConferenceForm({ schedule, onFinish }: ConferenceFormProps) {
 
         if (result.success) {
             toast({ title: "Sucesso!", description: "Produto da conferência salvo com sucesso." });
+            onConferenceSaved(schedule.nfd); // Notifica o componente pai que a conferência foi salva
             form.reset({
                 product: { sku: "", description: "" },
                 receivedVolume: 1,
@@ -122,6 +125,8 @@ export function ConferenceForm({ schedule, onFinish }: ConferenceFormProps) {
         processSubmit(formData);
     }
   };
+  
+  const selectedProduct = form.watch('product');
 
   return (
     <>
@@ -129,7 +134,7 @@ export function ConferenceForm({ schedule, onFinish }: ConferenceFormProps) {
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
           <FormField
             control={form.control}
-            name="product"
+            name="product.sku"
             render={({ field }) => (
               <FormItem className="flex flex-col">
                 <FormLabel>Produto (SKU, Item ou Descrição)</FormLabel>
@@ -140,7 +145,6 @@ export function ConferenceForm({ schedule, onFinish }: ConferenceFormProps) {
                             placeholder="Digite para buscar..."
                             value={productQuery}
                             onChange={(e) => handleProductSearch(e.target.value)}
-                            onClick={() => setIsPopoverOpen(true)}
                         />
                     </FormControl>
                   </PopoverTrigger>
@@ -156,7 +160,7 @@ export function ConferenceForm({ schedule, onFinish }: ConferenceFormProps) {
                               value={`${product.sku} - ${product.description}`}
                               onSelect={() => handleProductSelect(product)}
                             >
-                               <CheckIcon className={cn("mr-2 h-4 w-4", field.value.sku === product.sku ? "opacity-100" : "opacity-0")}/>
+                               <CheckIcon className={cn("mr-2 h-4 w-4", field.value === product.sku ? "opacity-100" : "opacity-0")}/>
                               {product.description} <span className="text-xs text-muted-foreground ml-2">({product.sku})</span>
                             </CommandItem>
                           ))}
@@ -165,8 +169,8 @@ export function ConferenceForm({ schedule, onFinish }: ConferenceFormProps) {
                     </Command>
                   </PopoverContent>
                 </Popover>
-                 <Input readOnly disabled className="mt-2" placeholder="SKU do produto selecionado" value={field.value.sku} />
-                 <Input readOnly disabled className="mt-2" placeholder="Descrição do produto selecionado" value={field.value.description} />
+                 <Input readOnly disabled className="mt-2" placeholder="SKU do produto selecionado" value={selectedProduct.sku} />
+                 <Input readOnly disabled className="mt-2" placeholder="Descrição do produto selecionado" value={selectedProduct.description} />
                 <FormMessage />
               </FormItem>
             )}

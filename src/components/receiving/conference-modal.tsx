@@ -8,15 +8,15 @@ interface ConferenceModalProps {
   isOpen: boolean;
   onClose: () => void;
   schedule: ReturnSchedule | null;
+  onConferenceSaved: (nfd: string) => void;
 }
 
-export function ConferenceModal({ isOpen, onClose, schedule }: ConferenceModalProps) {
+export function ConferenceModal({ isOpen, onClose, schedule, onConferenceSaved }: ConferenceModalProps) {
   if (!schedule) return null;
 
   const handleFinish = () => {
-    // Aqui você pode adicionar lógica para o que acontece quando a conferência de uma NF é finalizada
-    // Por exemplo, marcar a NF como conferida, etc.
-    // Por enquanto, apenas fechamos o modal.
+    // A conferência de uma nota pode envolver vários produtos, então o fechamento
+    // é uma ação manual do usuário no botão "Finalizar" do formulário.
     onClose();
   };
 
@@ -30,7 +30,11 @@ export function ConferenceModal({ isOpen, onClose, schedule }: ConferenceModalPr
           </DialogDescription>
         </DialogHeader>
         <div className="py-4">
-          <ConferenceForm schedule={schedule} onFinish={handleFinish} />
+          <ConferenceForm 
+            schedule={schedule} 
+            onFinish={handleFinish} 
+            onConferenceSaved={() => onConferenceSaved(schedule.nfd)} 
+          />
         </div>
       </DialogContent>
     </Dialog>
