@@ -4,14 +4,12 @@ import { UserNav } from "@/components/layout/user-nav";
 import { ThemeToggle } from "@/components/layout/theme-toggle";
 import { PackageSearch, Table, LayoutDashboard, CalendarClock } from "lucide-react";
 import Link from "next/link";
-import { SessionPayload } from "@/types";
+import { getSession } from "@/lib/auth";
 import { Button } from "../ui/button";
 
-interface HeaderProps {
-    user: SessionPayload['user'] | undefined;
-}
+export async function Header() {
+  const session = await getSession();
 
-export function Header({ user }: HeaderProps) {
   return (
     <header className="sticky top-0 z-50 flex h-16 items-center gap-4 border-b bg-background/80 px-4 backdrop-blur md:px-6">
       <Link href="/dashboard/products" className="flex items-center gap-2 font-headline text-lg font-semibold">
@@ -38,7 +36,7 @@ export function Header({ user }: HeaderProps) {
             </Link>
           </Button>
         <ThemeToggle />
-        <UserNav user={user} />
+        <UserNav user={session?.user} />
       </nav>
     </header>
   );

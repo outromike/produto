@@ -18,7 +18,7 @@ export default async function DashboardLayout({
   
   return (
     <div className="flex min-h-screen w-full flex-col">
-      <Header user={session?.user} />
+      <Header />
       <main className="flex-1 bg-muted/40">{children}</main>
     </div>
   );
