@@ -83,14 +83,14 @@ export async function uploadReturnSchedules(formData: FormData): Promise<{ error
             const currentData = await fs.readFile(filePath, 'utf-8');
             existingSchedules = JSON.parse(currentData);
         } catch (error) {
-            // Se o arquivo não existir, continuamos com um array vazio, o que é esperado na primeira execução.
+            // If the file does not exist, we continue with an empty array, which is expected on the first run.
         }
 
         const buffer = Buffer.from(await file.arrayBuffer());
         const content = buffer.toString('utf-8');
         const newSchedules = parseCSV(content);
 
-        // Concatena os agendamentos existentes com os novos
+        // Concatenate existing schedules with new ones
         const allSchedules = existingSchedules.concat(newSchedules);
 
         await fs.writeFile(filePath, JSON.stringify(allSchedules, null, 2), 'utf-8');
@@ -103,6 +103,5 @@ export async function uploadReturnSchedules(formData: FormData): Promise<{ error
         return { error: 'Ocorreu um erro desconhecido ao processar o arquivo.' };
     }
     
-    // Redirects to the admin panel after a successful upload
     redirect('/admin');
 }

@@ -20,7 +20,7 @@ import { AlertCircle, Loader2 } from "lucide-react";
 import { uploadReturnSchedules } from "./actions";
 
 const formSchema = z.object({
-  file: z.custom<File | undefined>().refine(file => file instanceof File, {
+  file: z.custom<File | undefined>().refine(file => file instanceof File && file.size > 0, {
     message: "O arquivo de agendamento é obrigatório.",
   }),
 });
@@ -31,7 +31,9 @@ export function DevolucaoUploadForm() {
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
-    defaultValues: {},
+    defaultValues: {
+        file: undefined,
+    },
   });
 
   function onSubmit(values: z.infer<typeof formSchema>) {
