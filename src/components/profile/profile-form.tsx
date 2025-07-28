@@ -10,9 +10,10 @@ import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { Separator } from "@/components/ui/separator";
 import { Loader2 } from "lucide-react";
-import { SessionPayload } from "@/types";
+import { User } from "@/types";
 import { updateUserInfo, changePassword } from "@/app/dashboard/profile/actions";
 import { useTransition } from "react";
+import { useRouter } from "next/navigation";
 
 const userInfoSchema = z.object({
   name: z.string().min(1, "O nome é obrigatório."),
@@ -32,11 +33,12 @@ type UserInfoFormValues = z.infer<typeof userInfoSchema>;
 type PasswordFormValues = z.infer<typeof passwordSchema>;
 
 interface ProfileFormProps {
-  user: SessionPayload['user'];
+  user: User;
 }
 
 export function ProfileForm({ user }: ProfileFormProps) {
   const { toast } = useToast();
+  const router = useRouter();
   const [isInfoPending, startInfoTransition] = useTransition();
   const [isPasswordPending, startPasswordTransition] = useTransition();
 
@@ -62,6 +64,7 @@ export function ProfileForm({ user }: ProfileFormProps) {
         const result = await updateUserInfo(user.username, values);
         if (result.success) {
             toast({ title: "Sucesso!", description: "Suas informações foram atualizadas." });
+            router.refresh(); // Refresh to update header
         } else {
             toast({ title: "Erro", description: result.error, variant: "destructive" });
         }

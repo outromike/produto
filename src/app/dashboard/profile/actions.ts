@@ -33,18 +33,24 @@ export async function updateUserInfo(username: string, data: { name: string; ema
             return { success: false, error: "Usuário não encontrado." };
         }
 
+        // Update user info in the array
         users[userIndex] = { ...users[userIndex], ...data };
         await saveUsers(users);
 
-        // Re-authenticate session with new info
-        const updatedUser = users[userIndex];
-        await setSession(updatedUser);
+        // Update the session with the new user info
+        const session = await getSession();
+        if (session.user) {
+            session.user.name = data.name;
+            session.user.email = data.email;
+            await session.save();
+        }
 
         revalidatePath('/dashboard/profile');
         
         return { success: true };
 
     } catch (error) {
+        console.error("Failed to update user info:", error);
         return { success: false, error: "Falha ao atualizar informações." };
     }
 }
@@ -70,6 +76,7 @@ export async function changePassword(username: string, data: { currentPassword; 
         return { success: true };
 
     } catch (error) {
+        console.error("Failed to change password:", error);
         return { success: false, error: "Falha ao alterar a senha." };
     }
 }
