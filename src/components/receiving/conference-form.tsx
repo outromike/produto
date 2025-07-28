@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useForm } from "react-hook-form";
@@ -192,7 +193,7 @@ export function ConferenceForm({ schedule, existingConference, onFinish, onConfe
                           {suggestions.map((product, index) => (
                             <CommandItem
                               key={product.sku + '-' + index}
-                              value={`${product.description} ${product.sku} ${product.item}`}
+                              value={`${product.sku} - ${product.description}`}
                               onSelect={() => handleProductSelect(product)}
                             >
                               <CheckIcon
@@ -287,12 +288,12 @@ export function ConferenceForm({ schedule, existingConference, onFinish, onConfe
               Recebimento Parcial
             </AlertDialogTitle>
             <AlertDialogDescription>
-              <p className="mt-2">A quantidade de volumes informada diverge do agendamento.</p>
+              <div className="mt-2">A quantidade de volumes informada diverge do agendamento.</div>
               <div className="mt-4 space-y-2 rounded-lg border bg-muted/50 p-4 text-sm">
-                <p><strong>Volumes Agendados:</strong> {schedule.invoiceVolume}</p>
-                <p><strong>Volumes Informados:</strong> {formData?.receivedVolume}</p>
+                <div><strong>Volumes Agendados:</strong> {schedule.invoiceVolume}</div>
+                <div><strong>Volumes Informados:</strong> {formData?.receivedVolume}</div>
               </div>
-              <p className="mt-4 font-semibold">Deseja confirmar o recebimento parcial mesmo assim?</p>
+              <div className="mt-4 font-semibold">Deseja confirmar o recebimento parcial mesmo assim?</div>
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
