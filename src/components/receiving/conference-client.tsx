@@ -7,7 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import { format, parseISO } from "date-fns";
+import { format, parseISO, isToday } from "date-fns";
 import { ConferenceModal } from "./conference-modal";
 import { CheckCircle2, Pencil, FileClock, Calendar, Box, Hash } from "lucide-react";
 import {
@@ -29,12 +29,15 @@ interface ConferenceClientProps {
 }
 
 export function ConferenceClient({ initialSchedules, carrierName, initialConferences }: ConferenceClientProps) {
-  const [schedules] = useState(initialSchedules);
   const [conferences, setConferences] = useState<ConferenceEntry[]>(initialConferences);
 
   const [selectedSchedule, setSelectedSchedule] = useState<ReturnSchedule | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isReviewAlertOpen, setIsReviewAlertOpen] = useState(false);
+
+  const schedulesForToday = useMemo(() => {
+    return initialSchedules.filter(s => isToday(parseISO(s.date)))
+  }, [initialSchedules]);
 
   
   const conferencedNfds = useMemo(() => {
@@ -43,8 +46,8 @@ export function ConferenceClient({ initialSchedules, carrierName, initialConfere
     return nfdSet;
   }, [conferences]);
 
-  const totalNotes = schedules.length;
-  const totalVolume = schedules.reduce((sum, s) => sum + s.invoiceVolume, 0);
+  const totalNotes = schedulesForToday.length;
+  const totalVolume = schedulesForToday.reduce((sum, s) => sum + s.invoiceVolume, 0);
 
   const handleRowClick = (schedule: ReturnSchedule) => {
     setSelectedSchedule(schedule);
@@ -75,21 +78,8 @@ export function ConferenceClient({ initialSchedules, carrierName, initialConfere
      setConferences(prev => [...prev, newConference]);
   }
 
-  const handleConferenceDelete = (deletedConferenceId: string, nfd: string) => {
-    const remainingConferencesForNfd = conferences.filter(c => c.nfd === nfd && c.id !== deletedConferenceId);
+  const handleConferenceDelete = (deletedConferenceId: string) => {
     setConferences(prev => prev.filter(c => c.id !== deletedConferenceId));
-
-    if (remainingConferencesForNfd.length === 0) {
-        // All entries for this NFD were removed
-        // To keep the state consistent, we need to manually update the conferencedNfds set
-        // A better approach might be recalculating it from scratch, but this is more performant.
-        const newConferencedNfds = new Set(conferencedNfds);
-        newConferencedNfds.delete(nfd);
-        // This is not how you update state from a set. This will be buggy.
-        // A better way: setConferences(newConferences); which would trigger the useMemo recalculation.
-        // However, the current implementation relies on this for instant UI feedback.
-        // For the purpose of this example, we leave it, but in a real app, this should be refactored.
-    }
   }
 
 
@@ -99,7 +89,7 @@ export function ConferenceClient({ initialSchedules, carrierName, initialConfere
   }, [selectedSchedule, conferences]);
 
   // Early return if no schedules are available for the carrier today.
-  if (schedules.length === 0) {
+  if (schedulesForToday.length === 0) {
     return (
         <main className="container mx-auto px-4 py-8 md:px-6">
             <div className="mb-6 space-y-2">
@@ -140,7 +130,7 @@ export function ConferenceClient({ initialSchedules, carrierName, initialConfere
                 <Calendar className="h-5 w-5 text-muted-foreground"/>
                 <div className="text-sm">
                     <span className="text-muted-foreground">Data:</span>{' '}
-                    <span className="font-bold">{format(parseISO(schedules[0].date), 'dd/MM/yyyy')}</span>
+                    <span className="font-bold">{format(parseISO(schedulesForToday[0].date), 'dd/MM/yyyy')}</span>
                 </div>
             </div>
              <div className="flex items-center gap-3">
@@ -179,7 +169,7 @@ export function ConferenceClient({ initialSchedules, carrierName, initialConfere
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {schedules.map(schedule => (
+                  {schedulesForToday.map(schedule => (
                     <TableRow 
                       key={schedule.id} 
                       onClick={() => handleRowClick(schedule)} 

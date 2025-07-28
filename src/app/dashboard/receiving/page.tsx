@@ -2,7 +2,6 @@
 import { promises as fs } from 'fs';
 import path from 'path';
 import { ConferenceEntry, ReturnSchedule, StorageEntry } from '@/types';
-import { isToday, parseISO } from 'date-fns';
 import { ReceivingClient } from '@/components/receiving/receiving-client';
 import { getProducts } from '@/lib/products';
 
@@ -48,9 +47,9 @@ async function getStorageData(): Promise<StorageEntry[]> {
     }
 }
 
-
 export type CarrierScheduleSummary = {
     carrier: string;
+    date: string; // Add date to the summary
     totalNotes: number;
     totalVolume: number;
     schedules: ReturnSchedule[];
@@ -61,45 +60,49 @@ export type CarrierScheduleSummary = {
 export default async function ReceivingPage() {
     const allSchedules = await getSchedules();
     const allConferences = await getConferences();
-    const allProducts = await getProducts(); // For the allocation wizard
-    const allStorageData = await getStorageData(); // For the allocation wizard
+    const allProducts = await getProducts();
+    const allStorageData = await getStorageData();
 
-    const todaySchedules = allSchedules.filter(s => isToday(parseISO(s.date)));
-    
     const conferencedNfds = new Set(allConferences.map(c => c.nfd));
 
-    const schedulesByCarrier = todaySchedules.reduce((acc, schedule) => {
-        if (!acc[schedule.carrier]) {
-            acc[schedule.carrier] = {
+    const schedulesByCarrierAndDate = allSchedules.reduce((acc, schedule) => {
+        const key = `${schedule.carrier}_${schedule.date}`;
+        if (!acc[key]) {
+            acc[key] = {
                 carrier: schedule.carrier,
+                date: schedule.date,
                 totalNotes: 0,
                 totalVolume: 0,
                 schedules: [],
-                isConferenceCompleted: false,
-                isAllocationCompleted: false,
+                isConferenceCompleted: false, // Will be calculated next
+                isAllocationCompleted: false, // Will be calculated next
             };
         }
-        acc[schedule.carrier].schedules.push(schedule);
-        acc[schedule.carrier].totalNotes += 1;
-        acc[schedule.carrier].totalVolume += schedule.invoiceVolume;
+        acc[key].schedules.push(schedule);
+        acc[key].totalNotes += 1;
+        acc[key].totalVolume += schedule.invoiceVolume;
         return acc;
     }, {} as Record<string, CarrierScheduleSummary>);
 
-    // Check for completion status
-    for (const carrier in schedulesByCarrier) {
-        const summary = schedulesByCarrier[carrier];
+    // Check for completion status for each summary
+    for (const key in schedulesByCarrierAndDate) {
+        const summary = schedulesByCarrierAndDate[key];
         const allNfdsForCarrier = summary.schedules.map(s => s.nfd);
+        
+        // Conference is completed if every scheduled NFD for that carrier on that day has at least one conference entry.
         const isConferenceCompleted = allNfdsForCarrier.every(nfd => conferencedNfds.has(nfd));
         summary.isConferenceCompleted = isConferenceCompleted;
 
         if (isConferenceCompleted) {
+            // Allocation is completed if all items for all related conferences are fully allocated.
             const conferencesForCarrier = allConferences.filter(c => allNfdsForCarrier.includes(c.nfd));
-            const isAllocationCompleted = conferencesForCarrier.every(c => c.allocatedVolume >= c.receivedVolume);
-            summary.isAllocationCompleted = isAllocationCompleted;
+            const totalReceived = conferencesForCarrier.reduce((sum, c) => sum + c.receivedVolume, 0);
+            const totalAllocated = conferencesForCarrier.reduce((sum, c) => sum + (c.allocatedVolume || 0), 0);
+            summary.isAllocationCompleted = totalAllocated >= totalReceived;
         }
     }
 
-    const carrierSummaries = Object.values(schedulesByCarrier);
+    const carrierSummaries = Object.values(schedulesByCarrierAndDate);
 
     return (
         <main className="container mx-auto px-4 py-8 md:px-6">

@@ -19,7 +19,8 @@
     "receivedVolume": 1,
     "productState": "Produto Bom",
     "observations": "oi",
-    "conferenceTimestamp": "2025-07-28T17:45:39.926Z"
+    "conferenceTimestamp": "2025-07-28T17:45:39.926Z",
+    "allocatedVolume": 1
   },
   {
     "id": "1753724757500-0.3192435851630476",
@@ -30,6 +31,7 @@
     "receivedVolume": 1,
     "productState": "Produto Bom",
     "observations": "oi",
-    "conferenceTimestamp": "2025-07-28T17:45:57.500Z"
+    "conferenceTimestamp": "2025-07-28T17:45:57.500Z",
+    "allocatedVolume": 1
   }
 ]

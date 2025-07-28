@@ -1,7 +1,7 @@
+
 import { promises as fs } from 'fs';
 import path from 'path';
 import { ReturnSchedule, ConferenceEntry } from '@/types';
-import { isToday, parseISO } from 'date-fns';
 import { ConferenceClient } from '@/components/receiving/conference-client';
 
 async function getSchedulesForCarrier(carrier: string): Promise<ReturnSchedule[]> {
@@ -10,9 +10,10 @@ async function getSchedulesForCarrier(carrier: string): Promise<ReturnSchedule[]
         const jsonData = await fs.readFile(filePath, 'utf-8');
         const allSchedules: ReturnSchedule[] = JSON.parse(jsonData);
         
+        // Let the client-side handle date filtering for better UX
         return allSchedules.filter(s => 
-            s.carrier === carrier && isToday(parseISO(s.date))
-        ).sort((a,b) => a.nfd.localeCompare(b.nfd));
+            s.carrier === carrier
+        ).sort((a,b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 
     } catch (error) {
         console.error("Error reading agendamentos.json:", error);
@@ -26,7 +27,7 @@ async function getConferencesForSchedules(scheduleNfds: string[]): Promise<Confe
         const jsonData = await fs.readFile(filePath, 'utf-8');
         const allConferences = JSON.parse(jsonData) as ConferenceEntry[];
         const scheduleNfdSet = new Set(scheduleNfds);
-        // Retorna todas as conferências cujas NFDs estão nos agendamentos de hoje
+        // Returns all conferences whose NFDs are in the carrier's schedules
         return allConferences.filter(c => scheduleNfdSet.has(c.nfd));
     } catch (error) {
         if (typeof error === 'object' && error !== null && 'code' in error && error.code === 'ENOENT') {
@@ -41,13 +42,8 @@ export default async function ConferencePage({ params }: { params: { carrier: st
     const carrierName = decodeURIComponent(params.carrier);
     const schedules = await getSchedulesForCarrier(carrierName);
     
-    // Mostra uma mensagem amigável no cliente se não houver agendamentos.
-    if (schedules.length === 0) {
-       // O ConferenceClient tratará o caso de `initialSchedules` ser um array vazio.
-    }
-    
-    const todaySchedulesNfds = schedules.map(s => s.nfd);
-    const initialConferences = await getConferencesForSchedules(todaySchedulesNfds);
+    const scheduleNfds = schedules.map(s => s.nfd);
+    const initialConferences = await getConferencesForSchedules(scheduleNfds);
 
     return (
         <ConferenceClient 

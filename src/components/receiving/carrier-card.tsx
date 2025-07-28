@@ -19,6 +19,7 @@ import { Truck, Box, FileText, CheckCircle2, Warehouse } from "lucide-react";
 import { Button } from "../ui/button";
 import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
+import { parseISO, format } from "date-fns";
   
 
 interface CarrierCardProps {
@@ -58,7 +59,7 @@ export function CarrierCard({ summary, onAllocate }: CarrierCardProps) {
                             </div>
                             <div>
                                 <CardTitle className="font-headline text-lg">{summary.carrier}</CardTitle>
-                                <CardDescription>{new Date().toLocaleDateString('pt-BR')}</CardDescription>
+                                <CardDescription>{format(parseISO(summary.date), 'dd/MM/yyyy')}</CardDescription>
                             </div>
                         </CardHeader>
                         <CardContent className="flex-grow space-y-4">
