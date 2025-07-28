@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { ReturnSchedule } from "@/types";
 import { Button } from "@/components/ui/button";
 import { PlusCircle, Loader2, Trash2 } from "lucide-react";
@@ -52,13 +52,20 @@ interface SchedulesClientProps {
 }
 
 export function SchedulesClient({ initialSchedules }: SchedulesClientProps) {
+  const [schedules, setSchedules] = useState<ReturnSchedule[]>(initialSchedules);
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [isDeleteAlertOpen, setIsDeleteAlertOpen] = useState(false);
   const [isBulkDeleteAlertOpen, setIsBulkDeleteAlertOpen] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
-  const [selectedSchedule, setSelectedSchedule] = useState<ReturnSchedule | null>(null);
-  const [selectedSchedules, setSelectedSchedules] = useState<string[]>([]);
+  const [scheduleToEdit, setScheduleToEdit] = useState<ReturnSchedule | null>(null);
+  const [scheduleToDelete, setScheduleToDelete] = useState<ReturnSchedule | null>(null);
+  const [selectedScheduleIds, setSelectedScheduleIds] = useState<string[]>([]);
   const { toast } = useToast();
+
+  useEffect(() => {
+    setSchedules(initialSchedules);
+  }, [initialSchedules]);
+
 
   const [filters, setFilters] = useState({
     query: '',
@@ -71,7 +78,7 @@ export function SchedulesClient({ initialSchedules }: SchedulesClientProps) {
   }, 300);
 
   const filteredSchedules = useMemo(() => {
-    return initialSchedules.filter(s => {
+    return schedules.filter(s => {
       const queryLower = filters.query.toLowerCase();
       const searchMatch = filters.query ? 
         s.customer.toLowerCase().includes(queryLower) ||
@@ -85,35 +92,35 @@ export function SchedulesClient({ initialSchedules }: SchedulesClientProps) {
 
       return searchMatch && carrierMatch && reasonMatch;
     });
-  }, [initialSchedules, filters]);
+  }, [schedules, filters]);
 
 
   const todaySchedules = filteredSchedules.filter(s => isToday(parseISO(s.date)));
   const otherSchedules = filteredSchedules.filter(s => !isToday(parseISO(s.date)));
 
   const handleEdit = (schedule: ReturnSchedule) => {
-    setSelectedSchedule(schedule);
+    setScheduleToEdit(schedule);
     setIsFormOpen(true);
   };
 
   const handleDeleteRequest = (schedule: ReturnSchedule) => {
-    setSelectedSchedule(schedule);
+    setScheduleToDelete(schedule);
     setIsDeleteAlertOpen(true);
   };
 
   const handleDelete = async () => {
-    if (!selectedSchedule) return;
+    if (!scheduleToDelete) return;
     setIsDeleting(true);
-    const result = await deleteSchedule(selectedSchedule.id);
+    const result = await deleteSchedule(scheduleToDelete.id);
     if (result.success) {
       toast({ title: "Sucesso!", description: "Agendamento excluído." });
-      window.location.reload(); // Recarrega a página para evitar problemas de sessão
+      setSchedules(prev => prev.filter(s => s.id !== scheduleToDelete.id));
     } else {
       toast({ title: "Erro", description: result.error, variant: "destructive" });
     }
     setIsDeleting(false);
     setIsDeleteAlertOpen(false);
-    setSelectedSchedule(null);
+    setScheduleToDelete(null);
   };
   
   const handleBulkDeleteRequest = () => {
@@ -122,10 +129,11 @@ export function SchedulesClient({ initialSchedules }: SchedulesClientProps) {
 
   const handleBulkDelete = async () => {
     setIsDeleting(true);
-    const result = await deleteSchedules(selectedSchedules);
+    const result = await deleteSchedules(selectedScheduleIds);
      if (result.success) {
-      toast({ title: "Sucesso!", description: `${selectedSchedules.length} agendamento(s) excluído(s).` });
-      window.location.reload(); // Recarrega a página para evitar problemas de sessão
+      toast({ title: "Sucesso!", description: `${selectedScheduleIds.length} agendamento(s) excluído(s).` });
+      setSchedules(prev => prev.filter(s => !selectedScheduleIds.includes(s.id)));
+      setSelectedScheduleIds([]);
     } else {
       toast({ title: "Erro", description: result.error, variant: "destructive" });
     }
@@ -136,8 +144,10 @@ export function SchedulesClient({ initialSchedules }: SchedulesClientProps) {
   const handleDialogClose = (open: boolean) => {
     setIsFormOpen(open);
     if (!open) {
-        setSelectedSchedule(null);
-        // Não recarrega mais aqui para dar chance da ação do servidor concluir
+        // Quando o formulário é fechado (seja criando ou editando),
+        // recarregamos a página para garantir que os dados mais recentes sejam mostrados.
+        // Isso é mais simples do que gerenciar o estado de adição/edição localmente.
+        window.location.reload();
     }
   }
 
@@ -148,7 +158,7 @@ export function SchedulesClient({ initialSchedules }: SchedulesClientProps) {
         <Dialog open={isFormOpen} onOpenChange={handleDialogClose}>
           <DialogTrigger asChild>
              <Button onClick={() => {
-                setSelectedSchedule(null);
+                setScheduleToEdit(null);
                 setIsFormOpen(true);
             }}>
               <PlusCircle className="mr-2" />
@@ -157,9 +167,9 @@ export function SchedulesClient({ initialSchedules }: SchedulesClientProps) {
           </DialogTrigger>
           <DialogContent className="sm:max-w-4xl">
             <DialogHeader>
-              <DialogTitle>{selectedSchedule ? 'Editar Agendamento' : 'Criar Novo(s) Agendamento(s)'}</DialogTitle>
+              <DialogTitle>{scheduleToEdit ? 'Editar Agendamento' : 'Criar Novo(s) Agendamento(s)'}</DialogTitle>
             </DialogHeader>
-            <ScheduleForm setOpen={setIsFormOpen} initialData={selectedSchedule} />
+            <ScheduleForm setOpen={setIsFormOpen} initialData={scheduleToEdit} />
           </DialogContent>
         </Dialog>
       </div>
@@ -186,9 +196,9 @@ export function SchedulesClient({ initialSchedules }: SchedulesClientProps) {
                 </SelectContent>
             </Select>
         </div>
-         {selectedSchedules.length > 0 && (
+         {selectedScheduleIds.length > 0 && (
             <div className="flex items-center gap-4">
-                <span className="text-sm text-muted-foreground">{selectedSchedules.length} agendamento(s) selecionado(s)</span>
+                <span className="text-sm text-muted-foreground">{selectedScheduleIds.length} agendamento(s) selecionado(s)</span>
                  <Button variant="destructive" size="sm" onClick={handleBulkDeleteRequest}>
                     <Trash2 className="mr-2 h-4 w-4" />
                     Excluir Selecionados
@@ -203,10 +213,10 @@ export function SchedulesClient({ initialSchedules }: SchedulesClientProps) {
           <TabsTrigger value="all">Outros Agendamentos</TabsTrigger>
         </TabsList>
         <TabsContent value="today">
-          <ScheduleTable schedules={todaySchedules} onEdit={handleEdit} onDelete={handleDeleteRequest} selectedSchedules={selectedSchedules} setSelectedSchedules={setSelectedSchedules}/>
+          <ScheduleTable schedules={todaySchedules} onEdit={handleEdit} onDelete={handleDeleteRequest} selectedSchedules={selectedScheduleIds} setSelectedSchedules={setSelectedScheduleIds}/>
         </TabsContent>
         <TabsContent value="all">
-          <ScheduleTable schedules={otherSchedules} onEdit={handleEdit} onDelete={handleDeleteRequest} selectedSchedules={selectedSchedules} setSelectedSchedules={setSelectedSchedules}/>
+          <ScheduleTable schedules={otherSchedules} onEdit={handleEdit} onDelete={handleDeleteRequest} selectedSchedules={selectedScheduleIds} setSelectedSchedules={setSelectedScheduleIds}/>
         </TabsContent>
       </Tabs>
 
@@ -216,7 +226,7 @@ export function SchedulesClient({ initialSchedules }: SchedulesClientProps) {
                   <AlertDialogTitle>Você tem certeza?</AlertDialogTitle>
                   <AlertDialogDescription>
                       Esta ação não pode ser desfeita. Isso excluirá permanentemente o agendamento
-                      para a transportadora <span className="font-bold">{selectedSchedule?.carrier}</span> do cliente <span className="font-bold">{selectedSchedule?.customer}</span>.
+                      para a transportadora <span className="font-bold">{scheduleToDelete?.carrier}</span> do cliente <span className="font-bold">{scheduleToDelete?.customer}</span>.
                   </AlertDialogDescription>
               </AlertDialogHeader>
               <AlertDialogFooter>
@@ -233,7 +243,7 @@ export function SchedulesClient({ initialSchedules }: SchedulesClientProps) {
               <AlertDialogHeader>
                   <AlertDialogTitle>Excluir agendamentos?</AlertDialogTitle>
                   <AlertDialogDescription>
-                      Esta ação não pode ser desfeita. Isso excluirá permanentemente os <strong>{selectedSchedules.length}</strong> agendamentos selecionados.
+                      Esta ação não pode ser desfeita. Isso excluirá permanentemente os <strong>{selectedScheduleIds.length}</strong> agendamentos selecionados.
                   </AlertDialogDescription>
               </AlertDialogHeader>
               <AlertDialogFooter>
