@@ -3,6 +3,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Info, TriangleAlert } from "lucide-react";
 import { getSession } from "@/lib/auth";
+import { redirect } from 'next/navigation';
 
 export default async function UploadPage() {
   const session = await getSession();
