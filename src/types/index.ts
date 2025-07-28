@@ -34,3 +34,19 @@ export type SessionPayload = {
   };
   expires: Date;
 };
+
+export type ReturnSchedule = {
+    id: string; // Unique identifier, can be a timestamp or UUID
+    date: string; // From 'DATA' - ISO 8601 format (e.g., "2024-07-29")
+    carrier: string; // From 'TRANSPORTADORA'
+    outgoingShipment: string; // From 'REMESSA DE SAIDA'
+    salesNote: string; // From 'NOTA VENDA'
+    nfd: string; // From 'NFD'
+    customer: string; // From 'CLIENTE'
+    bdv: string; // From 'BDV'
+    ov: string; // From 'OV'
+    returnReason: string; // From 'MOTIVO DA DEVOLUÇÃO'
+    productState: string; // From 'ESTADO DO PRODUTO'
+    invoiceVolume: number; // From 'VOL.NF.'
+    createdAt: string; // Timestamp of creation
+};

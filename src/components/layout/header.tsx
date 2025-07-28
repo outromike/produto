@@ -1,7 +1,8 @@
 
+
 import { UserNav } from "@/components/layout/user-nav";
 import { ThemeToggle } from "@/components/layout/theme-toggle";
-import { PackageSearch, Table, LayoutDashboard } from "lucide-react";
+import { PackageSearch, Table, LayoutDashboard, CalendarClock } from "lucide-react";
 import Link from "next/link";
 import { SessionPayload } from "@/types";
 import { Button } from "../ui/button";
@@ -22,6 +23,12 @@ export function Header({ user }: HeaderProps) {
             <Link href="/dashboard">
               <LayoutDashboard className="mr-2 h-4 w-4"/>
               Dashboard
+            </Link>
+          </Button>
+          <Button variant="outline" size="sm" asChild>
+            <Link href="/dashboard/schedules">
+              <CalendarClock className="mr-2 h-4 w-4"/>
+              Agendamentos
             </Link>
           </Button>
         <Button variant="outline" size="sm" asChild>
