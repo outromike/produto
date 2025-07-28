@@ -75,3 +75,17 @@ export async function deleteProduct(sku: string): Promise<{ success: boolean; er
         return { success: false, error: 'Falha ao excluir o produto.' };
     }
 }
+
+export async function findProducts(query: string): Promise<Product[]> {
+    if (!query || query.trim().length < 2) {
+        return [];
+    }
+    const products = await getProducts();
+    const lowerCaseQuery = query.toLowerCase();
+    
+    return products.filter(p => 
+        p.sku.toLowerCase().includes(lowerCaseQuery) ||
+        p.description.toLowerCase().includes(lowerCaseQuery)
+    ).slice(0, 15); // Limit to 15 results for performance
+}
+
