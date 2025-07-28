@@ -52,12 +52,20 @@ interface SchedulesClientProps {
   initialSchedules: ReturnSchedule[];
   initialConferencedNfds: string[];
   initialRejectedNfds: string[];
+  initialNfdReceivedVolumes: { [key: string]: number };
 }
 
-export function SchedulesClient({ initialSchedules, initialConferencedNfds, initialRejectedNfds }: SchedulesClientProps) {
+export function SchedulesClient({ 
+    initialSchedules, 
+    initialConferencedNfds, 
+    initialRejectedNfds,
+    initialNfdReceivedVolumes 
+}: SchedulesClientProps) {
   const [schedules, setSchedules] = useState<ReturnSchedule[]>(initialSchedules);
   const [conferencedNfds, setConferencedNfds] = useState<Set<string>>(new Set(initialConferencedNfds));
   const [rejectedNfds, setRejectedNfds] = useState<Set<string>>(new Set(initialRejectedNfds));
+  const [nfdReceivedVolumes, setNfdReceivedVolumes] = useState(initialNfdReceivedVolumes);
+
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [isDeleteAlertOpen, setIsDeleteAlertOpen] = useState(false);
   const [isBulkDeleteAlertOpen, setIsBulkDeleteAlertOpen] = useState(false);
@@ -77,7 +85,8 @@ export function SchedulesClient({ initialSchedules, initialConferencedNfds, init
     setSchedules(initialSchedules);
     setConferencedNfds(new Set(initialConferencedNfds));
     setRejectedNfds(new Set(initialRejectedNfds));
-  }, [initialSchedules, initialConferencedNfds, initialRejectedNfds]);
+    setNfdReceivedVolumes(initialNfdReceivedVolumes);
+  }, [initialSchedules, initialConferencedNfds, initialRejectedNfds, initialNfdReceivedVolumes]);
 
   const [filters, setFilters] = useState({
     query: '',
@@ -277,10 +286,10 @@ export function SchedulesClient({ initialSchedules, initialConferencedNfds, init
           <TabsTrigger value="all">Outros Agendamentos</TabsTrigger>
         </TabsList>
         <TabsContent value="today">
-          <ScheduleTable schedules={todaySchedules} onEdit={handleEdit} onDelete={handleDeleteRequest} selectedSchedules={selectedScheduleIds} setSelectedSchedules={setSelectedScheduleIds} conferencedNfds={conferencedNfds} rejectedNfds={rejectedNfds}/>
+          <ScheduleTable schedules={todaySchedules} onEdit={handleEdit} onDelete={handleDeleteRequest} selectedSchedules={selectedScheduleIds} setSelectedSchedules={setSelectedScheduleIds} conferencedNfds={conferencedNfds} rejectedNfds={rejectedNfds} nfdReceivedVolumes={nfdReceivedVolumes}/>
         </TabsContent>
         <TabsContent value="all">
-          <ScheduleTable schedules={otherSchedules} onEdit={handleEdit} onDelete={handleDeleteRequest} selectedSchedules={selectedScheduleIds} setSelectedSchedules={setSelectedScheduleIds} conferencedNfds={conferencedNfds} rejectedNfds={rejectedNfds}/>
+          <ScheduleTable schedules={otherSchedules} onEdit={handleEdit} onDelete={handleDeleteRequest} selectedSchedules={selectedScheduleIds} setSelectedSchedules={setSelectedScheduleIds} conferencedNfds={conferencedNfds} rejectedNfds={rejectedNfds} nfdReceivedVolumes={nfdReceivedVolumes} />
         </TabsContent>
       </Tabs>
 

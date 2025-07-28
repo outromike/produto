@@ -5,7 +5,7 @@ import { ReturnSchedule } from "@/types";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { format } from 'date-fns';
 import { Button } from "@/components/ui/button";
-import { Pencil, Trash2, CheckCircle2, Clock, MoreHorizontal, XCircle } from "lucide-react";
+import { Pencil, Trash2, CheckCircle2, Clock, MoreHorizontal, XCircle, AlertTriangle } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -23,9 +23,19 @@ interface ScheduleTableProps {
   setSelectedSchedules: (ids: string[]) => void;
   conferencedNfds: Set<string>;
   rejectedNfds: Set<string>;
+  nfdReceivedVolumes: { [key: string]: number };
 }
 
-export function ScheduleTable({ schedules, onEdit, onDelete, selectedSchedules, setSelectedSchedules, conferencedNfds, rejectedNfds }: ScheduleTableProps) {
+export function ScheduleTable({ 
+    schedules, 
+    onEdit, 
+    onDelete, 
+    selectedSchedules, 
+    setSelectedSchedules, 
+    conferencedNfds, 
+    rejectedNfds,
+    nfdReceivedVolumes
+}: ScheduleTableProps) {
   
   const handleSelectAll = (checked: boolean) => {
     setSelectedSchedules(checked ? schedules.map(s => s.id) : []);
@@ -57,6 +67,21 @@ export function ScheduleTable({ schedules, onEdit, onDelete, selectedSchedules, 
       );
     }
     if (conferencedNfds.has(schedule.nfd)) {
+        const received = nfdReceivedVolumes[schedule.nfd] || 0;
+        if (received < schedule.invoiceVolume) {
+            return (
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger>
+                      <AlertTriangle className="h-5 w-5 text-yellow-500" />
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>Recebido parcialmente ({received}/{schedule.invoiceVolume})</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+            );
+        }
       return (
         <TooltipProvider>
           <Tooltip>

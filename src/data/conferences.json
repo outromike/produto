@@ -36,15 +36,15 @@
     "allocatedVolume": 1
   },
   {
-    "id": "1753732130140-0.5710129721682351",
+    "id": "1753732855223-0.8559954858694592",
     "scheduleId": "1753731980883-0",
     "nfd": "222333444",
-    "productSku": "48BLED0912AT",
-    "productDescription": "LAM BLED A60 9W 12VAC/DC 6500K AT",
-    "receivedVolume": 3,
-    "productState": "Recusado",
-    "observations": "veio rasgado",
-    "conferenceTimestamp": "2025-07-28T19:54:35.906Z",
+    "productSku": "N/A",
+    "productDescription": "Recusa Total da Nota Fiscal",
+    "receivedVolume": 0,
+    "productState": "Recusa Total",
+    "observations": "Todos os itens foram recusados.",
+    "conferenceTimestamp": "2025-07-28T20:00:55.223Z",
     "allocatedVolume": 0
   }
 ]
