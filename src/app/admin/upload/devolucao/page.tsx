@@ -1,3 +1,5 @@
+// src/app/admin/upload/devolucao/page.tsx
+
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Info, ArrowLeft } from "lucide-react";
@@ -6,7 +8,7 @@ import Link from "next/link";
 import { DevolucaoUploadForm } from "@/components/upload/devolucao-upload-form";
 
 
-export default async function UploadDevolucaoPage() {
+export default function UploadDevolucaoPage() {
   return (
     <main className="container mx-auto max-w-2xl px-4 py-8 md:px-6">
        <div className="mb-4">

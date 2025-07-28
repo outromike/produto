@@ -77,22 +77,26 @@ export async function uploadReturnSchedules(formData: FormData): Promise<{ error
 
     try {
         const filePath = path.join(process.cwd(), 'src', 'data', 'devolucoes.json');
-        let existingSchedules: ReturnSchedule[] = [];
+        
+        // Ensure directory exists
+        await fs.mkdir(path.dirname(filePath), { recursive: true });
 
+        let allSchedules: ReturnSchedule[] = [];
         try {
             const currentData = await fs.readFile(filePath, 'utf-8');
-            existingSchedules = JSON.parse(currentData);
+            allSchedules = JSON.parse(currentData);
         } catch (e) {
-            // Arquivo não existe ou está vazio, o que é normal na primeira vez.
+            // File doesn't exist, which is fine. It will be created.
         }
 
         const buffer = Buffer.from(await file.arrayBuffer());
         const content = buffer.toString('utf-8');
         const newSchedules = parseReturnCSV(content);
 
-        const allSchedules = existingSchedules.concat(newSchedules);
+        // Append new schedules to the existing ones
+        const updatedSchedules = allSchedules.concat(newSchedules);
 
-        await fs.writeFile(filePath, JSON.stringify(allSchedules, null, 2), 'utf-8');
+        await fs.writeFile(filePath, JSON.stringify(updatedSchedules, null, 2), 'utf-8');
 
     } catch (error) {
         console.error('File processing error:', error);
