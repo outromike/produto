@@ -8,9 +8,9 @@ import { ConferenceForm } from "./conference-form";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { X, Pencil, AlertTriangle, BadgeAlert } from "lucide-react";
+import { X, Pencil, AlertTriangle, BadgeAlert, Ban, Loader2 } from "lucide-react";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
-import { deleteConference } from "@/app/dashboard/receiving/actions";
+import { deleteConference, rejectAllForNfd } from "@/app/dashboard/receiving/actions";
 import { useToast } from "@/hooks/use-toast";
 
 
@@ -22,6 +22,7 @@ interface ConferenceModalProps {
   onConferenceUpdate: (conference: ConferenceEntry) => void;
   onConferenceAdd: (conference: ConferenceEntry) => void;
   onConferenceDelete: (conferenceId: string) => void;
+  onRejectAll: (nfd: string) => void;
 }
 
 export function ConferenceModal({ 
@@ -32,11 +33,14 @@ export function ConferenceModal({
   onConferenceAdd,
   onConferenceUpdate,
   onConferenceDelete,
+  onRejectAll
 }: ConferenceModalProps) {
   
   const [conferences, setConferences] = useState(initialConferencesForNfd);
   const [entryToEdit, setEntryToEdit] = useState<ConferenceEntry | null>(null);
   const [showPartialReceiptAlert, setShowPartialReceiptAlert] = useState(false);
+  const [showRejectAllAlert, setShowRejectAllAlert] = useState(false);
+  const [isRejecting, setIsRejecting] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -86,6 +90,19 @@ export function ConferenceModal({
     }
   };
 
+  const handleRejectAll = async () => {
+    setIsRejecting(true);
+    const result = await rejectAllForNfd(schedule.id, schedule.nfd);
+    if (result.success) {
+        toast({ title: "Sucesso!", description: `A NFD ${schedule.nfd} foi marcada como recusada.` });
+        onRejectAll(schedule.nfd);
+        setShowRejectAllAlert(false);
+        onClose();
+    } else {
+        toast({ title: "Erro", description: result.error, variant: "destructive" });
+    }
+    setIsRejecting(false);
+  };
 
   return (
     <>
@@ -163,9 +180,13 @@ export function ConferenceModal({
                 </ScrollArea>
               </div>
           </div>
-           <DialogFooter className="sticky bottom-0 left-0 right-0 flex-col-reverse gap-2 border-t bg-background p-4 sm:flex-row sm:justify-end sm:p-6">
+           <DialogFooter className="sticky bottom-0 left-0 right-0 flex-col-reverse gap-2 border-t bg-background p-4 sm:flex-row sm:justify-end sm:gap-2">
                 <Button type="button" variant="outline" onClick={onClose}>
                     Cancelar
+                </Button>
+                 <Button type="button" variant="destructive" onClick={() => setShowRejectAllAlert(true)}>
+                    <Ban className="mr-2 h-4 w-4" />
+                    Recusar Total
                 </Button>
                 <Button type="button" onClick={handleFinishConference}>
                     Finalizar Conferência da NF
@@ -193,6 +214,29 @@ export function ConferenceModal({
             <AlertDialogCancel>Voltar</AlertDialogCancel>
             <AlertDialogAction onClick={handleForceClose} className="bg-primary hover:bg-primary/90">
               Sim, finalizar
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+      <AlertDialog open={showRejectAllAlert} onOpenChange={setShowRejectAllAlert}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="flex items-center gap-2">
+              <Ban className="h-6 w-6 text-destructive" />
+              Recusar Nota Fiscal?
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              Tem certeza de que quer recusar todos os produtos desta NF? Esta ação não pode ser desfeita.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction 
+                onClick={handleRejectAll} 
+                disabled={isRejecting}
+                className="bg-destructive hover:bg-destructive/90">
+              {isRejecting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              Sim, Recusar Tudo
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

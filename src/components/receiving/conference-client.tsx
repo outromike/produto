@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { format, parseISO, isToday } from "date-fns";
 import { ConferenceModal } from "./conference-modal";
-import { CheckCircle2, Pencil, FileClock, Calendar, Box, Hash } from "lucide-react";
+import { CheckCircle2, Pencil, FileClock, Calendar, Box, Hash, XCircle } from "lucide-react";
 import {
     AlertDialog,
     AlertDialogAction,
@@ -41,18 +41,25 @@ export function ConferenceClient({ initialSchedules, carrierName, initialConfere
 
   
   const conferencedNfds = useMemo(() => {
-    const nfdSet = new Set<string>();
-    conferences.forEach(c => nfdSet.add(c.nfd));
-    return nfdSet;
+    const nfdMap = new Map<string, string>(); // nfd -> status
+    conferences.forEach(c => {
+      if (c.productState === "Recusa Total") {
+        nfdMap.set(c.nfd, "rejected");
+      } else if (!nfdMap.has(c.nfd)) {
+        nfdMap.set(c.nfd, "conferenced");
+      }
+    });
+    return nfdMap;
   }, [conferences]);
 
   const totalNotes = schedulesForToday.length;
   const totalVolume = schedulesForToday.reduce((sum, s) => sum + s.invoiceVolume, 0);
 
   const handleRowClick = (schedule: ReturnSchedule) => {
+    if (conferencedNfds.get(schedule.nfd) === 'rejected') {
+      return; // Do not open modal for fully rejected notes
+    }
     setSelectedSchedule(schedule);
-    // If this NFD has already been conferenced, show the review/edit dialog.
-    // Otherwise, open the conference modal directly to add new entries.
     if (conferencedNfds.has(schedule.nfd)) {
       setIsReviewAlertOpen(true);
     } else {
@@ -68,7 +75,6 @@ export function ConferenceClient({ initialSchedules, carrierName, initialConfere
   const handleConferenceUpdate = (updatedConference: ConferenceEntry) => {
     const newConferences = conferences.map(c => c.id === updatedConference.id ? updatedConference : c);
     setConferences(newConferences);
-    // Add NFD to conferenced set if not already there
     if (!conferencedNfds.has(updatedConference.nfd)) {
         setConferences(prev => [...prev, updatedConference]);
     }
@@ -82,6 +88,23 @@ export function ConferenceClient({ initialSchedules, carrierName, initialConfere
     setConferences(prev => prev.filter(c => c.id !== deletedConferenceId));
   }
 
+  const handleRejectAll = (nfd: string) => {
+    const rejectionEntry: ConferenceEntry = {
+        id: `${Date.now()}`,
+        nfd,
+        productState: 'Recusa Total',
+        // Fill other fields with placeholder data as they are not relevant for a full rejection
+        scheduleId: selectedSchedule?.id || '',
+        productSku: 'N/A',
+        productDescription: 'Recusa Total da Nota Fiscal',
+        receivedVolume: 0,
+        allocatedVolume: 0,
+        observations: '',
+        conferenceTimestamp: new Date().toISOString(),
+    };
+    // Remove existing and add the rejection marker
+    setConferences(prev => [...prev.filter(c => c.nfd !== nfd), rejectionEntry]);
+  };
 
   const conferencesForSelectedNfd = useMemo(() => {
     if (!selectedSchedule) return [];
@@ -110,6 +133,17 @@ export function ConferenceClient({ initialSchedules, carrierName, initialConfere
             </div>
         </main>
     )
+  }
+
+  const renderStatusIcon = (nfd: string) => {
+    const status = conferencedNfds.get(nfd);
+    if (status === 'rejected') {
+        return <XCircle className="h-4 w-4 text-destructive" />;
+    }
+    if (status === 'conferenced') {
+        return <CheckCircle2 className="h-4 w-4 text-green-500" />;
+    }
+    return <Pencil className="h-4 w-4 text-yellow-500" />;
   }
 
   return (
@@ -177,10 +211,7 @@ export function ConferenceClient({ initialSchedules, carrierName, initialConfere
                     >
                       <TableCell className="font-mono font-semibold">
                         <div className="flex items-center gap-2">
-                          {conferencedNfds.has(schedule.nfd) ? 
-                            <CheckCircle2 className="h-4 w-4 text-green-500" /> :
-                            <Pencil className="h-4 w-4 text-yellow-500" />
-                          }
+                           {renderStatusIcon(schedule.nfd)}
                           <span>{schedule.nfd}</span>
                         </div>
                       </TableCell>
@@ -208,6 +239,7 @@ export function ConferenceClient({ initialSchedules, carrierName, initialConfere
             onConferenceAdd={handleConferenceAdd}
             onConferenceUpdate={handleConferenceUpdate}
             onConferenceDelete={handleConferenceDelete}
+            onRejectAll={handleRejectAll}
         />
       )}
 

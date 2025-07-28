@@ -58,7 +58,7 @@ export type ConferenceEntry = {
     productDescription: string;
     receivedVolume: number;
     allocatedVolume: number; // New field to track allocated items
-    productState: 'Produto Bom' | 'Descarte' | 'Avariado' | 'Recusado';
+    productState: 'Produto Bom' | 'Descarte' | 'Avariado' | 'Recusado' | 'Recusa Total';
     observations: string;
     conferenceTimestamp: string; // ISO 8601 format
 };

@@ -15,33 +15,43 @@ async function getSchedules(): Promise<ReturnSchedule[]> {
     }
 }
 
-async function getConferencedNfds(): Promise<Set<string>> {
+async function getConferenceData(): Promise<{ conferencedNfds: Set<string>, rejectedNfds: Set<string> }> {
     const filePath = path.join(process.cwd(), 'src', 'data', 'conferences.json');
+    const conferencedNfds = new Set<string>();
+    const rejectedNfds = new Set<string>();
+    
     try {
         const jsonData = await fs.readFile(filePath, 'utf-8');
         const conferences = JSON.parse(jsonData) as ConferenceEntry[];
-        const conferencedNfds = new Set(conferences.map(c => c.nfd));
-        return conferencedNfds;
+        
+        for (const c of conferences) {
+            conferencedNfds.add(c.nfd);
+            if (c.productState === 'Recusa Total') {
+                rejectedNfds.add(c.nfd);
+            }
+        }
+        return { conferencedNfds, rejectedNfds };
+
     } catch (error) {
         if (typeof error === 'object' && error !== null && 'code' in error && error.code === 'ENOENT') {
-            return new Set();
+             return { conferencedNfds, rejectedNfds };
         }
         console.error("Error reading conferences.json:", error);
-        return new Set();
+        return { conferencedNfds, rejectedNfds };
     }
 }
 
 export default async function SchedulesPage() {
     const schedules = await getSchedules();
-    const conferencedNfds = await getConferencedNfds();
+    const { conferencedNfds, rejectedNfds } = await getConferenceData();
     
     return (
         <main className="flex-1 p-4 sm:p-6 md:p-8">
            <SchedulesClient 
                 initialSchedules={schedules} 
                 initialConferencedNfds={Array.from(conferencedNfds)} 
+                initialRejectedNfds={Array.from(rejectedNfds)}
            />
         </main>
     );
 }
-

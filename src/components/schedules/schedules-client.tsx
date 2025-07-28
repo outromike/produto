@@ -51,11 +51,13 @@ const motivosDevolucao = [
 interface SchedulesClientProps {
   initialSchedules: ReturnSchedule[];
   initialConferencedNfds: string[];
+  initialRejectedNfds: string[];
 }
 
-export function SchedulesClient({ initialSchedules, initialConferencedNfds }: SchedulesClientProps) {
+export function SchedulesClient({ initialSchedules, initialConferencedNfds, initialRejectedNfds }: SchedulesClientProps) {
   const [schedules, setSchedules] = useState<ReturnSchedule[]>(initialSchedules);
   const [conferencedNfds, setConferencedNfds] = useState<Set<string>>(new Set(initialConferencedNfds));
+  const [rejectedNfds, setRejectedNfds] = useState<Set<string>>(new Set(initialRejectedNfds));
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [isDeleteAlertOpen, setIsDeleteAlertOpen] = useState(false);
   const [isBulkDeleteAlertOpen, setIsBulkDeleteAlertOpen] = useState(false);
@@ -74,7 +76,8 @@ export function SchedulesClient({ initialSchedules, initialConferencedNfds }: Sc
   useEffect(() => {
     setSchedules(initialSchedules);
     setConferencedNfds(new Set(initialConferencedNfds));
-  }, [initialSchedules, initialConferencedNfds]);
+    setRejectedNfds(new Set(initialRejectedNfds));
+  }, [initialSchedules, initialConferencedNfds, initialRejectedNfds]);
 
   const [filters, setFilters] = useState({
     query: '',
@@ -274,10 +277,10 @@ export function SchedulesClient({ initialSchedules, initialConferencedNfds }: Sc
           <TabsTrigger value="all">Outros Agendamentos</TabsTrigger>
         </TabsList>
         <TabsContent value="today">
-          <ScheduleTable schedules={todaySchedules} onEdit={handleEdit} onDelete={handleDeleteRequest} selectedSchedules={selectedScheduleIds} setSelectedSchedules={setSelectedScheduleIds} conferencedNfds={conferencedNfds}/>
+          <ScheduleTable schedules={todaySchedules} onEdit={handleEdit} onDelete={handleDeleteRequest} selectedSchedules={selectedScheduleIds} setSelectedSchedules={setSelectedScheduleIds} conferencedNfds={conferencedNfds} rejectedNfds={rejectedNfds}/>
         </TabsContent>
         <TabsContent value="all">
-          <ScheduleTable schedules={otherSchedules} onEdit={handleEdit} onDelete={handleDeleteRequest} selectedSchedules={selectedScheduleIds} setSelectedSchedules={setSelectedScheduleIds} conferencedNfds={conferencedNfds}/>
+          <ScheduleTable schedules={otherSchedules} onEdit={handleEdit} onDelete={handleDeleteRequest} selectedSchedules={selectedScheduleIds} setSelectedSchedules={setSelectedScheduleIds} conferencedNfds={conferencedNfds} rejectedNfds={rejectedNfds}/>
         </TabsContent>
       </Tabs>
 

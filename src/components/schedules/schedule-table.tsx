@@ -5,7 +5,7 @@ import { ReturnSchedule } from "@/types";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { format } from 'date-fns';
 import { Button } from "@/components/ui/button";
-import { Pencil, Trash2, CheckCircle2, Clock, MoreHorizontal } from "lucide-react";
+import { Pencil, Trash2, CheckCircle2, Clock, MoreHorizontal, XCircle } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -22,9 +22,10 @@ interface ScheduleTableProps {
   selectedSchedules: string[];
   setSelectedSchedules: (ids: string[]) => void;
   conferencedNfds: Set<string>;
+  rejectedNfds: Set<string>;
 }
 
-export function ScheduleTable({ schedules, onEdit, onDelete, selectedSchedules, setSelectedSchedules, conferencedNfds }: ScheduleTableProps) {
+export function ScheduleTable({ schedules, onEdit, onDelete, selectedSchedules, setSelectedSchedules, conferencedNfds, rejectedNfds }: ScheduleTableProps) {
   
   const handleSelectAll = (checked: boolean) => {
     setSelectedSchedules(checked ? schedules.map(s => s.id) : []);
@@ -39,6 +40,49 @@ export function ScheduleTable({ schedules, onEdit, onDelete, selectedSchedules, 
   };
 
   const isAllSelected = schedules.length > 0 && selectedSchedules.length === schedules.length;
+
+  const renderStatusIcon = (schedule: ReturnSchedule) => {
+    if (rejectedNfds.has(schedule.nfd)) {
+      return (
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger>
+              <XCircle className="h-5 w-5 text-destructive" />
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>Recebimento recusado</p>
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
+      );
+    }
+    if (conferencedNfds.has(schedule.nfd)) {
+      return (
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger>
+              <CheckCircle2 className="h-5 w-5 text-green-500" />
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>Recebimento conferido</p>
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
+      );
+    }
+    return (
+      <TooltipProvider>
+        <Tooltip>
+          <TooltipTrigger>
+            <Clock className="h-5 w-5 text-yellow-500" />
+          </TooltipTrigger>
+          <TooltipContent>
+            <p>Aguardando conferência</p>
+          </TooltipContent>
+        </Tooltip>
+      </TooltipProvider>
+    );
+  };
 
   return (
     <div className="rounded-lg border">
@@ -88,29 +132,7 @@ export function ScheduleTable({ schedules, onEdit, onDelete, selectedSchedules, 
                 <TableCell>{schedule.invoiceVolume}</TableCell>
                 <TableCell>
                    <div className="flex items-center justify-center">
-                    {conferencedNfds.has(schedule.nfd) ? (
-                      <TooltipProvider>
-                        <Tooltip>
-                          <TooltipTrigger>
-                            <CheckCircle2 className="h-5 w-5 text-green-500" />
-                          </TooltipTrigger>
-                          <TooltipContent>
-                            <p>Recebimento conferido</p>
-                          </TooltipContent>
-                        </Tooltip>
-                      </TooltipProvider>
-                    ) : (
-                       <TooltipProvider>
-                        <Tooltip>
-                          <TooltipTrigger>
-                            <Clock className="h-5 w-5 text-yellow-500" />
-                          </TooltipTrigger>
-                          <TooltipContent>
-                            <p>Aguardando conferência</p>
-                          </TooltipContent>
-                        </Tooltip>
-                      </TooltipProvider>
-                    )}
+                    {renderStatusIcon(schedule)}
                   </div>
                 </TableCell>
                 <TableCell className="text-right">

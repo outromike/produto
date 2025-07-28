@@ -72,6 +72,38 @@ export async function deleteConference(id: string): Promise<{ success: boolean; 
     }
 }
 
+export async function rejectAllForNfd(scheduleId: string, nfd: string): Promise<{ success: boolean; error?: string }> {
+    try {
+        const allConferences = await getConferences();
+        
+        // Remove any existing entries for this NFD
+        const filteredConferences = allConferences.filter(c => c.nfd !== nfd);
+
+        // Add a single "marker" entry to indicate total refusal
+        const rejectionEntry: ConferenceEntry = {
+            id: `${Date.now()}-${Math.random()}`,
+            scheduleId: scheduleId,
+            nfd: nfd,
+            productSku: "N/A",
+            productDescription: "Recusa Total da Nota Fiscal",
+            receivedVolume: 0,
+            productState: "Recusa Total",
+            observations: "Todos os itens foram recusados.",
+            conferenceTimestamp: new Date().toISOString(),
+            allocatedVolume: 0,
+        };
+
+        filteredConferences.push(rejectionEntry);
+
+        await saveConferences(filteredConferences);
+        return { success: true };
+
+    } catch (error) {
+        console.error("Failed to reject all items for NFD:", error);
+        return { success: false, error: "Não foi possível processar a recusa total." };
+    }
+}
+
 
 export async function findProduct(query: string): Promise<Product[]> {
     if (!query) return [];
