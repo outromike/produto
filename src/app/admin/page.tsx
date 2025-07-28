@@ -8,15 +8,15 @@ import { redirect } from "next/navigation";
 
 export default async function AdminDashboardPage() {
   const session = await getSession();
-  // Verificação de permissão de admin feita diretamente na página.
-  if (session?.user?.role !== 'admin') {
+  
+  if (!session?.user || session.user.role !== 'admin') {
     redirect('/dashboard/products');
   }
 
   return (
     <main className="container mx-auto max-w-4xl px-4 py-8 md:px-6">
       <div className="mb-6 flex items-center gap-4">
-        <h1 className="text-3xl font-headline font-bold">Visão Geral</h1>
+        <h1 className="text-3xl font-headline font-bold">Painel do Administrador</h1>
       </div>
 
       <div className="grid gap-6 md:grid-cols-2">
