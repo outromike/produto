@@ -1,10 +1,16 @@
-
+import { getSession } from "@/lib/auth";
+import { redirect } from 'next/navigation';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { Upload, Shield } from "lucide-react";
 
-export default function AdminDashboardPage() {
+export default async function AdminDashboardPage() {
+  const session = await getSession();
+  if (session?.user?.role !== 'admin') {
+    redirect('/dashboard/products');
+  }
+
   return (
     <main className="container mx-auto max-w-4xl px-4 py-8 md:px-6">
       <div className="mb-6 flex items-center gap-4">
