@@ -7,7 +7,7 @@ import { redirect } from "next/navigation";
 
 export default async function ProfilePage() {
     // A proteção da rota é feita pelo layout.tsx.
-    // Aqui, apenas buscamos a sessão para obter os dados do usuário.
+    // Aqui, apenas buscamos a sessão para obter os dados do usuário para o formulário.
     const session = await getSession();
 
     if (!session.user) {

@@ -2,7 +2,7 @@
 import { Header } from "@/components/layout/header";
 import { getSession } from "@/lib/auth";
 import { redirect } from 'next/navigation';
-import { User } from "@/types";
+import type { User } from "@/types";
 
 // Este layout protege TODAS as rotas dentro de /dashboard
 export default async function DashboardLayout({
