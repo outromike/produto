@@ -1,1 +1,15 @@
-[]
+[
+  {
+    "id": "1753734996608-0.9536292924515075",
+    "building": "111",
+    "level": "1A",
+    "nfd": "01",
+    "salesNote": "01",
+    "shipment": "01",
+    "productSku": "48ECOSPQBM00",
+    "productDescription": "ECOSPOT LED EMB.QD.5W BIV,3000K,C/LENT",
+    "quantity": 3,
+    "status": "Produto Bom OK",
+    "allocatedAt": "2025-07-28T20:36:36.608Z"
+  }
+]

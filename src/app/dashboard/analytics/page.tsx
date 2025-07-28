@@ -1,45 +1,58 @@
-
-import { getProducts } from '@/lib/products';
+import { StorageEntry } from "@/types";
+import { promises as fs } from "fs";
+import path from "path";
 import { DashboardClient } from '@/components/dashboard/dashboard-client';
 
+async function getStorageData(): Promise<StorageEntry[]> {
+    const filePath = path.join(process.cwd(), 'src', 'data', 'rua08.json');
+    try {
+        await fs.access(filePath);
+        const jsonData = await fs.readFile(filePath, 'utf-8');
+        return JSON.parse(jsonData) as StorageEntry[];
+    } catch (error) {
+        if (typeof error === 'object' && error !== null && 'code' in error && error.code === 'ENOENT') {
+            return [];
+        }
+        console.error("Error reading rua08.json:", error);
+        return [];
+    }
+}
+
+const buildings = [ "111", "109", "107", "105", "103", "101", "99", "97", "95", "93", "91", "89", "87", "85", "83", "81", "79", "77", "75", "73" ];
+const TOTAL_POSITIONS = buildings.length * 6; // 20 buildings * 6 levels each
+
 export default async function AnalyticsPage() {
-  const products = await getProducts();
+    const storageData = await getStorageData();
 
-  const totalProducts = products.length;
-  const uniqueCategories = [...new Set(products.map(p => p.category))].length;
-  const productsInItj = products.filter(p => p.unit === 'ITJ').length;
-  const productsInJvl = products.filter(p => p.unit === 'JVL').length;
+    const occupiedPositions = new Set(storageData.map(e => `${e.building}-${e.level}`));
+    const occupiedCount = occupiedPositions.size;
+    const availableCount = TOTAL_POSITIONS - occupiedCount;
+    const occupationRate = TOTAL_POSITIONS > 0 ? (occupiedCount / TOTAL_POSITIONS) * 100 : 0;
 
-  const categoryCounts = products.reduce((acc, product) => {
-    acc[product.category] = (acc[product.category] || 0) + 1;
-    return acc;
-  }, {} as Record<string, number>);
+    const goodProductsStatuses = ["Produto Bom OK", "Produto Bom SEM BDV", "Produto Bom Ag. Fiscal"];
+    const goodProductPositions = new Set(
+        storageData
+            .filter(e => goodProductsStatuses.includes(e.status))
+            .map(e => `${e.building}-${e.level}`)
+    );
+    const goodProductsCount = goodProductPositions.size;
 
-  const categoryChartData = Object.entries(categoryCounts)
-    .map(([name, count]) => ({ name, value: count }))
-    .sort((a, b) => b.value - a.value)
-    .slice(0, 10);
+    const discardStatuses = ["Descarte OK", "Descarte SEM BDV", "Descarte Ag. Fiscal"];
+    const discardPositions = new Set(
+        storageData
+            .filter(e => discardStatuses.includes(e.status))
+            .map(e => `${e.building}-${e.level}`)
+    );
+    const discardCount = discardPositions.size;
+    
+    const dashboardData = {
+        totalPositions: TOTAL_POSITIONS,
+        occupiedPositions: occupiedCount,
+        availablePositions: availableCount,
+        occupationRate: occupationRate,
+        goodProductsPositions: goodProductsCount,
+        discardPositions: discardCount,
+    };
 
-  const packagingCounts = products.reduce((acc, product) => {
-    const packagingType = product.packaging || "Não definido";
-    acc[packagingType] = (acc[packagingType] || 0) + 1;
-    return acc;
-  }, {} as Record<string, number>);
-
-  const packagingChartData = Object.entries(packagingCounts).map(([name, value], index) => ({
-    name,
-    value,
-    fill: `hsl(var(--chart-${(index % 5) + 1}))`,
-  }));
-
-  const dashboardData = {
-    totalProducts,
-    uniqueCategories,
-    productsInItj,
-    productsInJvl,
-    categoryChartData,
-    packagingChartData,
-  };
-
-  return <DashboardClient data={dashboardData} />;
+    return <DashboardClient data={dashboardData} />;
 }
