@@ -10,7 +10,6 @@ async function getSchedules(): Promise<ReturnSchedule[]> {
     const filePath = path.join(process.cwd(), 'src', 'data', 'agendamentos.json');
     try {
         const jsonData = await fs.readFile(filePath, 'utf-8');
-        // We parse and then sort by date descending to have the most recent first.
         const schedules: ReturnSchedule[] = JSON.parse(jsonData);
         return schedules.sort((a,b) => new Date(b.date).getTime() - new Date(a.date).getTime());
     } catch (error) {
@@ -52,7 +51,7 @@ async function getStorageData(): Promise<StorageEntry[]> {
 
 export type CarrierScheduleSummary = {
     carrier: string;
-    date: string; // Add date to the summary
+    date: string; 
     totalNotes: number;
     totalVolume: number;
     schedules: ReturnSchedule[];
@@ -67,6 +66,12 @@ export default async function ReceivingPage() {
     const allStorageData = await getStorageData();
 
     const conferencedNfds = new Set(allConferences.map(c => c.nfd));
+    const rejectedNfds = new Set(allConferences.filter(c => c.productState === "Recusa Total").map(c => c.nfd));
+    const nfdReceivedVolumes: { [key: string]: number } = {};
+
+    allConferences.forEach(c => {
+        nfdReceivedVolumes[c.nfd] = (nfdReceivedVolumes[c.nfd] || 0) + c.receivedVolume;
+    });
 
     const schedulesByCarrierAndDate = allSchedules.reduce((acc, schedule) => {
         const key = `${schedule.carrier}_${schedule.date}`;
@@ -77,8 +82,8 @@ export default async function ReceivingPage() {
                 totalNotes: 0,
                 totalVolume: 0,
                 schedules: [],
-                isConferenceCompleted: false, // Will be calculated next
-                isAllocationCompleted: false, // Will be calculated next
+                isConferenceCompleted: false,
+                isAllocationCompleted: false, 
             };
         }
         acc[key].schedules.push(schedule);
@@ -87,17 +92,14 @@ export default async function ReceivingPage() {
         return acc;
     }, {} as Record<string, CarrierScheduleSummary>);
 
-    // Check for completion status for each summary
     for (const key in schedulesByCarrierAndDate) {
         const summary = schedulesByCarrierAndDate[key];
         const allNfdsForCarrier = summary.schedules.map(s => s.nfd);
         
-        // Conference is completed if every scheduled NFD for that carrier on that day has at least one conference entry.
         const isConferenceCompleted = allNfdsForCarrier.every(nfd => conferencedNfds.has(nfd));
         summary.isConferenceCompleted = isConferenceCompleted;
 
         if (isConferenceCompleted) {
-            // Allocation is completed if all items for all related conferences are fully allocated.
             const conferencesForCarrier = allConferences.filter(c => allNfdsForCarrier.includes(c.nfd));
             const totalReceived = conferencesForCarrier.reduce((sum, c) => sum + c.receivedVolume, 0);
             const totalAllocated = conferencesForCarrier.reduce((sum, c) => sum + (c.allocatedVolume || 0), 0);
@@ -111,8 +113,12 @@ export default async function ReceivingPage() {
         <main className="container mx-auto px-4 py-8 md:px-6">
             <ReceivingClient 
                 initialSummaries={carrierSummaries} 
+                allSchedules={allSchedules}
                 allProducts={allProducts}
                 initialStorageData={allStorageData}
+                conferencedNfds={conferencedNfds}
+                rejectedNfds={rejectedNfds}
+                nfdReceivedVolumes={nfdReceivedVolumes}
             />
         </main>
     );

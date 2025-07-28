@@ -1,26 +1,43 @@
 
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { CarrierScheduleSummary } from "@/app/dashboard/receiving/page";
 import { CarrierCard } from "./carrier-card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { AllocationWizardModal } from "@/components/rua08/allocation-wizard-modal";
-import { Product, StorageEntry } from "@/types";
+import { Product, ReturnSchedule, StorageEntry } from "@/types";
 import { DatePicker } from "../ui/date-picker";
-import { isToday, parseISO, format, isSameDay } from 'date-fns';
+import { isToday, parseISO, isSameDay } from 'date-fns';
+import { ScheduleTable } from "../schedules/schedule-table";
 
 interface ReceivingClientProps {
   initialSummaries: CarrierScheduleSummary[];
+  allSchedules: ReturnSchedule[]; // Pass all schedules for the new tab
   allProducts: Product[];
   initialStorageData: StorageEntry[];
+  conferencedNfds: Set<string>;
+  rejectedNfds: Set<string>;
+  nfdReceivedVolumes: { [key: string]: number };
 }
 
-export function ReceivingClient({ initialSummaries, allProducts, initialStorageData }: ReceivingClientProps) {
+export function ReceivingClient({ 
+    initialSummaries, 
+    allSchedules,
+    allProducts, 
+    initialStorageData,
+    conferencedNfds,
+    rejectedNfds,
+    nfdReceivedVolumes
+}: ReceivingClientProps) {
   const [summaries, setSummaries] = useState(initialSummaries);
   const [isAllocationModalOpen, setIsAllocationModalOpen] = useState(false);
   const [selectedSummary, setSelectedSummary] = useState<CarrierScheduleSummary | null>(null);
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
+  
+  // State for destined schedules table
+  const [selectedDestinedIds, setSelectedDestinedIds] = useState<string[]>([]);
+
 
   const handleOpenAllocationModal = (summary: CarrierScheduleSummary) => {
     setSelectedSummary(summary);
@@ -45,9 +62,13 @@ export function ReceivingClient({ initialSummaries, allProducts, initialStorageD
 
   const completedSummaries = summaries.filter(s => {
       if (!s.isAllocationCompleted) return false;
-      if (!selectedDate) return true; // Show all if no date is selected
+      if (!selectedDate) return true;
       return isSameDay(parseISO(s.date), selectedDate);
   });
+  
+  const destinedSchedules = useMemo(() => {
+    return allSchedules.filter(s => s.destination);
+  }, [allSchedules]);
 
   return (
     <>
@@ -61,6 +82,7 @@ export function ReceivingClient({ initialSummaries, allProducts, initialStorageD
           <TabsList>
             <TabsTrigger value="pending">Pendentes</TabsTrigger>
             <TabsTrigger value="allocated">Alocados</TabsTrigger>
+            <TabsTrigger value="destined">Destinados</TabsTrigger>
           </TabsList>
           <TabsContent value="pending" className="pt-4">
             {pendingSummaries.length > 0 ? (
@@ -91,6 +113,25 @@ export function ReceivingClient({ initialSummaries, allProducts, initialStorageD
                   <h3 className="text-xl font-bold tracking-tight text-foreground">Nenhum item alocado na data selecionada</h3>
                   <p className="text-muted-foreground">Altere a data para consultar o histórico de outras datas.</p>
               </div>
+            )}
+          </TabsContent>
+          <TabsContent value="destined" className="pt-4">
+            {destinedSchedules.length > 0 ? (
+                <ScheduleTable 
+                    schedules={destinedSchedules}
+                    onEdit={() => {}} // Not editable from this view
+                    onDelete={() => {}} // Not deletable from this view
+                    selectedSchedules={selectedDestinedIds}
+                    setSelectedSchedules={setSelectedDestinedIds}
+                    conferencedNfds={conferencedNfds}
+                    rejectedNfds={rejectedNfds}
+                    nfdReceivedVolumes={nfdReceivedVolumes}
+                />
+            ) : (
+                 <div className="flex flex-col items-center justify-center rounded-lg border-2 border-dashed border-muted-foreground/30 bg-muted/20 py-20 text-center mt-4">
+                    <h3 className="text-xl font-bold tracking-tight text-foreground">Nenhuma NF foi destinada ainda.</h3>
+                    <p className="text-muted-foreground">Os agendamentos destinados aparecerão aqui.</p>
+                </div>
             )}
           </TabsContent>
         </Tabs>

@@ -58,5 +58,17 @@
     "observations": "",
     "conferenceTimestamp": "2025-07-28T20:09:19.897Z",
     "allocatedVolume": 0
+  },
+  {
+    "id": "1753734536026-0.20715775416732796",
+    "scheduleId": "1753733666605-0",
+    "nfd": "7",
+    "productSku": "48BLED0912AT",
+    "productDescription": "LAM BLED A60 9W 12VAC/DC 6500K AT",
+    "receivedVolume": 7,
+    "productState": "Produto Bom",
+    "observations": "ok",
+    "conferenceTimestamp": "2025-07-28T20:28:56.026Z",
+    "allocatedVolume": 0
   }
 ]
