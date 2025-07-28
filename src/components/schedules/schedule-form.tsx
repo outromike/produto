@@ -18,6 +18,7 @@ import { useToast } from "@/hooks/use-toast";
 import { addSchedule, updateSchedule } from "@/app/dashboard/schedules/actions";
 import { Loader2 } from "lucide-react";
 import { ReturnSchedule } from "@/types";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 const formSchema = z.object({
   date: z.string().min(1, "A data é obrigatória."),
@@ -39,6 +40,23 @@ interface ScheduleFormProps {
     setOpen: (open: boolean) => void;
     initialData?: ReturnSchedule;
 }
+
+const transportadoras = [
+  "ALFA", "AND", "BERTOLINI", "CROSS", "EXPRESSO SÃO MIGUEL", "LFG", "RODONAVES", 
+  "SOLÍSTICA", "TECMAR", "TESBA", "TRANSLOVATO", "TRANSOLIVEIRA", "TRANSBEN", 
+  "ZAZ", "COTAÇÃO"
+];
+
+const motivosDevolucao = [
+    "Acordo Comercial Gerente", "Atendimento em Garantia", "Atraso na Entrega Expedição",
+    "Cliente desistiu da compra", "Cliente não fez pedido", "Cliente solicitou incorreto",
+    "Defeito Técnico", "Divergência no endereço de entrega", "Extravio",
+    "Falta Parcial de Mercadoria", "Inversão de Mercadoria", "Motivos Comerciais",
+    "Avaria na Transportadora", "Sobra de Mercadoria", "Vendedor solicitou incorreto",
+    "Stock Rotation", "Decurso de Prazo", "Não informado", "______"
+];
+
+const estadosProduto = ["Avariado", "Descarte", "Produto Bom", "___"];
 
 export function ScheduleForm({ setOpen, initialData }: ScheduleFormProps) {
   const { toast } = useToast();
@@ -98,7 +116,16 @@ export function ScheduleForm({ setOpen, initialData }: ScheduleFormProps) {
             <FormField control={form.control} name="carrier" render={({ field }) => (
                 <FormItem>
                     <FormLabel>Transportadora</FormLabel>
-                    <FormControl><Input placeholder="Nome da transportadora" {...field} /></FormControl>
+                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <FormControl>
+                            <SelectTrigger>
+                                <SelectValue placeholder="Selecione a transportadora" />
+                            </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                            {transportadoras.map(t => <SelectItem key={t} value={t}>{t}</SelectItem>)}
+                        </SelectContent>
+                    </Select>
                     <FormMessage />
                 </FormItem>
             )}/>
@@ -154,14 +181,32 @@ export function ScheduleForm({ setOpen, initialData }: ScheduleFormProps) {
             <FormField control={form.control} name="returnReason" render={({ field }) => (
                 <FormItem className="lg:col-span-2">
                     <FormLabel>Motivo da Devolução</FormLabel>
-                    <FormControl><Input placeholder="Ex: Produto avariado" {...field} /></FormControl>
+                     <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <FormControl>
+                            <SelectTrigger>
+                                <SelectValue placeholder="Selecione o motivo" />
+                            </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                            {motivosDevolucao.map(m => <SelectItem key={m} value={m}>{m}</SelectItem>)}
+                        </SelectContent>
+                    </Select>
                     <FormMessage />
                 </FormItem>
             )}/>
              <FormField control={form.control} name="productState" render={({ field }) => (
                 <FormItem>
                     <FormLabel>Estado do Produto</FormLabel>
-                    <FormControl><Input placeholder="Ex: Lacrado, Aberto" {...field} /></FormControl>
+                     <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <FormControl>
+                            <SelectTrigger>
+                                <SelectValue placeholder="Selecione o estado" />
+                            </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                             {estadosProduto.map(e => <SelectItem key={e} value={e}>{e}</SelectItem>)}
+                        </SelectContent>
+                    </Select>
                     <FormMessage />
                 </FormItem>
             )}/>
@@ -176,3 +221,4 @@ export function ScheduleForm({ setOpen, initialData }: ScheduleFormProps) {
     </Form>
   );
 }
+
