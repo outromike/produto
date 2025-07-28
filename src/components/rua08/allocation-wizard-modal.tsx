@@ -133,7 +133,7 @@ export function AllocationWizardModal({ isOpen, onClose, onFinish, summary }: Al
         });
     };
 
-    const nfdList = Array.from(new Set(summary.schedules.map(s => s.nfd)));
+    const nfdList = Array.from(new Set(summary.schedules.filter(s => !s.destination).map(s => s.nfd)));
     
     return(
         <Dialog open={isOpen} onOpenChange={onClose}>
