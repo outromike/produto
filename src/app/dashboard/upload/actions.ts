@@ -131,10 +131,11 @@ export async function uploadProducts(formData: FormData): Promise<{ error?: stri
     let db;
     try {
         db = await getDbConnection();
+        if (!db) {
+            return { error: 'A conexão com o banco de dados não está configurada. Verifique suas variáveis de ambiente.' };
+        }
+
         await setupDatabase(); // Garante que a infraestrutura do BD esteja pronta
-        
-        // Opcional: Limpar a tabela antes de inserir novos dados
-        // await db.execute('DELETE FROM products');
         
         if (fileITJ) {
             const bufferITJ = Buffer.from(await fileITJ.arrayBuffer());

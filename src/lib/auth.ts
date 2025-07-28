@@ -39,6 +39,12 @@ export async function destroySession() {
 
 export async function findUserByCredentials(credentials: User): Promise<User | undefined> {
   const db = await getDbConnection();
+  if (!db) {
+    // Se não houver conexão com o banco, não é possível validar o usuário.
+    console.warn("Database not connected, cannot authenticate user.");
+    return undefined;
+  }
+  
   const [rows] = await db.execute<RowDataPacket[]>(
     'SELECT * FROM users WHERE username = ? AND password = ?',
     [credentials.username, credentials.password]

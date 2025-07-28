@@ -26,8 +26,14 @@ async function mapRowToProduct(row: RowDataPacket): Promise<Product> {
 }
 
 export async function getProducts(): Promise<Product[]> {
+  const db = await getDbConnection();
+  if (!db) {
+    // Se não houver conexão com o banco, retorne uma lista vazia.
+    console.warn("Database not connected, returning empty product list.");
+    return [];
+  }
+
   try {
-    const db = await getDbConnection();
     await setupDatabase(); // Garante que as tabelas existam
     const [rows] = await db.execute<RowDataPacket[]>('SELECT * FROM products ORDER BY description ASC');
     return Promise.all(rows.map(mapRowToProduct));
@@ -39,8 +45,13 @@ export async function getProducts(): Promise<Product[]> {
 }
 
 export async function getProductBySku(sku: string): Promise<Product | undefined> {
+  const db = await getDbConnection();
+  if (!db) {
+    console.warn(`Database not connected, cannot fetch SKU: ${sku}.`);
+    return undefined;
+  }
+  
   try {
-    const db = await getDbConnection();
     await setupDatabase(); // Garante que as tabelas existam
     const [rows] = await db.execute<RowDataPacket[]>('SELECT * FROM products WHERE sku = ?', [sku]);
 

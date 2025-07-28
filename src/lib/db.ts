@@ -13,13 +13,19 @@ let connection: mysql.Connection | null = null;
 
 // Função para obter a conexão com o banco de dados
 export async function getDbConnection() {
+  // Se as credenciais do banco de dados não estiverem configuradas, não tente conectar.
+  if (!dbConfig.host || !dbConfig.user || !dbConfig.database) {
+    // console.warn('Database credentials are not set. Skipping DB connection.');
+    return null;
+  }
+  
   if (connection === null || connection.connection.stream.destroyed) {
     try {
       connection = await mysql.createConnection(dbConfig);
-      console.log('Successfully connected to the database.');
     } catch (error) {
       console.error('Error connecting to the database:', error);
-      throw error;
+      // Retorna null em vez de lançar um erro para não quebrar a aplicação.
+      return null;
     }
   }
   return connection;
@@ -28,6 +34,7 @@ export async function getDbConnection() {
 // Função para criar as tabelas se elas não existirem
 export async function setupDatabase() {
   const db = await getDbConnection();
+  if (!db) return; // Não faz nada se a conexão não foi estabelecida
 
   const createUsersTableQuery = `
     CREATE TABLE IF NOT EXISTS users (
