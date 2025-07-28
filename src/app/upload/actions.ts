@@ -101,24 +101,40 @@ export async function uploadProducts(formData: FormData): Promise<{ error?: stri
     let allProducts: Product[] = [];
 
     try {
-        if (fileITJ) {
+        // Tenta ler o arquivo JSON existente para mesclar os dados, se necessário
+        const filePath = path.join(process.cwd(), 'src', 'data', 'products.json');
+        let existingProducts: Product[] = [];
+        try {
+            const currentData = await fs.readFile(filePath, 'utf-8');
+            existingProducts = JSON.parse(currentData);
+        } catch (e) {
+            // Arquivo não existe ou está vazio, o que é normal na primeira vez
+        }
+
+        if (fileITJ && fileITJ.size > 0) {
             const bufferITJ = Buffer.from(await fileITJ.arrayBuffer());
             const contentITJ = bufferITJ.toString('utf-8');
             const productsITJ = parseCSV(contentITJ, 'ITJ');
-            allProducts = allProducts.concat(productsITJ);
+            // Remove produtos antigos da unidade ITJ antes de adicionar os novos
+            existingProducts = existingProducts.filter(p => p.unit !== 'ITJ');
+            allProducts = existingProducts.concat(productsITJ);
         }
 
-        if (fileJVL) {
+        if (fileJVL && fileJVL.size > 0) {
             const bufferJVL = Buffer.from(await fileJVL.arrayBuffer());
             const contentJVL = bufferJVL.toString('utf-8');
             const productsJVL = parseCSV(contentJVL, 'JVL');
-            allProducts = allProducts.concat(productsJVL);
+             // Se já houver produtos de ITJ, mescla. Senão, começa do zero.
+            if (allProducts.length > 0) {
+                 allProducts = allProducts.filter(p => p.unit !== 'JVL');
+                 allProducts = allProducts.concat(productsJVL);
+            } else {
+                 existingProducts = existingProducts.filter(p => p.unit !== 'JVL');
+                 allProducts = existingProducts.concat(productsJVL);
+            }
         }
-
-        // Path to save the JSON file, overwriting the existing one.
-        const filePath = path.join(process.cwd(), 'src', 'data', 'products.json');
         
-        // Write the combined data to the file
+        // Escreve os dados combinados e atualizados no arquivo
         await fs.writeFile(filePath, JSON.stringify(allProducts, null, 2), 'utf-8');
 
     } catch (error) {
@@ -126,6 +142,6 @@ export async function uploadProducts(formData: FormData): Promise<{ error?: stri
         return { error: 'Ocorreu um erro ao processar os arquivos. Verifique o console para mais detalhes.' };
     }
     
-    // Redirect to products page after successful upload
-    redirect('/products');
+    // Redireciona para a página de produtos após o upload bem-sucedido
+    redirect('/dashboard/products');
 }
