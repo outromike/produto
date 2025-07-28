@@ -2,8 +2,8 @@
 import { Header } from "@/components/layout/header-admin";
 import { getSession } from "@/lib/auth";
 
-// O layout agora é apenas um componente visual e não lida mais com
-// a lógica de proteção, que foi movida para a página.
+// Este layout agora é apenas um componente visual e não lida mais com
+// a lógica de proteção, que foi movida para cada página individualmente.
 export default async function AdminLayout({
   children,
 }: {

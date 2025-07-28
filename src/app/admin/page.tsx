@@ -7,12 +7,12 @@ import { getSession } from "@/lib/auth";
 import { redirect } from "next/navigation";
 
 // A verificação de sessão e permissão agora é feita aqui, na página.
-// Isso evita conflitos com o layout e o problema de logout.
 export default async function AdminDashboardPage() {
   const session = await getSession();
 
+  // Se não houver sessão ou o usuário não for admin, redireciona para a página de login.
   if (!session?.user || session.user.role !== 'admin') {
-    redirect('/dashboard/products');
+    redirect('/login');
   }
 
   return (

@@ -5,8 +5,17 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Info, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
+import { getSession } from "@/lib/auth";
+import { redirect } from "next/navigation";
 
-export default function UploadPage() {
+export default async function UploadPage() {
+    const session = await getSession();
+
+    // Se não houver sessão ou o usuário não for admin, redireciona para a página de login.
+    if (!session?.user || session.user.role !== 'admin') {
+        redirect('/login');
+    }
+
   return (
     <main className="container mx-auto max-w-2xl px-4 py-8 md:px-6">
        <div className="mb-4">

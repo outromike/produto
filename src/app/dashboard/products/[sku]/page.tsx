@@ -1,3 +1,4 @@
+
 import { getProductBySku, getProducts } from "@/lib/products";
 import { notFound } from "next/navigation";
 import { Badge } from "@/components/ui/badge";
@@ -8,8 +9,15 @@ import { Building, Box, Weight, Ruler, ScanLine, Tag, Package, Inbox, Layers } f
 import { AiSuggestions } from "@/components/products/ai-suggestions";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import { getSession } from "@/lib/auth";
+import { redirect } from "next/navigation";
 
 export default async function ProductDetailPage({ params }: { params: { sku: string } }) {
+  const session = await getSession();
+  if (!session?.user) {
+    redirect('/login');
+  }
+
   const product = await getProductBySku(params.sku);
   const allProducts = await getProducts();
 

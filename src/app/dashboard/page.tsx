@@ -1,7 +1,15 @@
+
 import { getProducts } from '@/lib/products';
 import { DashboardClient } from '@/components/dashboard/dashboard-client';
+import { getSession } from '@/lib/auth';
+import { redirect } from 'next/navigation';
 
 export default async function DashboardPage() {
+  const session = await getSession();
+  if (!session?.user) {
+    redirect('/login');
+  }
+
   const products = await getProducts();
 
   const totalProducts = products.length;
