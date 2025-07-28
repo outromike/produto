@@ -338,11 +338,11 @@ export function SchedulesClient({
                   <AlertDialogDescription>
                       A NFD <span className="font-bold text-foreground">{duplicateSchedule?.nfd}</span> já foi agendada. Por favor, verifique os detalhes abaixo.
                       <div className="mt-4 space-y-2 rounded-lg border bg-muted/50 p-4 text-sm">
-                          <p><strong>Cliente:</strong> {duplicateSchedule?.customer}</p>
-                          <p><strong>Transportadora:</strong> {duplicateSchedule?.carrier}</p>
-                          <p><strong>Data do Agendamento:</strong> {duplicateSchedule ? format(parseISO(duplicateSchedule.date), 'dd/MM/yyyy') : ''}</p>
+                          <div><strong>Cliente:</strong> {duplicateSchedule?.customer}</div>
+                          <div><strong>Transportadora:</strong> {duplicateSchedule?.carrier}</div>
+                          <div><strong>Data do Agendamento:</strong> {duplicateSchedule ? format(parseISO(duplicateSchedule.date), 'dd/MM/yyyy') : ''}</div>
                       </div>
-                      <p className="mt-4">Deseja agendar mesmo assim?</p>
+                      <div className="mt-4 font-semibold">Deseja agendar mesmo assim?</div>
                   </AlertDialogDescription>
               </AlertDialogHeader>
               <AlertDialogFooter>
@@ -357,3 +357,4 @@ export function SchedulesClient({
     </div>
   );
 }
+
