@@ -1,3 +1,4 @@
+
 "use server";
 
 import { promises as fs } from 'fs';
@@ -36,11 +37,12 @@ export async function saveConference(data: ConferenceEntry): Promise<{ success: 
 
         if (existingIndex > -1) {
             // Update existing conference
-            allConferences[existingIndex] = data; // replace with new data entirely
+            const existingEntry = allConferences[existingIndex];
+            allConferences[existingIndex] = { ...existingEntry, ...data }; 
             savedConference = allConferences[existingIndex];
         } else {
             // Add new conference
-            savedConference = data;
+            savedConference = { ...data, allocatedVolume: 0 }; // Initialize allocatedVolume
             allConferences.push(savedConference);
         }
 
@@ -81,4 +83,9 @@ export async function findProduct(query: string): Promise<Product[]> {
         p.item.toLowerCase().includes(lowerCaseQuery) ||
         p.description.toLowerCase().includes(lowerCaseQuery)
     ).slice(0, 10); // Limita a 10 resultados para performance
+}
+
+export async function getConferenceByNfd(nfd: string): Promise<ConferenceEntry[]> {
+    const conferences = await getConferences();
+    return conferences.filter(c => c.nfd === nfd);
 }

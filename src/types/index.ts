@@ -1,5 +1,4 @@
 
-
 export type Product = {
   sku: string;
   item: string; // From 'Item'
@@ -58,6 +57,7 @@ export type ConferenceEntry = {
     productSku: string;
     productDescription: string;
     receivedVolume: number;
+    allocatedVolume: number; // New field to track allocated items
     productState: 'Produto Bom' | 'Descarte' | 'Avariado';
     observations: string;
     conferenceTimestamp: string; // ISO 8601 format
@@ -76,6 +76,19 @@ export type StorageEntry = {
     status: string;
     allocatedAt: string; // ISO 8601 format
 };
+
+export type AllocationEntry = {
+    conferenceId: string;
+    building: string;
+    level: string;
+    nfd: string;
+    salesNote: string;
+    shipment: string;
+    productSku: string;
+    productDescription: string;
+    quantity: number;
+    status: string;
+}
 
 // This type is no longer needed with the table format.
 // We are storing individual entries now.
