@@ -129,6 +129,23 @@ export default function AdminDashboardPage() {
             </Button>
           </CardContent>
         </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Agendamento de Devolução</CardTitle>
+            <CardDescription>
+              Faça o upload da planilha de agendamentos de devolução. (Funcionalidade futura)
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Button asChild>
+              <Link href="/admin/upload/devolucao">
+                <FileClock className="mr-2 h-4 w-4" />
+                Agendar Devoluções
+              </Link>
+            </Button>
+          </CardContent>
+        </Card>
         
         <Card>
            <CardHeader>

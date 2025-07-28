@@ -21,6 +21,25 @@ export type Product = {
   unit: 'ITJ' | 'JVL'; // Determined by origin file
 };
 
+export type ReturnSchedule = {
+    data: string;
+    transportadora: string;
+    remessaSaida: string;
+    notaVenda: string;
+    nfd: string;
+    cliente: string;
+    bdv: string;
+    ov: string;
+    motivoDevolucao: string;
+    estadoProduto: string;
+    volNf: string;
+    status: string;
+    destArmazenagem: string;
+    recebido: string;
+    estadoRecebido: string;
+    observacoesRecebimento: string;
+}
+
 export type User = {
   username: string;
   password?: string;
