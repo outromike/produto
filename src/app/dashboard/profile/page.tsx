@@ -8,7 +8,7 @@ import { redirect } from "next/navigation";
 export default async function ProfilePage() {
     const session = await getSession();
 
-    // A verificação agora é feita pelo layout pai, mas mantemos como uma segurança extra.
+    // O layout principal já protege esta rota, mas esta é uma camada extra de segurança.
     if (!session.user) {
         redirect('/login');
     }
