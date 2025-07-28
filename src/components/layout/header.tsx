@@ -1,11 +1,10 @@
 
-
 import { UserNav } from "@/components/layout/user-nav";
 import { ThemeToggle } from "@/components/layout/theme-toggle";
-import { PackageSearch, Table, LayoutDashboard, CalendarClock, Inbox } from "lucide-react";
+import { PackageSearch } from "lucide-react";
 import Link from "next/link";
 import { getSession } from "@/lib/auth";
-import { Button } from "../ui/button";
+import { MainNav } from "./main-nav";
 
 export async function Header() {
   const session = await getSession();
@@ -16,31 +15,13 @@ export async function Header() {
         <PackageSearch className="h-6 w-6 text-primary" />
         <span>Consulta de Produtos</span>
       </Link>
+      
+      {/* Navegação principal visível em telas maiores */}
+      <div className="hidden flex-1 md:flex md:items-center md:justify-end">
+        <MainNav />
+      </div>
+
       <nav className="ml-auto flex items-center gap-2">
-         <Button variant="outline" size="sm" asChild>
-            <Link href="/dashboard">
-              <LayoutDashboard className="mr-2 h-4 w-4"/>
-              Dashboard
-            </Link>
-          </Button>
-          <Button variant="outline" size="sm" asChild>
-            <Link href="/dashboard/schedules">
-              <CalendarClock className="mr-2 h-4 w-4"/>
-              Agendamentos
-            </Link>
-          </Button>
-           <Button variant="outline" size="sm" asChild>
-            <Link href="/dashboard/receiving">
-              <Inbox className="mr-2 h-4 w-4"/>
-              Recebimento
-            </Link>
-          </Button>
-        <Button variant="outline" size="sm" asChild>
-            <Link href="/dashboard/products/table">
-              <Table className="mr-2 h-4 w-4"/>
-              Ver em Tabela
-            </Link>
-          </Button>
         <ThemeToggle />
         <UserNav user={session?.user} />
       </nav>

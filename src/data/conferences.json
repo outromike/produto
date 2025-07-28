@@ -9,5 +9,27 @@
     "observations": "",
     "id": "1753722420813-0.9547663759391267",
     "conferenceTimestamp": "2025-07-28T17:07:00.813Z"
+  },
+  {
+    "id": "1753724739926-0.3013981174169319",
+    "scheduleId": "1753722864018-0",
+    "nfd": "2",
+    "productSku": "82417",
+    "productDescription": "BAT.ZCO.AR 1,4V (13)AP.AUD.PR 48BLI6 ASIBAT.ZCO.AR 1,4V (13)AP.AUD.PR 48BLI6",
+    "receivedVolume": 1,
+    "productState": "Produto Bom",
+    "observations": "oi",
+    "conferenceTimestamp": "2025-07-28T17:45:39.926Z"
+  },
+  {
+    "id": "1753724757500-0.3192435851630476",
+    "scheduleId": "1753722864018-0",
+    "nfd": "2",
+    "productSku": "48BLED0912AT",
+    "productDescription": "LAM BLED A60 9W 12VAC/DC 6500K AT",
+    "receivedVolume": 1,
+    "productState": "Produto Bom",
+    "observations": "oi",
+    "conferenceTimestamp": "2025-07-28T17:45:57.500Z"
   }
 ]

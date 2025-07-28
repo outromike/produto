@@ -8,6 +8,7 @@ import { PlusCircle, Loader2, Trash2, X, AlertTriangle } from "lucide-react";
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
@@ -211,6 +212,9 @@ export function SchedulesClient({ initialSchedules, initialConferencedNfds }: Sc
           <DialogContent className="sm:max-w-4xl">
             <DialogHeader>
               <DialogTitle>{scheduleToEdit ? 'Editar Agendamento' : 'Criar Novo(s) Agendamento(s)'}</DialogTitle>
+              <DialogDescription>
+                  Preencha os campos abaixo para criar um novo agendamento. Você pode colar múltiplas NFDs separadas por espaço ou quebra de linha.
+              </DialogDescription>
             </DialogHeader>
             <ScheduleForm 
                 setOpen={setIsFormOpen} 

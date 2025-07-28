@@ -90,8 +90,8 @@ export function ConferenceModal({
   return (
     <>
       <Dialog open={isOpen} onOpenChange={onClose}>
-        <DialogContent className="sm:max-w-4xl">
-          <DialogHeader>
+        <DialogContent className="h-full w-full max-w-full overflow-y-auto p-0 sm:h-auto sm:max-w-4xl sm:p-6">
+          <DialogHeader className="p-6 sm:p-0">
             <DialogTitle>
               Conferência da NFD: {schedule.nfd}
             </DialogTitle>
@@ -99,7 +99,7 @@ export function ConferenceModal({
               Registre os produtos recebidos. A validação do volume total só ocorre ao finalizar a conferência.
             </DialogDescription>
           </DialogHeader>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 py-4">
+          <div className="grid grid-cols-1 gap-8 p-6 sm:p-4 md:grid-cols-2">
               <div className="space-y-4">
                 <h3 className="font-semibold text-lg">Registrar Produto</h3>
                 <ConferenceForm 
@@ -111,7 +111,7 @@ export function ConferenceModal({
               </div>
               <div className="space-y-4">
                 <h3 className="font-semibold text-lg">Produtos Conferidos ({conferences.length})</h3>
-                <div className="flex justify-between items-center text-sm font-medium p-2 bg-muted rounded-md">
+                <div className="flex flex-col gap-2 rounded-md bg-muted p-2 text-sm font-medium sm:flex-row sm:justify-between sm:items-center">
                     <span>Volumes na Nota Fiscal: <span className="font-bold">{schedule.invoiceVolume}</span></span>
                     <span>Volumes Recebidos: <span className="font-bold">{totalReceivedVolume}</span></span>
                 </div>
@@ -163,7 +163,7 @@ export function ConferenceModal({
                 </ScrollArea>
               </div>
           </div>
-           <DialogFooter className="mt-6">
+           <DialogFooter className="sticky bottom-0 left-0 right-0 flex-col-reverse gap-2 border-t bg-background p-4 sm:flex-row sm:justify-end sm:p-6">
                 <Button type="button" variant="outline" onClick={onClose}>
                     Cancelar
                 </Button>

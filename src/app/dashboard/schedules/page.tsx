@@ -36,7 +36,7 @@ export default async function SchedulesPage() {
     const conferencedNfds = await getConferencedNfds();
     
     return (
-        <main className="container mx-auto px-4 py-8 md:px-6">
+        <main className="flex-1 p-4 sm:p-6 md:p-8">
            <SchedulesClient 
                 initialSchedules={schedules} 
                 initialConferencedNfds={Array.from(conferencedNfds)} 

@@ -42,6 +42,7 @@ export function ScheduleTable({ schedules, onEdit, onDelete, selectedSchedules, 
 
   return (
     <div className="rounded-lg border">
+        <div className="relative w-full overflow-auto">
       <Table>
         <TableHeader>
           <TableRow>
@@ -55,10 +56,10 @@ export function ScheduleTable({ schedules, onEdit, onDelete, selectedSchedules, 
             <TableHead>Data</TableHead>
             <TableHead>Transportadora</TableHead>
             <TableHead>Cliente</TableHead>
-            <TableHead>BDV</TableHead>
-            <TableHead>Nota Venda</TableHead>
+            <TableHead className="hidden md:table-cell">BDV</TableHead>
+            <TableHead className="hidden md:table-cell">Nota Venda</TableHead>
             <TableHead>NFD</TableHead>
-            <TableHead>Motivo</TableHead>
+            <TableHead className="hidden lg:table-cell">Motivo</TableHead>
             <TableHead>Estado do Produto</TableHead>
             <TableHead>Vol.</TableHead>
             <TableHead>Recebimento</TableHead>
@@ -79,10 +80,10 @@ export function ScheduleTable({ schedules, onEdit, onDelete, selectedSchedules, 
                 <TableCell className="font-medium whitespace-nowrap">{format(new Date(schedule.date), 'dd/MM/yyyy')}</TableCell>
                 <TableCell>{schedule.carrier}</TableCell>
                 <TableCell>{schedule.customer}</TableCell>
-                <TableCell>{schedule.bdv || "SEM BDV"}</TableCell>
-                <TableCell>{schedule.salesNote}</TableCell>
+                <TableCell className="hidden md:table-cell">{schedule.bdv || "SEM BDV"}</TableCell>
+                <TableCell className="hidden md:table-cell">{schedule.salesNote}</TableCell>
                 <TableCell>{schedule.nfd}</TableCell>
-                <TableCell>{schedule.returnReason}</TableCell>
+                <TableCell className="hidden lg:table-cell">{schedule.returnReason}</TableCell>
                 <TableCell>{schedule.productState}</TableCell>
                 <TableCell>{schedule.invoiceVolume}</TableCell>
                 <TableCell>
@@ -143,6 +144,7 @@ export function ScheduleTable({ schedules, onEdit, onDelete, selectedSchedules, 
           )}
         </TableBody>
       </Table>
+      </div>
     </div>
   );
 }

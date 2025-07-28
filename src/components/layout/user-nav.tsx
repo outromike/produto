@@ -1,4 +1,5 @@
 
+
 "use client";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -14,13 +15,21 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { SessionPayload } from "@/types";
 import { logout } from "@/app/login/actions";
-import { LogOut, User as UserIcon, Shield } from "lucide-react";
+import { LogOut, Shield, LayoutDashboard, CalendarClock, Inbox, Table } from "lucide-react";
 import { useTransition } from "react";
 import Link from "next/link";
+import { cn } from "@/lib/utils";
 
 interface UserNavProps {
     user: SessionPayload['user'] | undefined;
 }
+
+const mobileNavLinks = [
+    { href: "/dashboard", icon: LayoutDashboard, label: "Dashboard" },
+    { href: "/dashboard/schedules", icon: CalendarClock, label: "Agendamentos" },
+    { href: "/dashboard/receiving", icon: Inbox, label: "Recebimento" },
+    { href: "/dashboard/products/table", icon: Table, label: "Ver em Tabela" },
+];
 
 export function UserNav({ user }: UserNavProps) {
     const [isPending, startTransition] = useTransition();
@@ -49,10 +58,24 @@ export function UserNav({ user }: UserNavProps) {
             </p>
           </div>
         </DropdownMenuLabel>
+        
+        {/* Navegação Mobile */}
+        <div className="md:hidden">
+            <DropdownMenuSeparator />
+            <DropdownMenuGroup>
+                {mobileNavLinks.map(link => (
+                    <DropdownMenuItem key={link.href} asChild>
+                        <Link href={link.href}>
+                            <link.icon className="mr-2 h-4 w-4" />
+                            <span>{link.label}</span>
+                        </Link>
+                    </DropdownMenuItem>
+                ))}
+            </DropdownMenuGroup>
+        </div>
+
         <DropdownMenuSeparator />
         <DropdownMenuGroup>
-          {/* O link para o Painel de Admin agora é sempre visível, 
-              a proteção é feita na própria página /admin com a senha */}
           <DropdownMenuItem asChild>
             <Link href="/admin">
               <Shield className="mr-2 h-4 w-4" />
