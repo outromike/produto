@@ -9,6 +9,7 @@ const CONFERENCES_FILE_PATH = path.join(process.cwd(), 'src', 'data', 'conferenc
 
 async function getConferences(): Promise<ConferenceEntry[]> {
     try {
+        await fs.access(CONFERENCES_FILE_PATH);
         const jsonData = await fs.readFile(CONFERENCES_FILE_PATH, 'utf-8');
         return JSON.parse(jsonData) as ConferenceEntry[];
     } catch (error) {
@@ -26,25 +27,32 @@ async function saveConferences(conferences: ConferenceEntry[]): Promise<void> {
     await fs.writeFile(CONFERENCES_FILE_PATH, data, 'utf-8');
 }
 
-export async function saveConference(data: Omit<ConferenceEntry, 'id' | 'conferenceTimestamp'>): Promise<{ success: boolean; error?: string; savedConference?: ConferenceEntry }> {
+export async function saveConference(data: ConferenceEntry): Promise<{ success: boolean; error?: string; savedConference?: ConferenceEntry }> {
     try {
         const allConferences = await getConferences();
-        
-        const newConference: ConferenceEntry = {
-            ...data,
-            id: `${new Date().getTime()}-${Math.random()}`,
-            conferenceTimestamp: new Date().toISOString(),
-        };
+        const existingIndex = allConferences.findIndex(c => c.id === data.id);
 
-        const updatedConferences = [...allConferences, newConference];
-        await saveConferences(updatedConferences);
+        let savedConference: ConferenceEntry;
+
+        if (existingIndex > -1) {
+            // Update existing conference
+            allConferences[existingIndex] = { ...allConferences[existingIndex], ...data, conferenceTimestamp: new Date().toISOString() };
+            savedConference = allConferences[existingIndex];
+        } else {
+            // Add new conference
+            savedConference = data;
+            allConferences.push(savedConference);
+        }
+
+        await saveConferences(allConferences);
         
-        return { success: true, savedConference: newConference };
+        return { success: true, savedConference };
     } catch (error) {
         console.error("Failed to save conference:", error);
         return { success: false, error: "Não foi possível salvar a conferência." };
     }
 }
+
 
 export async function findProduct(query: string): Promise<Product[]> {
     if (!query) return [];

@@ -3,7 +3,7 @@
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { useState, useTransition } from "react";
+import { useState, useTransition, useEffect } from "react";
 import { ReturnSchedule, Product, ConferenceEntry } from "@/types";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -35,11 +35,12 @@ type ConferenceFormValues = z.infer<typeof formSchema>;
 
 interface ConferenceFormProps {
   schedule: ReturnSchedule;
+  existingConference: ConferenceEntry | null;
   onFinish: () => void;
   onConferenceSaved: (conference: ConferenceEntry) => void;
 }
 
-export function ConferenceForm({ schedule, onFinish, onConferenceSaved }: ConferenceFormProps) {
+export function ConferenceForm({ schedule, existingConference, onFinish, onConferenceSaved }: ConferenceFormProps) {
   const [isPending, startTransition] = useTransition();
   const [productQuery, setProductQuery] = useState("");
   const [suggestions, setSuggestions] = useState<Product[]>([]);
@@ -58,6 +59,30 @@ export function ConferenceForm({ schedule, onFinish, onConferenceSaved }: Confer
       observations: "",
     },
   });
+
+  useEffect(() => {
+    if (existingConference) {
+      form.reset({
+        product: {
+          sku: existingConference.productSku,
+          description: existingConference.productDescription,
+        },
+        receivedVolume: existingConference.receivedVolume,
+        productState: existingConference.productState,
+        observations: existingConference.observations,
+      });
+      setProductQuery(existingConference.productDescription)
+    } else {
+        form.reset({
+            product: { sku: "", description: "" },
+            receivedVolume: 1,
+            productState: "Produto Bom",
+            observations: "",
+          });
+        setProductQuery("")
+    }
+  }, [existingConference, form]);
+
 
   const debouncedProductSearch = useDebouncedCallback(async (query: string) => {
     if (query.length > 2) {
@@ -82,7 +107,10 @@ export function ConferenceForm({ schedule, onFinish, onConferenceSaved }: Confer
 
   const processSubmit = (values: ConferenceFormValues) => {
     startTransition(async () => {
-        const result = await saveConference({
+        // Here you would check if it's an update or new entry and call the appropriate server action
+        // For now, let's assume `saveConference` can handle both based on an ID
+        const conferenceData = {
+            id: existingConference?.id || `${new Date().getTime()}-${Math.random()}`,
             scheduleId: schedule.id,
             nfd: schedule.nfd,
             productSku: values.product.sku,
@@ -90,19 +118,23 @@ export function ConferenceForm({ schedule, onFinish, onConferenceSaved }: Confer
             receivedVolume: values.receivedVolume,
             productState: values.productState,
             observations: values.observations || "",
-        });
+            conferenceTimestamp: existingConference?.conferenceTimestamp || new Date().toISOString(),
+        };
+
+        const result = await saveConference(conferenceData);
 
         if (result.success && result.savedConference) {
-            toast({ title: "Sucesso!", description: "Produto da conferência salvo com sucesso." });
+            toast({ title: "Sucesso!", description: `Conferência ${existingConference ? 'atualizada' : 'salva'} com sucesso.` });
             onConferenceSaved(result.savedConference);
-            form.reset({
-                product: { sku: "", description: "" },
-                receivedVolume: 1,
-                productState: "Produto Bom",
-                observations: "",
-            });
-            setProductQuery("");
-            setSuggestions([]);
+            if (!existingConference) { // Only reset for new entries, not for edits
+                form.reset({
+                    product: { sku: "", description: "" },
+                    receivedVolume: 1,
+                    productState: "Produto Bom",
+                    observations: "",
+                });
+                setProductQuery("");
+            }
             setShowPartialReceiptAlert(false);
             setFormData(null);
         } else {
@@ -112,7 +144,7 @@ export function ConferenceForm({ schedule, onFinish, onConferenceSaved }: Confer
   };
 
   const onSubmit = (values: ConferenceFormValues) => {
-    if (values.receivedVolume !== schedule.invoiceVolume) {
+    if (values.receivedVolume !== schedule.invoiceVolume && !existingConference) {
         setFormData(values);
         setShowPartialReceiptAlert(true);
     } else {
@@ -205,7 +237,7 @@ export function ConferenceForm({ schedule, onFinish, onConferenceSaved }: Confer
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Estado do Produto</FormLabel>
-                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                  <Select onValueChange={field.onChange} value={field.value}>
                     <FormControl>
                       <SelectTrigger>
                         <SelectValue placeholder="Selecione o estado" />
@@ -238,10 +270,12 @@ export function ConferenceForm({ schedule, onFinish, onConferenceSaved }: Confer
           />
             
           <div className="flex justify-end gap-4 pt-4">
-            <Button type="button" variant="outline" onClick={onFinish}>Finalizar Conferência da NF</Button>
+            <Button type="button" variant="outline" onClick={onFinish}>
+                {existingConference ? "Fechar" : "Finalizar Conferência da NF"}
+            </Button>
             <Button type="submit" disabled={isPending}>
               {isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              Salvar Produto
+              {existingConference ? 'Salvar Alterações' : 'Salvar Produto'}
             </Button>
           </div>
         </form>

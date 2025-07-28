@@ -8,24 +8,31 @@ interface ConferenceModalProps {
   isOpen: boolean;
   onClose: () => void;
   schedule: ReturnSchedule | null;
+  conference: ConferenceEntry | null;
   onConferenceSaved: (conference: ConferenceEntry) => void;
 }
 
-export function ConferenceModal({ isOpen, onClose, schedule, onConferenceSaved }: ConferenceModalProps) {
+export function ConferenceModal({ isOpen, onClose, schedule, conference, onConferenceSaved }: ConferenceModalProps) {
   if (!schedule) return null;
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-2xl">
         <DialogHeader>
-          <DialogTitle>Conferência da NFD: {schedule.nfd}</DialogTitle>
+          <DialogTitle>
+            {conference ? `Editando Conferência da NFD: ${schedule.nfd}`: `Conferência da NFD: ${schedule.nfd}`}
+          </DialogTitle>
           <DialogDescription>
-            Registre os produtos recebidos para esta nota fiscal. Você pode salvar múltiplos produtos.
+             {conference 
+                ? "Altere os dados da conferência abaixo e clique em salvar."
+                : "Registre os produtos recebidos para esta nota fiscal. Você pode salvar múltiplos produtos."
+             }
           </DialogDescription>
         </DialogHeader>
         <div className="py-4">
           <ConferenceForm 
             schedule={schedule} 
+            existingConference={conference}
             onFinish={onClose} 
             onConferenceSaved={onConferenceSaved}
           />
