@@ -31,6 +31,7 @@ export function ScheduleTable({ schedules, onEdit, onDelete }: ScheduleTableProp
             <TableHead>Data</TableHead>
             <TableHead>Transportadora</TableHead>
             <TableHead>Cliente</TableHead>
+            <TableHead>BDV</TableHead>
             <TableHead>Nota Venda</TableHead>
             <TableHead>NFD</TableHead>
             <TableHead>Motivo</TableHead>
@@ -46,6 +47,7 @@ export function ScheduleTable({ schedules, onEdit, onDelete }: ScheduleTableProp
                 <TableCell className="font-medium whitespace-nowrap">{format(new Date(schedule.date), 'dd/MM/yyyy')}</TableCell>
                 <TableCell>{schedule.carrier}</TableCell>
                 <TableCell>{schedule.customer}</TableCell>
+                <TableCell>{schedule.bdv || "SEM BDV"}</TableCell>
                 <TableCell>{schedule.salesNote}</TableCell>
                 <TableCell>{schedule.nfd}</TableCell>
                 <TableCell>{schedule.returnReason}</TableCell>
@@ -75,7 +77,7 @@ export function ScheduleTable({ schedules, onEdit, onDelete }: ScheduleTableProp
             ))
           ) : (
             <TableRow>
-              <TableCell colSpan={9} className="h-24 text-center">
+              <TableCell colSpan={10} className="h-24 text-center">
                 Nenhum agendamento encontrado para este período.
               </TableCell>
             </TableRow>
@@ -85,3 +87,4 @@ export function ScheduleTable({ schedules, onEdit, onDelete }: ScheduleTableProp
     </div>
   );
 }
+

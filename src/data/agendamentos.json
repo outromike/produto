@@ -1,1 +1,17 @@
-[]
+[
+  {
+    "date": "2025-07-28",
+    "carrier": "ALFA",
+    "outgoingShipment": "123",
+    "salesNote": "123",
+    "nfd": "123",
+    "customer": "oi",
+    "bdv": "123",
+    "ov": "123",
+    "returnReason": "Extravio",
+    "productState": "Avariado",
+    "invoiceVolume": 1,
+    "id": "1753716039988",
+    "createdAt": "2025-07-28T15:20:39.988Z"
+  }
+]
