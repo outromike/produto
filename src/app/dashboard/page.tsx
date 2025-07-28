@@ -1,7 +1,7 @@
 
 import Link from 'next/link';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { AreaChart, PackageSearch, CalendarClock, Inbox, Warehouse } from 'lucide-react';
+import { AreaChart, PackageSearch, CalendarClock, Inbox, Warehouse, FileText } from 'lucide-react';
 
 const hubLinks = [
     {
@@ -36,7 +36,14 @@ const hubLinks = [
       label: "Rua 08",
       title: "Alocação - Rua 08",
       description: "Visualize e gerencie a alocação de produtos no armazém.",
-  },
+    },
+    {
+      href: "/dashboard/reports",
+      icon: FileText,
+      label: "Relatórios",
+      title: "Exportar Relatórios",
+      description: "Exporte dados de agendamentos, estoque e recebimentos para Excel.",
+    }
   ];
 
 export default function DashboardHubPage() {

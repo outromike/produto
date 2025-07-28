@@ -3,7 +3,7 @@
 
 import Link from "next/link";
 import { Button } from "../ui/button";
-import { Home, AreaChart, CalendarClock, Inbox, PackageSearch, Warehouse } from "lucide-react";
+import { Home, AreaChart, CalendarClock, Inbox, PackageSearch, Warehouse, FileText } from "lucide-react";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 
@@ -14,6 +14,7 @@ const navLinks = [
     { href: "/dashboard/receiving", icon: Inbox, label: "Recebimento" },
     { href: "/dashboard/products", icon: PackageSearch, label: "Produtos" },
     { href: "/dashboard/rua08", icon: Warehouse, label: "Rua 08"},
+    { href: "/dashboard/reports", icon: FileText, label: "Relatórios" },
 ];
 
 export function MainNav() {
