@@ -4,7 +4,7 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Info, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import { DevolucaoUploadForm } from "./devolucao-upload-form";
+import { DevolucaoUploadForm } from "@/components/upload/devolucao-upload-form";
 
 
 export default async function UploadDevolucaoPage() {

@@ -17,7 +17,7 @@ import { Input } from "@/components/ui/input";
 import { useState, useTransition } from "react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { AlertCircle, Loader2 } from "lucide-react";
-import { uploadReturnSchedules } from "./actions";
+import { uploadReturnSchedules } from "@/app/admin/upload/devolucao/actions";
 
 const formSchema = z.object({
   file: z.custom<File | undefined>().refine(file => file instanceof File && file.size > 0, {
