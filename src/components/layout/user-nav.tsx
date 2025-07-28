@@ -13,15 +13,12 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { SessionPayload } from "@/types";
+import { User } from "@/types";
 import { logout } from "@/app/login/actions";
-import { LogOut, Shield, Home, AreaChart, CalendarClock, Inbox, PackageSearch, User } from "lucide-react";
+import { LogOut, Shield, UserCircle, Home, AreaChart, CalendarClock, Inbox, PackageSearch, FileText } from "lucide-react";
 import { useTransition } from "react";
 import Link from "next/link";
-
-interface UserNavProps {
-    user: SessionPayload['user'] | undefined;
-}
+import { useSession } from "@/hooks/use-session";
 
 const mobileNavLinks = [
     { href: "/dashboard", icon: Home, label: "Início" },
@@ -29,14 +26,17 @@ const mobileNavLinks = [
     { href: "/dashboard/schedules", icon: CalendarClock, label: "Agendamentos" },
     { href: "/dashboard/receiving", icon: Inbox, label: "Recebimento" },
     { href: "/dashboard/products", icon: PackageSearch, label: "Produtos" },
+    { href: "/dashboard/reports", icon: FileText, label: "Relatórios" },
 ];
 
-export function UserNav({ user }: UserNavProps) {
+export function UserNav({ user }: { user: User | null }) {
     const [isPending, startTransition] = useTransition();
     
     const handleLogout = () => {
         startTransition(async () => {
             await logout();
+            sessionStorage.removeItem('user-session');
+            window.dispatchEvent(new Event('session-changed'));
         });
     }
 
@@ -78,16 +78,18 @@ export function UserNav({ user }: UserNavProps) {
         <DropdownMenuGroup>
             <DropdownMenuItem asChild>
                 <Link href="/dashboard/profile">
-                <User className="mr-2 h-4 w-4" />
+                <UserCircle className="mr-2 h-4 w-4" />
                 <span>Meu Perfil</span>
                 </Link>
             </DropdownMenuItem>
-            <DropdownMenuItem asChild>
-                <Link href="/admin">
-                <Shield className="mr-2 h-4 w-4" />
-                <span>Painel do Admin</span>
-                </Link>
-            </DropdownMenuItem>
+            {user?.role === 'admin' && (
+                <DropdownMenuItem asChild>
+                    <Link href="/admin">
+                    <Shield className="mr-2 h-4 w-4" />
+                    <span>Painel do Admin</span>
+                    </Link>
+                </DropdownMenuItem>
+            )}
         </DropdownMenuGroup>
         <DropdownMenuSeparator />
         <DropdownMenuItem onSelect={(e) => { e.preventDefault(); handleLogout();}} disabled={isPending}>

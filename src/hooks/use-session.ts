@@ -2,29 +2,49 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import type { IronSession } from 'iron-session';
-import { SessionPayload } from '@/types';
-import { getSessionData } from '@/lib/auth';
-
+import { User } from '@/types';
 
 export function useSession() {
-  const [session, setSession] = useState<IronSession<SessionPayload> | null>(null);
+  const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    async function loadSession() {
-        try {
-            const sessionData = await getSessionData();
-            setSession(sessionData);
-        } catch (e) {
-            console.error(e);
-            setSession(null);
-        } finally {
-            setIsLoading(false);
-        }
+    try {
+      const storedUser = sessionStorage.getItem('user-session');
+      if (storedUser) {
+        setUser(JSON.parse(storedUser));
+      }
+    } catch (e) {
+      console.error("Failed to parse user session from storage", e);
+      setUser(null);
+    } finally {
+      setIsLoading(false);
     }
-    loadSession();
+    
+    const handleStorageChange = () => {
+        try {
+            const storedUser = sessionStorage.getItem('user-session');
+            if (storedUser) {
+                setUser(JSON.parse(storedUser));
+            } else {
+                setUser(null);
+            }
+        } catch (e) {
+            console.error("Failed to parse user session from storage on update", e);
+            setUser(null);
+        }
+    };
+
+    window.addEventListener('storage', handleStorageChange);
+    // Custom event to handle changes in the same tab
+    window.addEventListener('session-changed', handleStorageChange);
+    
+    return () => {
+        window.removeEventListener('storage', handleStorageChange);
+        window.removeEventListener('session-changed', handleStorageChange);
+    };
+
   }, []);
 
-  return { session, isLoading };
+  return { user, isLoading };
 }

@@ -20,22 +20,13 @@ export async function getSession(): Promise<IronSession<SessionPayload>> {
     return session;
 }
 
-// This is a server action that can be called from client components.
-export async function getSessionData(): Promise<IronSession<SessionPayload> | null> {
-    const session = await getSession();
-    if (!session.user) {
-        return null;
-    }
-    return session;
-}
-
-
-export async function setSession(user: User): Promise<IronSession<SessionPayload>> {
+export async function setSession(user: User): Promise<void> {
   const session = await getIronSession<SessionPayload>(cookies(), sessionOptions);
-  session.user = { username: user.username, role: user.role };
+  // Remove password before saving to session
+  const { password, ...userWithoutPassword } = user;
+  session.user = userWithoutPassword;
   session.expires = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours
   await session.save();
-  return session;
 }
 
 export async function destroySession() {
@@ -68,4 +59,3 @@ export async function verifyAdminPassword(password: string): Promise<{ success: 
     }
     return { success: false };
 }
-

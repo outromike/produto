@@ -11,7 +11,7 @@ import { MainNav } from "./main-nav";
 import { useSession } from "@/hooks/use-session";
 
 export function Header() {
-  const { session } = useSession();
+  const { user } = useSession();
 
   return (
     <header className="sticky top-0 z-50 flex h-16 items-center gap-4 border-b bg-background/80 px-4 backdrop-blur md:px-6">
@@ -43,7 +43,7 @@ export function Header() {
 
       <div className="ml-auto flex items-center gap-2">
         <ThemeToggle />
-        <UserNav user={session?.user} />
+        <UserNav user={user} />
       </div>
     </header>
   );

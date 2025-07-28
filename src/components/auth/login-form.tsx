@@ -1,4 +1,5 @@
 
+
 "use client";
 
 import { useForm } from "react-hook-form";
@@ -42,7 +43,11 @@ export function LoginForm() {
     setError(null);
     startTransition(async () => {
       const result = await login(values);
-      if (result?.error) {
+      if (result.success && result.user) {
+        sessionStorage.setItem('user-session', JSON.stringify(result.user));
+        window.dispatchEvent(new Event('session-changed')); // Notifica outras abas/componentes
+        router.push('/dashboard');
+      } else {
         setError(result.error);
         form.reset();
       }
