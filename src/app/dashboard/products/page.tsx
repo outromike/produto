@@ -3,21 +3,15 @@ import { getProducts } from '@/lib/products';
 import { ProductGrid } from '@/components/products/product-grid';
 import { ProductFilters } from '@/components/products/product-filters';
 import { PaginationComponent } from '@/components/products/pagination';
-import { getSession } from '@/lib/auth';
-import { redirect } from 'next/navigation';
 
 const PRODUCTS_PER_PAGE = 12;
 
+// A proteção de rota foi movida para o layout.tsx
 export default async function ProductsPage({
   searchParams,
 }: {
   searchParams?: { [key: string]: string | string[] | undefined };
 }) {
-  const session = await getSession();
-  if (!session?.user) {
-    redirect('/login');
-  }
-  
   const allProducts = await getProducts();
 
   const query = (searchParams?.query as string) || '';

@@ -3,14 +3,18 @@ import { Header } from "@/components/layout/header";
 import { getSession } from "@/lib/auth";
 import { redirect } from 'next/navigation';
 
-// Este layout agora é apenas um componente visual e não lida mais com
-// a lógica de proteção, que foi movida para cada página individualmente.
+// Este layout protege TODAS as rotas dentro de /dashboard
 export default async function DashboardLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
   const session = await getSession();
+
+  // Se não houver sessão, redireciona para a página de login.
+  if (!session?.user) {
+    redirect('/login');
+  }
   
   return (
     <div className="flex min-h-screen w-full flex-col">

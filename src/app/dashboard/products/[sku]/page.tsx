@@ -9,15 +9,9 @@ import { Building, Box, Weight, Ruler, ScanLine, Tag, Package, Inbox, Layers } f
 import { AiSuggestions } from "@/components/products/ai-suggestions";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { getSession } from "@/lib/auth";
-import { redirect } from "next/navigation";
 
+// A proteção de rota foi movida para o layout.tsx
 export default async function ProductDetailPage({ params }: { params: { sku: string } }) {
-  const session = await getSession();
-  if (!session?.user) {
-    redirect('/login');
-  }
-
   const product = await getProductBySku(params.sku);
   const allProducts = await getProducts();
 

@@ -3,17 +3,9 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { Upload, Shield, Users } from "lucide-react";
-import { getSession } from "@/lib/auth";
-import { redirect } from "next/navigation";
 
-// A verificação de sessão e permissão agora é feita aqui, na página.
+// A proteção de rota foi movida para o layout.tsx
 export default async function AdminDashboardPage() {
-  const session = await getSession();
-
-  // Se não houver sessão ou o usuário não for admin, redireciona para a página de login.
-  if (!session?.user || session.user.role !== 'admin') {
-    redirect('/login');
-  }
 
   return (
     <main className="container mx-auto max-w-4xl px-4 py-8 md:px-6">
