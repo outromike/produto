@@ -5,7 +5,7 @@ import { ReturnSchedule } from "@/types";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { format } from 'date-fns';
 import { Button } from "@/components/ui/button";
-import { Pencil, Trash2 } from "lucide-react";
+import { Pencil, Trash2, CheckCircle2 } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -21,9 +21,10 @@ interface ScheduleTableProps {
   onDelete: (schedule: ReturnSchedule) => void;
   selectedSchedules: string[];
   setSelectedSchedules: (ids: string[]) => void;
+  conferencedNfds: Set<string>;
 }
 
-export function ScheduleTable({ schedules, onEdit, onDelete, selectedSchedules, setSelectedSchedules }: ScheduleTableProps) {
+export function ScheduleTable({ schedules, onEdit, onDelete, selectedSchedules, setSelectedSchedules, conferencedNfds }: ScheduleTableProps) {
   
   const handleSelectAll = (checked: boolean) => {
     setSelectedSchedules(checked ? schedules.map(s => s.id) : []);
@@ -60,6 +61,7 @@ export function ScheduleTable({ schedules, onEdit, onDelete, selectedSchedules, 
             <TableHead>Motivo</TableHead>
             <TableHead>Estado do Produto</TableHead>
             <TableHead>Vol.</TableHead>
+            <TableHead>Recebimento</TableHead>
             <TableHead className="text-right">Ações</TableHead>
           </TableRow>
         </TableHeader>
@@ -83,6 +85,13 @@ export function ScheduleTable({ schedules, onEdit, onDelete, selectedSchedules, 
                 <TableCell>{schedule.returnReason}</TableCell>
                 <TableCell>{schedule.productState}</TableCell>
                 <TableCell>{schedule.invoiceVolume}</TableCell>
+                <TableCell>
+                  {conferencedNfds.has(schedule.nfd) && (
+                    <div className="flex items-center justify-center">
+                      <CheckCircle2 className="h-5 w-5 text-green-500" />
+                    </div>
+                  )}
+                </TableCell>
                 <TableCell className="text-right">
                     <DropdownMenu>
                         <DropdownMenuTrigger asChild>
@@ -107,7 +116,7 @@ export function ScheduleTable({ schedules, onEdit, onDelete, selectedSchedules, 
             ))
           ) : (
             <TableRow>
-              <TableCell colSpan={11} className="h-24 text-center">
+              <TableCell colSpan={12} className="h-24 text-center">
                 Nenhum agendamento encontrado para este período.
               </TableCell>
             </TableRow>

@@ -49,10 +49,12 @@ const motivosDevolucao = [
 
 interface SchedulesClientProps {
   initialSchedules: ReturnSchedule[];
+  initialConferencedNfds: string[];
 }
 
-export function SchedulesClient({ initialSchedules }: SchedulesClientProps) {
+export function SchedulesClient({ initialSchedules, initialConferencedNfds }: SchedulesClientProps) {
   const [schedules, setSchedules] = useState<ReturnSchedule[]>(initialSchedules);
+  const [conferencedNfds, setConferencedNfds] = useState<Set<string>>(new Set(initialConferencedNfds));
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [isDeleteAlertOpen, setIsDeleteAlertOpen] = useState(false);
   const [isBulkDeleteAlertOpen, setIsBulkDeleteAlertOpen] = useState(false);
@@ -70,7 +72,8 @@ export function SchedulesClient({ initialSchedules }: SchedulesClientProps) {
 
   useEffect(() => {
     setSchedules(initialSchedules);
-  }, [initialSchedules]);
+    setConferencedNfds(new Set(initialConferencedNfds));
+  }, [initialSchedules, initialConferencedNfds]);
 
   const [filters, setFilters] = useState({
     query: '',
@@ -145,7 +148,7 @@ export function SchedulesClient({ initialSchedules }: SchedulesClientProps) {
     setIsDeleteAlertOpen(true);
   };
 
-  const handleDelete = async () => {
+  const handleDelete = () => {
     if (!scheduleToDelete) return;
     startDeleteTransition(async () => {
         const result = await deleteSchedule(scheduleToDelete.id);
@@ -164,7 +167,7 @@ export function SchedulesClient({ initialSchedules }: SchedulesClientProps) {
     setIsBulkDeleteAlertOpen(true);
   };
 
-  const handleBulkDelete = async () => {
+  const handleBulkDelete = () => {
     startDeleteTransition(async () => {
         const result = await deleteSchedules(selectedScheduleIds);
         if (result.success) {
@@ -267,10 +270,10 @@ export function SchedulesClient({ initialSchedules }: SchedulesClientProps) {
           <TabsTrigger value="all">Outros Agendamentos</TabsTrigger>
         </TabsList>
         <TabsContent value="today">
-          <ScheduleTable schedules={todaySchedules} onEdit={handleEdit} onDelete={handleDeleteRequest} selectedSchedules={selectedScheduleIds} setSelectedSchedules={setSelectedScheduleIds}/>
+          <ScheduleTable schedules={todaySchedules} onEdit={handleEdit} onDelete={handleDeleteRequest} selectedSchedules={selectedScheduleIds} setSelectedSchedules={setSelectedScheduleIds} conferencedNfds={conferencedNfds}/>
         </TabsContent>
         <TabsContent value="all">
-          <ScheduleTable schedules={otherSchedules} onEdit={handleEdit} onDelete={handleDeleteRequest} selectedSchedules={selectedScheduleIds} setSelectedSchedules={setSelectedScheduleIds}/>
+          <ScheduleTable schedules={otherSchedules} onEdit={handleEdit} onDelete={handleDeleteRequest} selectedSchedules={selectedScheduleIds} setSelectedSchedules={setSelectedScheduleIds} conferencedNfds={conferencedNfds}/>
         </TabsContent>
       </Tabs>
 
