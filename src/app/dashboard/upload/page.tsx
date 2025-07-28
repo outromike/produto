@@ -1,15 +1,24 @@
 import { UploadForm } from "@/components/upload/upload-form";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Info } from "lucide-react";
+import { Info, TriangleAlert } from "lucide-react";
 import { getSession } from "@/lib/auth";
-import { redirect } from "next/navigation";
 
 export default async function UploadPage() {
   const session = await getSession();
 
   if (session?.user?.username !== 'admin') {
-    redirect('/dashboard/products');
+    return (
+      <main className="container mx-auto max-w-2xl px-4 py-8 md:px-6">
+        <Alert variant="destructive">
+          <TriangleAlert className="h-4 w-4" />
+          <AlertTitle>Acesso Negado</AlertTitle>
+          <AlertDescription>
+            Você não tem permissão para acessar esta página. Apenas o usuário 'admin' pode fazer upload de arquivos.
+          </AlertDescription>
+        </Alert>
+      </main>
+    )
   }
 
   return (
