@@ -1,4 +1,7 @@
+
 // src/app/dashboard/rua08/page.tsx
+import { getSession } from "@/lib/auth";
+import { redirect } from "next/navigation";
 import { promises as fs } from "fs";
 import path from "path";
 import { Product, StorageEntry } from "@/types";
@@ -23,6 +26,11 @@ async function getStorageData(): Promise<StorageEntry[]> {
 }
 
 export default async function Rua08Page() {
+    const session = await getSession();
+    if (!session.user?.permissions.allocation) {
+        redirect('/dashboard');
+    }
+
     const products = await getProducts();
     const storageData = await getStorageData();
 

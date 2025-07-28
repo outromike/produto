@@ -1,4 +1,6 @@
 
+import { getSession } from "@/lib/auth";
+import { redirect } from "next/navigation";
 import { promises as fs } from 'fs';
 import path from 'path';
 import { ReturnSchedule, ConferenceEntry, StorageEntry } from '@/types';
@@ -39,6 +41,11 @@ async function getStorageData(): Promise<StorageEntry[]> {
 
 
 export default async function ReportsPage() {
+    const session = await getSession();
+    if (!session.user?.permissions.reports) {
+        redirect('/dashboard');
+    }
+
     const [schedules, conferences, storageData] = await Promise.all([
         getSchedules(),
         getConferences(),

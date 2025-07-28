@@ -1,4 +1,3 @@
-
 [
   {
     "username": "admin",
@@ -24,12 +23,12 @@
     "email": "",
     "permissions": {
       "schedules": false,
-      "products": false,
-      "receiving": false,
+      "products": true,
+      "receiving": true,
       "conference": false,
       "allocation": false,
-      "dashboard": false,
-      "reports": false
+      "dashboard": true,
+      "reports": true
     }
   },
   {
@@ -185,6 +184,22 @@
     "permissions": {
       "schedules": false,
       "products": false,
+      "receiving": false,
+      "conference": false,
+      "allocation": false,
+      "dashboard": false,
+      "reports": false
+    }
+  },
+  {
+    "username": "operacional",
+    "password": "123",
+    "name": "Operacional Itajaí",
+    "email": "",
+    "role": "user",
+    "permissions": {
+      "schedules": false,
+      "products": true,
       "receiving": false,
       "conference": false,
       "allocation": false,

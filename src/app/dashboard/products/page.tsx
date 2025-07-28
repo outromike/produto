@@ -1,4 +1,6 @@
 
+import { getSession } from "@/lib/auth";
+import { redirect } from "next/navigation";
 import { getProducts } from '@/lib/products';
 import { ProductGrid } from '@/components/products/product-grid';
 import { ProductFilters } from '@/components/products/product-filters';
@@ -11,6 +13,11 @@ export default async function ProductsPage({
 }: {
   searchParams?: { [key: string]: string | string[] | undefined };
 }) {
+  const session = await getSession();
+  if (!session.user?.permissions.products) {
+      redirect('/dashboard');
+  }
+  
   const allProducts = await getProducts();
 
   const query = (searchParams?.query as string) || '';

@@ -5,6 +5,8 @@ import path from 'path';
 import { ConferenceEntry, ReturnSchedule, StorageEntry } from '@/types';
 import { ReceivingClient } from '@/components/receiving/receiving-client';
 import { getProducts } from '@/lib/products';
+import { getSession } from "@/lib/auth";
+import { redirect } from "next/navigation";
 
 async function getSchedules(): Promise<ReturnSchedule[]> {
     const filePath = path.join(process.cwd(), 'src', 'data', 'agendamentos.json');
@@ -56,10 +58,15 @@ export type CarrierScheduleSummary = {
     totalVolume: number;
     schedules: ReturnSchedule[];
     isConferenceCompleted: boolean;
-    isAllocationCompleted: boolean;
+    isAllocationCompleted: boolean; 
 };
 
 export default async function ReceivingPage() {
+    const session = await getSession();
+    if (!session.user?.permissions.receiving) {
+        redirect('/dashboard');
+    }
+
     const allSchedules = await getSchedules();
     const allConferences = await getConferences();
     const allProducts = await getProducts();

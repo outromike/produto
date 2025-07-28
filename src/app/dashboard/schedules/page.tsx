@@ -1,4 +1,6 @@
 
+import { getSession } from "@/lib/auth";
+import { redirect } from "next/navigation";
 import { promises as fs } from 'fs';
 import path from 'path';
 import { ConferenceEntry, ReturnSchedule } from '@/types';
@@ -51,6 +53,11 @@ async function getConferenceData(): Promise<ConferenceData> {
 }
 
 export default async function SchedulesPage() {
+    const session = await getSession();
+    if (!session.user?.permissions.schedules) {
+        redirect('/dashboard');
+    }
+
     const schedules = await getSchedules();
     const { conferencedNfds, rejectedNfds, nfdReceivedVolumes } = await getConferenceData();
     

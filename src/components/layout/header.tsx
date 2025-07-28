@@ -20,7 +20,7 @@ export function Header({ user }: HeaderProps) {
           <PackageSearch className="h-6 w-6 text-primary" />
           <span className="sr-only">ELGIN APP</span>
         </Link>
-        <MainNav />
+        <MainNav permissions={user?.permissions} />
       </div>
       
       <Sheet>
@@ -36,7 +36,7 @@ export function Header({ user }: HeaderProps) {
                 <PackageSearch className="h-6 w-6 text-primary" />
                 <span>ELGIN APP</span>
             </Link>
-            <MainNav />
+            <MainNav permissions={user?.permissions} />
           </nav>
         </SheetContent>
       </Sheet>

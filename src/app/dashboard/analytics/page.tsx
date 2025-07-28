@@ -1,3 +1,6 @@
+
+import { getSession } from "@/lib/auth";
+import { redirect } from "next/navigation";
 import { StorageEntry } from "@/types";
 import { promises as fs } from "fs";
 import path from "path";
@@ -22,6 +25,11 @@ const buildings = [ "111", "109", "107", "105", "103", "101", "99", "97", "95", 
 const TOTAL_POSITIONS = buildings.length * 6; // 20 buildings * 6 levels each
 
 export default async function AnalyticsPage() {
+    const session = await getSession();
+    if (!session.user?.permissions.dashboard) {
+        redirect('/dashboard');
+    }
+
     const storageData = await getStorageData();
 
     const occupiedPositions = new Set(storageData.map(e => `${e.building}-${e.level}`));
