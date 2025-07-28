@@ -39,7 +39,7 @@ export async function updateUserInfo(username: string, data: { name: string; ema
 
         // Update the session with the new user info
         const session = await getSession();
-        if (session.user) {
+        if (session.user && session.user.username === username) {
             session.user.name = data.name;
             session.user.email = data.email;
             await session.save();
@@ -56,7 +56,7 @@ export async function updateUserInfo(username: string, data: { name: string; ema
 }
 
 
-export async function changePassword(username: string, data: { currentPassword; newPassword; }): Promise<{ success: boolean; error?: string }> {
+export async function changePassword(username: string, data: { currentPassword: string; newPassword: string; }): Promise<{ success: boolean; error?: string }> {
     try {
         const users = await getUsers();
         const userIndex = users.findIndex(u => u.username === username);
