@@ -1,8 +1,8 @@
-
 "use server";
 
 import { redirect } from 'next/navigation';
 
+// Ação simplificada para aceitar o upload e redirecionar, sem processamento.
 export async function uploadReturnSchedules(formData: FormData): Promise<{ error?: string }> {
     const file = formData.get('fileAgendamento') as File | null;
 
@@ -12,8 +12,8 @@ export async function uploadReturnSchedules(formData: FormData): Promise<{ error
 
     try {
         const buffer = Buffer.from(await file.arrayBuffer());
-        // Simplesmente loga o sucesso do recebimento do arquivo por enquanto.
-        console.log(`Arquivo ${file.name} recebido com sucesso com ${buffer.length} bytes.`);
+        // Apenas para confirmar que o arquivo foi recebido.
+        console.log(`Arquivo ${file.name} recebido com ${buffer.length} bytes. Sem processamento.`);
         
     } catch (error) {
         console.error('File processing error:', error);
@@ -23,6 +23,7 @@ export async function uploadReturnSchedules(formData: FormData): Promise<{ error
         return { error: 'Ocorreu um erro desconhecido ao processar o arquivo.' };
     }
     
-    // Redireciona em caso de sucesso
-    redirect('/admin');
+    // Não redireciona mais aqui para evitar conflitos, o cliente fará isso.
+    // redirect('/admin');
+    return {}; // Retorna um objeto vazio em caso de sucesso
 }

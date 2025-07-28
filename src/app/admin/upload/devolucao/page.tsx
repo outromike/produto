@@ -19,6 +19,7 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { uploadReturnSchedules } from "./actions";
+import { useRouter } from "next/navigation";
 
 // Define o schema do formulário com Zod
 const formSchema = z.object({
@@ -27,10 +28,11 @@ const formSchema = z.object({
   })
 });
 
-// O componente do formulário agora está integrado na página
-function DevolucaoUploadForm() {
+// O componente da página agora é um Client Component único que contém o formulário
+export default function UploadDevolucaoPage() {
   const [error, setError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
+  const router = useRouter();
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -49,50 +51,14 @@ function DevolucaoUploadForm() {
       const result = await uploadReturnSchedules(formData);
       if (result?.error) {
         setError(result.error);
+      } else {
+        // Redirecionamento via cliente em caso de sucesso, para maior robustez
+        router.push('/admin');
+        router.refresh(); // Opcional: força a atualização dos dados na página de admin
       }
     });
   }
-
-  return (
-    <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-        {error && (
-            <Alert variant="destructive">
-                <AlertCircle className="h-4 w-4" />
-                <AlertTitle>Falha no Upload</AlertTitle>
-                <AlertDescription>{error}</AlertDescription>
-            </Alert>
-        )}
-        
-        <FormField
-          control={form.control}
-          name="fileAgendamento"
-          render={({ field: { onChange, value, ...rest }}) => (
-            <FormItem>
-              <FormLabel>Arquivo CSV - Agendamentos</FormLabel>
-              <FormControl>
-                  <Input 
-                      type="file" 
-                      accept=".csv"
-                      onChange={(e) => onChange(e.target.files?.[0])}
-                      {...rest}
-                  />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        
-        <Button type="submit" className="w-full" disabled={isPending}>
-          {isPending ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" />Processando...</> : "Enviar Arquivo"}
-        </Button>
-      </form>
-    </Form>
-  );
-}
-
-// O componente da página agora é um Client Component
-export default function UploadDevolucaoPage() {
+  
   return (
     <main className="container mx-auto max-w-2xl px-4 py-8 md:px-6">
        <div className="mb-4">
@@ -122,7 +88,41 @@ export default function UploadDevolucaoPage() {
                     </ul>
                 </AlertDescription>
             </Alert>
-          <DevolucaoUploadForm />
+            {/* O formulário agora está diretamente integrado aqui */}
+            <Form {...form}>
+                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+                    {error && (
+                        <Alert variant="destructive">
+                            <AlertCircle className="h-4 w-4" />
+                            <AlertTitle>Falha no Upload</AlertTitle>
+                            <AlertDescription>{error}</AlertDescription>
+                        </Alert>
+                    )}
+                    
+                    <FormField
+                    control={form.control}
+                    name="fileAgendamento"
+                    render={({ field: { onChange, value, ...rest }}) => (
+                        <FormItem>
+                        <FormLabel>Arquivo CSV - Agendamentos</FormLabel>
+                        <FormControl>
+                            <Input 
+                                type="file" 
+                                accept=".csv"
+                                onChange={(e) => onChange(e.target.files?.[0])}
+                                {...rest}
+                            />
+                        </FormControl>
+                        <FormMessage />
+                        </FormItem>
+                    )}
+                    />
+                    
+                    <Button type="submit" className="w-full" disabled={isPending}>
+                    {isPending ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" />Processando...</> : "Enviar Arquivo"}
+                    </Button>
+                </form>
+            </Form>
         </CardContent>
       </Card>
     </main>
