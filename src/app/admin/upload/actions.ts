@@ -85,6 +85,11 @@ const parseCSV = (csvContent: string, unit: 'ITJ' | 'JVL'): Product[] => {
 };
 
 export async function uploadProducts(formData: FormData): Promise<{ error?: string }> {
+    const session = await getSession();
+    if (session?.user?.role !== 'admin') {
+      return { error: 'Acesso não autorizado.' };
+    }
+
     const fileITJ = formData.get('fileITJ') as File | null;
     const fileJVL = formData.get('fileJVL') as File | null;
 

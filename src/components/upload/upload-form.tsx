@@ -17,7 +17,7 @@ import { Input } from "@/components/ui/input";
 import { useState, useTransition } from "react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { AlertCircle, Loader2 } from "lucide-react";
-import { uploadProducts } from "@/app/dashboard/admin/upload/actions";
+import { uploadProducts } from "@/app/admin/upload/actions";
 
 const formSchema = z.object({
   fileITJ: z.custom<File | undefined>().optional(),

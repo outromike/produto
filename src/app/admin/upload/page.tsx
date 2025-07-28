@@ -11,7 +11,7 @@ export default function UploadPage() {
     <main className="container mx-auto max-w-2xl px-4 py-8 md:px-6">
        <div className="mb-4">
         <Button variant="outline" asChild>
-          <Link href="/dashboard/admin">
+          <Link href="/admin">
             <ArrowLeft className="mr-2 h-4 w-4" />
             Voltar ao Painel do Admin
           </Link>

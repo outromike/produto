@@ -53,7 +53,7 @@ export function UserNav({ user }: UserNavProps) {
         <DropdownMenuGroup>
            {user?.role === 'admin' && (
             <DropdownMenuItem asChild>
-              <Link href="/dashboard/admin">
+              <Link href="/admin">
                 <Shield className="mr-2 h-4 w-4" />
                 <span>Painel do Admin</span>
               </Link>

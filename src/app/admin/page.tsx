@@ -1,21 +1,15 @@
-import { getSession } from "@/lib/auth";
-import { redirect } from 'next/navigation';
+
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import { Upload, Shield } from "lucide-react";
+import { Upload, Shield, Users } from "lucide-react";
 
 export default async function AdminDashboardPage() {
-  const session = await getSession();
-  if (session?.user?.role !== 'admin') {
-    redirect('/dashboard/products');
-  }
 
   return (
     <main className="container mx-auto max-w-4xl px-4 py-8 md:px-6">
       <div className="mb-6 flex items-center gap-4">
-        <Shield className="h-8 w-8 text-primary" />
-        <h1 className="text-3xl font-headline font-bold">Painel do Administrador</h1>
+        <h1 className="text-3xl font-headline font-bold">Visão Geral</h1>
       </div>
 
       <div className="grid gap-6 md:grid-cols-2">
@@ -28,7 +22,7 @@ export default async function AdminDashboardPage() {
           </CardHeader>
           <CardContent>
             <Button asChild>
-              <Link href="/dashboard/admin/upload">
+              <Link href="/admin/upload">
                 <Upload className="mr-2 h-4 w-4" />
                 Ir para Upload de CSV
               </Link>
@@ -36,7 +30,6 @@ export default async function AdminDashboardPage() {
           </CardContent>
         </Card>
 
-        {/* Futuramente, você pode adicionar outros cards aqui para novas funcionalidades de admin */}
         <Card>
            <CardHeader>
             <CardTitle>Gerenciamento de Usuários</CardTitle>
@@ -46,6 +39,7 @@ export default async function AdminDashboardPage() {
           </CardHeader>
            <CardContent>
             <Button disabled>
+                <Users className="mr-2 h-4 w-4" />
                 Gerenciar Usuários
             </Button>
           </CardContent>
