@@ -1,3 +1,4 @@
+
 import { getIronSession, IronSession } from 'iron-session';
 import { cookies } from 'next/headers';
 import { SessionPayload, User } from '@/types';
@@ -26,7 +27,7 @@ export async function getSession(): Promise<IronSession<SessionPayload> | null> 
 
 export async function setSession(user: User): Promise<IronSession<SessionPayload>> {
   const session = await getIronSession<SessionPayload>(cookies(), sessionOptions);
-  session.user = { username: user.username };
+  session.user = { username: user.username, role: user.role };
   session.expires = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours
   await session.save();
   return session;
@@ -48,7 +49,7 @@ async function getUsers(): Promise<User[]> {
     }
 }
 
-export async function findUserByCredentials(credentials: User): Promise<User | undefined> {
+export async function findUserByCredentials(credentials: Pick<User, 'username' | 'password'>): Promise<User | undefined> {
     const users = await getUsers();
     return users.find(
       (u) => u.username === credentials.username && u.password === credentials.password

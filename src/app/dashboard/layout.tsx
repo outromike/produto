@@ -1,3 +1,4 @@
+
 import { Header } from "@/components/layout/header";
 import { getSession } from "@/lib/auth";
 import { redirect } from 'next/navigation';
@@ -15,7 +16,7 @@ export default async function DashboardLayout({
   return (
     <div className="flex min-h-screen w-full flex-col">
       <Header user={session.user} />
-      <main className="flex-1">{children}</main>
+      <main className="flex-1 bg-muted/40">{children}</main>
     </div>
   );
 }

@@ -1,12 +1,13 @@
+
 import { UserNav } from "@/components/layout/user-nav";
 import { ThemeToggle } from "@/components/layout/theme-toggle";
 import { PackageSearch, Upload, Table, LayoutDashboard } from "lucide-react";
 import Link from "next/link";
-import { User } from "@/types";
+import { SessionPayload } from "@/types";
 import { Button } from "../ui/button";
 
 interface HeaderProps {
-    user: User | undefined;
+    user: SessionPayload['user'] | undefined;
 }
 
 export function Header({ user }: HeaderProps) {
@@ -29,7 +30,7 @@ export function Header({ user }: HeaderProps) {
               Ver em Tabela
             </Link>
           </Button>
-        {user?.username === 'admin' && (
+        {user?.role === 'admin' && (
           <Button variant="outline" size="sm" asChild>
             <Link href="/dashboard/upload">
               <Upload className="mr-2 h-4 w-4"/>

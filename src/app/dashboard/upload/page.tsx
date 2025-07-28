@@ -1,34 +1,17 @@
+
 import { UploadForm } from "@/components/upload/upload-form";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Info, TriangleAlert } from "lucide-react";
-import { getSession } from "@/lib/auth";
-import { redirect } from 'next/navigation';
+import { Info } from "lucide-react";
 
-export default async function UploadPage() {
-  const session = await getSession();
-
-  if (session?.user?.username !== 'admin') {
-    return (
-      <main className="container mx-auto max-w-2xl px-4 py-8 md:px-6">
-        <Alert variant="destructive">
-          <TriangleAlert className="h-4 w-4" />
-          <AlertTitle>Acesso Negado</AlertTitle>
-          <AlertDescription>
-            Você não tem permissão para acessar esta página. Apenas o usuário 'admin' pode fazer upload de arquivos.
-          </AlertDescription>
-        </Alert>
-      </main>
-    )
-  }
-
+export default function UploadPage() {
   return (
     <main className="container mx-auto max-w-2xl px-4 py-8 md:px-6">
        <Card>
         <CardHeader>
           <CardTitle>Upload de Planilhas de Produtos</CardTitle>
           <CardDescription>
-            Faça o upload dos arquivos CSV para as unidades de Itajaí (ITJ) e Joinville (JVL) para atualizar a base de dados de produtos. Apenas o usuário 'admin' pode realizar esta ação.
+            Faça o upload dos arquivos CSV para as unidades de Itajaí (ITJ) e Joinville (JVL) para atualizar a base de dados de produtos.
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">

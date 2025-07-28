@@ -1,3 +1,4 @@
+
 "use client";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -11,13 +12,13 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { User } from "@/types";
+import { SessionPayload } from "@/types";
 import { logout } from "@/app/login/actions";
 import { LogOut, User as UserIcon } from "lucide-react";
 import { useTransition } from "react";
 
 interface UserNavProps {
-    user: User | undefined;
+    user: SessionPayload['user'] | undefined;
 }
 
 export function UserNav({ user }: UserNavProps) {
@@ -43,7 +44,7 @@ export function UserNav({ user }: UserNavProps) {
           <div className="flex flex-col space-y-1">
             <p className="text-sm font-medium leading-none">Logado como</p>
             <p className="text-xs leading-none text-muted-foreground">
-              {user?.username}
+              {user?.username} ({user?.role})
             </p>
           </div>
         </DropdownMenuLabel>

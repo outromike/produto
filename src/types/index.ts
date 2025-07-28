@@ -1,3 +1,4 @@
+
 export type Product = {
   sku: string;
   item: string; // From 'Item'
@@ -22,9 +23,13 @@ export type Product = {
 export type User = {
   username: string;
   password?: string;
+  role: 'admin' | 'user';
 };
 
 export type SessionPayload = {
-  user: User;
+  user: {
+    username: string;
+    role: 'admin' | 'user';
+  };
   expires: Date;
 };

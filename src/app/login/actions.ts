@@ -1,11 +1,11 @@
-// src/app/login/actions.ts
+
 "use server";
 
 import { redirect } from 'next/navigation';
 import { setSession, findUserByCredentials, destroySession } from '@/lib/auth';
 import { User } from '@/types';
 
-export async function login(credentials: User): Promise<{ error?: string }> {
+export async function login(credentials: Pick<User, 'username' | 'password'>): Promise<{ error?: string }> {
   const user = await findUserByCredentials(credentials);
 
   if (!user) {
