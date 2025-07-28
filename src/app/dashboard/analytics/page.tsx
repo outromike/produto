@@ -1,10 +1,10 @@
 
 import { getSession } from "@/lib/auth";
-import { redirect } from "next/navigation";
 import { StorageEntry } from "@/types";
 import { promises as fs } from "fs";
 import path from "path";
 import { DashboardClient } from '@/components/dashboard/dashboard-client';
+import { AccessDenied } from "@/components/auth/access-denied";
 
 async function getStorageData(): Promise<StorageEntry[]> {
     const filePath = path.join(process.cwd(), 'src', 'data', 'rua08.json');
@@ -27,7 +27,7 @@ const TOTAL_POSITIONS = buildings.length * 6; // 20 buildings * 6 levels each
 export default async function AnalyticsPage() {
     const session = await getSession();
     if (!session.user?.permissions.dashboard) {
-        redirect('/dashboard');
+        return <AccessDenied />;
     }
 
     const storageData = await getStorageData();

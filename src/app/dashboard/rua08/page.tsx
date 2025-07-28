@@ -1,12 +1,12 @@
 
 // src/app/dashboard/rua08/page.tsx
 import { getSession } from "@/lib/auth";
-import { redirect } from "next/navigation";
 import { promises as fs } from "fs";
 import path from "path";
 import { Product, StorageEntry } from "@/types";
 import { getProducts } from "@/lib/products";
 import { StorageManager } from "@/components/rua08/storage-manager";
+import { AccessDenied } from "@/components/auth/access-denied";
 
 async function getStorageData(): Promise<StorageEntry[]> {
     const filePath = path.join(process.cwd(), 'src', 'data', 'rua08.json');
@@ -28,7 +28,7 @@ async function getStorageData(): Promise<StorageEntry[]> {
 export default async function Rua08Page() {
     const session = await getSession();
     if (!session.user?.permissions.allocation) {
-        redirect('/dashboard');
+        return <AccessDenied />;
     }
 
     const products = await getProducts();

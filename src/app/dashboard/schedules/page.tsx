@@ -1,10 +1,10 @@
 
 import { getSession } from "@/lib/auth";
-import { redirect } from "next/navigation";
 import { promises as fs } from 'fs';
 import path from 'path';
 import { ConferenceEntry, ReturnSchedule } from '@/types';
 import { SchedulesClient } from '@/components/schedules/schedules-client';
+import { AccessDenied } from "@/components/auth/access-denied";
 
 async function getSchedules(): Promise<ReturnSchedule[]> {
     const filePath = path.join(process.cwd(), 'src', 'data', 'agendamentos.json');
@@ -55,7 +55,7 @@ async function getConferenceData(): Promise<ConferenceData> {
 export default async function SchedulesPage() {
     const session = await getSession();
     if (!session.user?.permissions.schedules) {
-        redirect('/dashboard');
+        return <AccessDenied />;
     }
 
     const schedules = await getSchedules();

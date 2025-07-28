@@ -6,7 +6,7 @@ import { ConferenceEntry, ReturnSchedule, StorageEntry } from '@/types';
 import { ReceivingClient } from '@/components/receiving/receiving-client';
 import { getProducts } from '@/lib/products';
 import { getSession } from "@/lib/auth";
-import { redirect } from "next/navigation";
+import { AccessDenied } from "@/components/auth/access-denied";
 
 async function getSchedules(): Promise<ReturnSchedule[]> {
     const filePath = path.join(process.cwd(), 'src', 'data', 'agendamentos.json');
@@ -64,7 +64,7 @@ export type CarrierScheduleSummary = {
 export default async function ReceivingPage() {
     const session = await getSession();
     if (!session.user?.permissions.receiving) {
-        redirect('/dashboard');
+        return <AccessDenied />;
     }
 
     const allSchedules = await getSchedules();

@@ -1,10 +1,10 @@
 
 import { getSession } from "@/lib/auth";
-import { redirect } from "next/navigation";
 import { getProducts } from '@/lib/products';
 import { ProductGrid } from '@/components/products/product-grid';
 import { ProductFilters } from '@/components/products/product-filters';
 import { PaginationComponent } from '@/components/products/pagination';
+import { AccessDenied } from "@/components/auth/access-denied";
 
 const PRODUCTS_PER_PAGE = 12;
 
@@ -15,7 +15,7 @@ export default async function ProductsPage({
 }) {
   const session = await getSession();
   if (!session.user?.permissions.products) {
-      redirect('/dashboard');
+      return <AccessDenied />;
   }
   
   const allProducts = await getProducts();

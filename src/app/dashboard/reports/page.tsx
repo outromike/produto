@@ -1,10 +1,10 @@
 
 import { getSession } from "@/lib/auth";
-import { redirect } from "next/navigation";
 import { promises as fs } from 'fs';
 import path from 'path';
 import { ReturnSchedule, ConferenceEntry, StorageEntry } from '@/types';
 import { ReportsClient } from '@/components/reports/reports-client';
+import { AccessDenied } from "@/components/auth/access-denied";
 
 async function getSchedules(): Promise<ReturnSchedule[]> {
     const filePath = path.join(process.cwd(), 'src', 'data', 'agendamentos.json');
@@ -43,7 +43,7 @@ async function getStorageData(): Promise<StorageEntry[]> {
 export default async function ReportsPage() {
     const session = await getSession();
     if (!session.user?.permissions.reports) {
-        redirect('/dashboard');
+        return <AccessDenied />;
     }
 
     const [schedules, conferences, storageData] = await Promise.all([
