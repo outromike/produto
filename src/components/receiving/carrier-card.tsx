@@ -148,7 +148,8 @@ export function CarrierCard({ summary, onAllocate, permissions }: CarrierCardPro
                     <AlertDialogFooter>
                     <AlertDialogCancel>Cancelar</AlertDialogCancel>
                     <AlertDialogAction 
-                        onClick={handleStartConference} 
+                        onClick={handleStartConference}
+                        disabled={!canStartConference} 
                     >
                          Iniciar
                     </AlertDialogAction>
