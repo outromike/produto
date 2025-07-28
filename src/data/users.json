@@ -19,13 +19,13 @@
   {
     "username": "olga",
     "password": "olga",
-    "role": "user",
     "name": "Olga",
     "email": "olga@example.com",
+    "role": "user",
     "permissions": {
       "schedules": true,
       "products": true,
-      "productManagement": true,
+      "productManagement": false,
       "receiving": true,
       "conference": false,
       "allocation": false,
@@ -36,9 +36,9 @@
   {
     "username": "michelle",
     "password": "michelle",
+    "name": "Michelle",
+    "email": "michelle@example.com",
     "role": "user",
-    "name": "",
-    "email": "",
     "permissions": {
       "schedules": false,
       "products": false,
@@ -53,9 +53,9 @@
   {
     "username": "fabio",
     "password": "fabio",
+    "name": "Fabio",
+    "email": "fabio@example.com",
     "role": "user",
-    "name": "",
-    "email": "",
     "permissions": {
       "schedules": false,
       "products": false,
@@ -70,9 +70,9 @@
   {
     "username": "mike",
     "password": "mike",
+    "name": "Mike",
+    "email": "mike@example.com",
     "role": "user",
-    "name": "",
-    "email": "",
     "permissions": {
       "schedules": false,
       "products": false,
@@ -87,9 +87,9 @@
   {
     "username": "thiago",
     "password": "thiago",
+    "name": "Thiago",
+    "email": "thiago@example.com",
     "role": "user",
-    "name": "",
-    "email": "",
     "permissions": {
       "schedules": false,
       "products": false,
@@ -104,9 +104,9 @@
   {
     "username": "juliane",
     "password": "juliane",
+    "name": "Juliane",
+    "email": "juliane@example.com",
     "role": "user",
-    "name": "",
-    "email": "",
     "permissions": {
       "schedules": false,
       "products": false,
@@ -121,9 +121,9 @@
   {
     "username": "luanna",
     "password": "luanna",
+    "name": "Luanna",
+    "email": "luanna@example.com",
     "role": "user",
-    "name": "",
-    "email": "",
     "permissions": {
       "schedules": false,
       "products": false,
@@ -138,9 +138,9 @@
   {
     "username": "fernanda",
     "password": "fernanda",
+    "name": "Fernanda",
+    "email": "fernanda@example.com",
     "role": "user",
-    "name": "",
-    "email": "",
     "permissions": {
       "schedules": false,
       "products": false,
@@ -155,9 +155,9 @@
   {
     "username": "jonatas",
     "password": "jonatas",
+    "name": "Jonatas",
+    "email": "jonatas@example.com",
     "role": "user",
-    "name": "",
-    "email": "",
     "permissions": {
       "schedules": false,
       "products": false,
@@ -172,9 +172,9 @@
   {
     "username": "gabriel",
     "password": "gabriel",
+    "name": "Gabriel",
+    "email": "gabriel@example.com",
     "role": "user",
-    "name": "",
-    "email": "",
     "permissions": {
       "schedules": false,
       "products": false,
@@ -189,9 +189,9 @@
   {
     "username": "cris",
     "password": "cris",
+    "name": "Cris",
+    "email": "cris@example.com",
     "role": "user",
-    "name": "",
-    "email": "",
     "permissions": {
       "schedules": false,
       "products": false,
