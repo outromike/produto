@@ -3,7 +3,7 @@
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { useState, useTransition } from "react";
+import { useState, useTransition, useEffect } from "react";
 import { ReturnSchedule, Product } from "@/types";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -14,12 +14,13 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
 import { saveConference, findProduct } from "@/app/dashboard/receiving/actions";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, AlertTriangle } from "lucide-react";
+import { Loader2, AlertTriangle, CheckIcon } from "lucide-react";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
+import { cn } from "@/lib/utils";
 
 const formSchema = z.object({
   product: z.object({
-    sku: z.string().min(1, "O SKU é obrigatório"),
+    sku: z.string().min(1, "O produto é obrigatório"),
     description: z.string().min(1, "A descrição é obrigatória"),
   }),
   receivedVolume: z.coerce.number().min(1, "A quantidade de volumes recebidos é obrigatória."),
@@ -58,19 +59,19 @@ export function ConferenceForm({ schedule, onFinish }: ConferenceFormProps) {
 
   const handleProductSearch = async (query: string) => {
     setProductQuery(query);
-    if (query.length > 1) {
+    if (query.length > 2) {
       const results = await findProduct(query);
       setSuggestions(results);
-      setIsPopoverOpen(true);
     } else {
       setSuggestions([]);
-      setIsPopoverOpen(false);
     }
   };
 
   const handleProductSelect = (product: Product) => {
     form.setValue("product", { sku: product.sku, description: product.description });
+    setProductQuery(`${product.sku} - ${product.description}`);
     setIsPopoverOpen(false);
+    setSuggestions([]);
   };
 
   const processSubmit = (values: ConferenceFormValues) => {
@@ -86,11 +87,16 @@ export function ConferenceForm({ schedule, onFinish }: ConferenceFormProps) {
         });
 
         if (result.success) {
-            toast({ title: "Sucesso!", description: "Conferência salva com sucesso." });
-            form.reset(); // Reseta o form para um novo produto
+            toast({ title: "Sucesso!", description: "Produto da conferência salvo com sucesso." });
+            form.reset({
+                product: { sku: "", description: "" },
+                receivedVolume: 1,
+                productState: "Produto Bom",
+                observations: "",
+            });
+            setProductQuery("");
             setShowPartialReceiptAlert(false);
             setFormData(null);
-            // Poderíamos chamar onFinish() aqui se quiséssemos fechar o modal após cada salvamento
         } else {
             toast({ title: "Erro", description: result.error, variant: "destructive" });
         }
@@ -120,9 +126,9 @@ export function ConferenceForm({ schedule, onFinish }: ConferenceFormProps) {
             control={form.control}
             name="product"
             render={({ field }) => (
-              <FormItem>
+              <FormItem className="flex flex-col">
                 <FormLabel>Produto (SKU, Item ou Descrição)</FormLabel>
-                <Popover open={isPopoverOpen} onOpenChange={setIsPopoverOpen}>
+                 <Popover open={isPopoverOpen} onOpenChange={setIsPopoverOpen}>
                   <PopoverTrigger asChild>
                     <FormControl>
                         <Input
@@ -134,7 +140,7 @@ export function ConferenceForm({ schedule, onFinish }: ConferenceFormProps) {
                   </PopoverTrigger>
                   <PopoverContent className="p-0 w-[--radix-popover-trigger-width]" align="start">
                     <Command>
-                      <CommandInput placeholder="Buscar produto..." />
+                      <CommandInput placeholder="Buscar produto..." onValueChange={handleProductSearch}/>
                       <CommandList>
                         <CommandEmpty>Nenhum produto encontrado.</CommandEmpty>
                         <CommandGroup>
@@ -144,6 +150,7 @@ export function ConferenceForm({ schedule, onFinish }: ConferenceFormProps) {
                               value={`${product.sku} - ${product.description}`}
                               onSelect={() => handleProductSelect(product)}
                             >
+                               <CheckIcon className={cn("mr-2 h-4 w-4", field.value.sku === product.sku ? "opacity-100" : "opacity-0")}/>
                               {product.description} <span className="text-xs text-muted-foreground ml-2">({product.sku})</span>
                             </CommandItem>
                           ))}

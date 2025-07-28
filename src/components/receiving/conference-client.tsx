@@ -12,10 +12,9 @@ import { ConferenceModal } from "./conference-modal";
 interface ConferenceClientProps {
   initialSchedules: ReturnSchedule[];
   carrierName: string;
-  allProducts: Product[];
 }
 
-export function ConferenceClient({ initialSchedules, carrierName, allProducts }: ConferenceClientProps) {
+export function ConferenceClient({ initialSchedules, carrierName }: ConferenceClientProps) {
   const [schedules, setSchedules] = useState(initialSchedules);
   const [selectedSchedule, setSelectedSchedule] = useState<ReturnSchedule | null>(null);
 
@@ -41,7 +40,7 @@ export function ConferenceClient({ initialSchedules, carrierName, allProducts }:
               <CardTitle>Data</CardTitle>
             </CardHeader>
             <CardContent>
-              <p className="text-2xl font-bold">{format(parseISO(schedules[0].date), 'dd/MM/yyyy')}</p>
+              <p className="text-2xl font-bold">{schedules.length > 0 ? format(parseISO(schedules[0].date), 'dd/MM/yyyy') : 'N/A'}</p>
             </CardContent>
           </Card>
           <Card>
@@ -108,3 +107,4 @@ export function ConferenceClient({ initialSchedules, carrierName, allProducts }:
     </>
   );
 }
+
