@@ -1,6 +1,9 @@
 import { Product } from '@/types';
 import { getDbConnection, setupDatabase } from './db';
 import { RowDataPacket } from 'mysql2';
+import path from 'path';
+import { promises as fs } from 'fs';
+
 
 async function mapRowToProduct(row: RowDataPacket): Promise<Product> {
   return {
@@ -28,9 +31,16 @@ async function mapRowToProduct(row: RowDataPacket): Promise<Product> {
 export async function getProducts(): Promise<Product[]> {
   const db = await getDbConnection();
   if (!db) {
-    // Se não houver conexão com o banco, retorne uma lista vazia.
-    console.warn("Database not connected, returning empty product list.");
-    return [];
+    // Fallback para o arquivo JSON se o banco de dados não estiver conectado
+    console.warn("Database not connected, falling back to products.json.");
+    const filePath = path.join(process.cwd(), 'src', 'data', 'products.json');
+    try {
+      const jsonData = await fs.readFile(filePath, 'utf-8');
+      return JSON.parse(jsonData);
+    } catch (error) {
+      console.error("Error reading products.json:", error);
+      return []; // Retorna vazio se o arquivo JSON também falhar
+    }
   }
 
   try {
@@ -47,8 +57,10 @@ export async function getProducts(): Promise<Product[]> {
 export async function getProductBySku(sku: string): Promise<Product | undefined> {
   const db = await getDbConnection();
   if (!db) {
-    console.warn(`Database not connected, cannot fetch SKU: ${sku}.`);
-    return undefined;
+     // Fallback para o arquivo JSON se o banco de dados não estiver conectado
+    console.warn(`Database not connected, falling back to products.json for SKU: ${sku}.`);
+    const allProducts = await getProducts();
+    return allProducts.find(p => p.sku === sku);
   }
   
   try {

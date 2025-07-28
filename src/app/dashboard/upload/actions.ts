@@ -102,8 +102,7 @@ async function insertProductsIntoDb(db: Connection, products: Product[]) {
         packaging = VALUES(packaging),
         measurementUnit = VALUES(measurementUnit),
         quantity = VALUES(quantity),
-        classification = VALUES(classification),
-        unit = VALUES(unit);
+        classification = VALUES(classification);
     `;
 
     const values = products.map(p => [
@@ -137,14 +136,14 @@ export async function uploadProducts(formData: FormData): Promise<{ error?: stri
 
         await setupDatabase(); // Garante que a infraestrutura do BD esteja pronta
         
-        if (fileITJ) {
+        if (fileITJ && fileITJ.size > 0) {
             const bufferITJ = Buffer.from(await fileITJ.arrayBuffer());
             const contentITJ = bufferITJ.toString('utf-8');
             const productsITJ = parseCSV(contentITJ, 'ITJ');
             await insertProductsIntoDb(db, productsITJ);
         }
 
-        if (fileJVL) {
+        if (fileJVL && fileJVL.size > 0) {
             const bufferJVL = Buffer.from(await fileJVL.arrayBuffer());
             const contentJVL = bufferJVL.toString('utf-8');
             const productsJVL = parseCSV(contentJVL, 'JVL');

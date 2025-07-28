@@ -15,7 +15,6 @@ let connection: mysql.Connection | null = null;
 export async function getDbConnection() {
   // Se as credenciais do banco de dados não estiverem configuradas, não tente conectar.
   if (!dbConfig.host || !dbConfig.user || !dbConfig.database) {
-    // console.warn('Database credentials are not set. Skipping DB connection.');
     return null;
   }
   
@@ -47,7 +46,7 @@ export async function setupDatabase() {
 
   const createProductsTableQuery = `
     CREATE TABLE IF NOT EXISTS products (
-      sku VARCHAR(255) PRIMARY KEY,
+      sku VARCHAR(255) NOT NULL,
       item VARCHAR(255),
       description TEXT,
       category VARCHAR(255),
@@ -62,7 +61,8 @@ export async function setupDatabase() {
       measurementUnit VARCHAR(50),
       quantity INT,
       classification VARCHAR(10),
-      unit ENUM('ITJ', 'JVL') NOT NULL
+      unit ENUM('ITJ', 'JVL') NOT NULL,
+      PRIMARY KEY (sku, unit)
     );
   `;
   
