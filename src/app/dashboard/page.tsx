@@ -1,7 +1,7 @@
 
 import Link from 'next/link';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { AreaChart, PackageSearch, CalendarClock, Inbox } from 'lucide-react';
+import { AreaChart, PackageSearch, CalendarClock, Inbox, Warehouse } from 'lucide-react';
 
 const hubLinks = [
     {
@@ -30,6 +30,13 @@ const hubLinks = [
         title: "Recebimento",
         description: "Inicie e acompanhe a conferência de notas fiscais recebidas.",
     },
+    {
+      href: "/dashboard/rua08",
+      icon: Warehouse,
+      label: "Rua 08",
+      title: "Alocação - Rua 08",
+      description: "Visualize e gerencie a alocação de produtos no armazém.",
+  },
   ];
 
 export default function DashboardHubPage() {
@@ -39,7 +46,7 @@ export default function DashboardHubPage() {
             <h1 className="text-3xl font-headline font-bold">Bem-vindo(a) ao seu Painel</h1>
             <p className="text-lg text-muted-foreground">Selecione uma das opções abaixo para começar.</p>
         </div>
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
             {hubLinks.map((link) => (
                  <Link key={link.href} href={link.href} className="group">
                     <Card className="flex h-full flex-col transition-all duration-300 group-hover:shadow-lg group-hover:-translate-y-1">

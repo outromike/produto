@@ -62,3 +62,18 @@ export type ConferenceEntry = {
     observations: string;
     conferenceTimestamp: string; // ISO 8601 format
 };
+
+export type StorageEntry = {
+    nfd: string;
+    productSku: string;
+    productDescription: string;
+    quantity: number;
+    timestamp: string;
+};
+
+export type StorageLocation = {
+    id: string; // e.g., "111-6" for column 111, level 6
+    entries: StorageEntry[];
+    status: 'empty' | 'partial' | 'full' | 'blocked';
+    capacity: number; // Max volume or items
+};

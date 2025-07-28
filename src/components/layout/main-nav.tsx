@@ -3,7 +3,7 @@
 
 import Link from "next/link";
 import { Button } from "../ui/button";
-import { Home, AreaChart, CalendarClock, Inbox, PackageSearch } from "lucide-react";
+import { Home, AreaChart, CalendarClock, Inbox, PackageSearch, Warehouse } from "lucide-react";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 
@@ -13,6 +13,7 @@ const navLinks = [
     { href: "/dashboard/schedules", icon: CalendarClock, label: "Agendamentos" },
     { href: "/dashboard/receiving", icon: Inbox, label: "Recebimento" },
     { href: "/dashboard/products", icon: PackageSearch, label: "Produtos" },
+    { href: "/dashboard/rua08", icon: Warehouse, label: "Rua 08"},
 ];
 
 export function MainNav() {
@@ -23,7 +24,7 @@ export function MainNav() {
             {navLinks.map(({ href, icon: Icon, label }) => (
                 <Button 
                     key={href} 
-                    variant={pathname === href ? "secondary" : "ghost"} 
+                    variant={pathname.startsWith(href) && href !== "/dashboard" || pathname === href ? "secondary" : "ghost"} 
                     size="sm" 
                     asChild
                     className="justify-start"
