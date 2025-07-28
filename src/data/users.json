@@ -1,8 +1,15 @@
 
 [
-  { "username": "admin", "password": "password123", "role": "admin", "name": "Admin User", "email": "admin@example.com" },
-  { "username": "user", "password": "password", "role": "user", "name": "Regular User", "email": "user@example.com" },
-  { "username": "itj", "password": "itj", "role": "user", "name": "", "email": "" },
-  { "username": "jvl", "password": "jvl", "role": "user", "name": "", "email": "" },
-  { "username": "mike", "password": "123", "role": "user", "name": "", "email": "" }
+  { "username": "admin", "password": "@Mikece66", "role": "admin", "name": "Admin User", "email": "admin@example.com" },
+  { "username": "olga", "password": "olga", "role": "user", "name": "", "email": "" },
+  { "username": "michelle", "password": "michelle", "role": "user", "name": "", "email": "" },
+  { "username": "fabio", "password": "fabio", "role": "user", "name": "", "email": "" },
+  { "username": "mike", "password": "mike", "role": "user", "name": "", "email": "" },
+  { "username": "thiago", "password": "thiago", "role": "user", "name": "", "email": "" },
+  { "username": "juliane", "password": "juliane", "role": "user", "name": "", "email": "" },
+  { "username": "luanna", "password": "luanna", "role": "user", "name": "", "email": "" },
+  { "username": "fernanda", "password": "fernanda", "role": "user", "name": "", "email": "" },
+  { "username": "jonatas", "password": "jonatas", "role": "user", "name": "", "email": "" },
+  { "username": "gabriel", "password": "gabriel", "role": "user", "name": "", "email": "" },
+  { "username": "cris", "password": "cris", "role": "user", "name": "", "email": "" }
 ]
