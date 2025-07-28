@@ -57,6 +57,8 @@ export function AllocationWizardModal({ isOpen, onClose, onFinish, summary }: Al
                 }));
                 setConferenceItems(allocationItems);
             });
+        } else {
+            setConferenceItems([]);
         }
     }, [selectedNfd]);
     
@@ -131,7 +133,7 @@ export function AllocationWizardModal({ isOpen, onClose, onFinish, summary }: Al
         });
     };
 
-    const nfdList = summary.schedules.map(s => s.nfd);
+    const nfdList = Array.from(new Set(summary.schedules.map(s => s.nfd)));
     
     return(
         <Dialog open={isOpen} onOpenChange={onClose}>
@@ -177,8 +179,14 @@ export function AllocationWizardModal({ isOpen, onClose, onFinish, summary }: Al
                                     </TableRow>
                                 </TableHeader>
                                 <TableBody>
-                                    {conferenceItems.map(item => {
-                                        const saldo = item.receivedVolume - (item.allocatedVolume || 0);
+                                    {isPending ? (
+                                        <TableRow>
+                                            <TableCell colSpan={8} className="h-24 text-center">
+                                                <Loader2 className="mx-auto h-6 w-6 animate-spin text-muted-foreground" />
+                                            </TableCell>
+                                        </TableRow>
+                                    ) : conferenceItems.map(item => {
+                                        const saldo = Math.max(0, item.receivedVolume - (item.allocatedVolume || 0));
                                         return (
                                             <TableRow key={item.id} className={saldo <= 0 ? "opacity-50" : ""}>
                                                 <TableCell className="text-xs">
