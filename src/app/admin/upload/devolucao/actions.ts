@@ -78,7 +78,6 @@ export async function uploadReturnSchedules(formData: FormData): Promise<{ error
     try {
         const filePath = path.join(process.cwd(), 'src', 'data', 'devolucoes.json');
         
-        // Ensure directory exists
         await fs.mkdir(path.dirname(filePath), { recursive: true });
 
         let allSchedules: ReturnSchedule[] = [];
@@ -92,8 +91,7 @@ export async function uploadReturnSchedules(formData: FormData): Promise<{ error
         const buffer = Buffer.from(await file.arrayBuffer());
         const content = buffer.toString('utf-8');
         const newSchedules = parseReturnCSV(content);
-
-        // Append new schedules to the existing ones
+        
         const updatedSchedules = allSchedules.concat(newSchedules);
 
         await fs.writeFile(filePath, JSON.stringify(updatedSchedules, null, 2), 'utf-8');
