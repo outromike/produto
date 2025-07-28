@@ -15,20 +15,20 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { SessionPayload } from "@/types";
 import { logout } from "@/app/login/actions";
-import { LogOut, Shield, LayoutDashboard, CalendarClock, Inbox, Table } from "lucide-react";
+import { LogOut, Shield, Home, AreaChart, CalendarClock, Inbox, PackageSearch } from "lucide-react";
 import { useTransition } from "react";
 import Link from "next/link";
-import { cn } from "@/lib/utils";
 
 interface UserNavProps {
     user: SessionPayload['user'] | undefined;
 }
 
 const mobileNavLinks = [
-    { href: "/dashboard", icon: LayoutDashboard, label: "Dashboard" },
+    { href: "/dashboard", icon: Home, label: "Início" },
+    { href: "/dashboard/analytics", icon: AreaChart, label: "Dashboard" },
     { href: "/dashboard/schedules", icon: CalendarClock, label: "Agendamentos" },
     { href: "/dashboard/receiving", icon: Inbox, label: "Recebimento" },
-    { href: "/dashboard/products/table", icon: Table, label: "Ver em Tabela" },
+    { href: "/dashboard/products", icon: PackageSearch, label: "Produtos" },
 ];
 
 export function UserNav({ user }: UserNavProps) {

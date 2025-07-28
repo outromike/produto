@@ -1,30 +1,51 @@
 
+"use client";
+
 import { UserNav } from "@/components/layout/user-nav";
 import { ThemeToggle } from "@/components/layout/theme-toggle";
-import { PackageSearch } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { PackageSearch, Menu } from "lucide-react";
 import Link from "next/link";
 import { getSession } from "@/lib/auth";
 import { MainNav } from "./main-nav";
+import { useSession } from "@/hooks/use-session";
 
-export async function Header() {
-  const session = await getSession();
+export function Header() {
+  const { session } = useSession();
 
   return (
     <header className="sticky top-0 z-50 flex h-16 items-center gap-4 border-b bg-background/80 px-4 backdrop-blur md:px-6">
-      <Link href="/dashboard/products" className="flex items-center gap-2 font-headline text-lg font-semibold">
-        <PackageSearch className="h-6 w-6 text-primary" />
-        <span>Consulta de Produtos</span>
-      </Link>
-      
-      {/* Navegação principal visível em telas maiores */}
-      <div className="hidden flex-1 md:flex md:items-center md:justify-end">
+      <nav className="hidden flex-col gap-6 text-lg font-medium md:flex md:flex-row md:items-center md:gap-5 md:text-sm lg:gap-6">
+        <Link href="/dashboard" className="flex items-center gap-2 font-headline text-lg font-semibold">
+          <PackageSearch className="h-6 w-6 text-primary" />
+          <span className="sr-only">Consulta de Produtos</span>
+        </Link>
         <MainNav />
-      </div>
+      </nav>
+      
+      <Sheet>
+        <SheetTrigger asChild>
+          <Button variant="outline" size="icon" className="shrink-0 md:hidden">
+            <Menu className="h-5 w-5" />
+            <span className="sr-only">Abrir menu de navegação</span>
+          </Button>
+        </SheetTrigger>
+        <SheetContent side="left">
+          <nav className="grid gap-6 text-lg font-medium">
+             <Link href="/dashboard" className="flex items-center gap-2 font-headline text-lg font-semibold">
+                <PackageSearch className="h-6 w-6 text-primary" />
+                <span>Consulta de Produtos</span>
+            </Link>
+            <MainNav />
+          </nav>
+        </SheetContent>
+      </Sheet>
 
-      <nav className="ml-auto flex items-center gap-2">
+      <div className="ml-auto flex items-center gap-2">
         <ThemeToggle />
         <UserNav user={session?.user} />
-      </nav>
+      </div>
     </header>
   );
 }

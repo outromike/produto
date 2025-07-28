@@ -13,7 +13,7 @@ export async function login(credentials: Pick<User, 'username' | 'password'>): P
   }
   
   await setSession(user);
-  redirect('/dashboard/products');
+  redirect('/dashboard');
 }
 
 export async function logout() {
