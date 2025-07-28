@@ -1,32 +1,55 @@
 import { Product } from '@/types';
-import productsData from '@/data/products.json';
-import { promises as fs } from 'fs';
-import path from 'path';
+import { getDbConnection, setupDatabase } from './db';
+import { RowDataPacket } from 'mysql2';
 
-// Path to the products file
-const productsPath = path.join(process.cwd(), 'src', 'data', 'products.json');
+async function mapRowToProduct(row: RowDataPacket): Promise<Product> {
+  return {
+    sku: row.sku,
+    item: row.item,
+    description: row.description,
+    category: row.category,
+    netWeight: parseFloat(row.netWeight),
+    grossWeight: parseFloat(row.grossWeight),
+    volume: parseFloat(row.volume),
+    dimensions: row.dimensions,
+    palletization: {
+      height: row.palletizationHeight,
+      base: row.palletizationBase,
+    },
+    barcode: row.barcode,
+    packaging: row.packaging,
+    measurementUnit: row.measurementUnit,
+    quantity: row.quantity,
+    classification: row.classification,
+    unit: row.unit,
+  };
+}
 
 export async function getProducts(): Promise<Product[]> {
   try {
-    const productsFileData = await fs.readFile(productsPath, 'utf-8');
-    const products = JSON.parse(productsFileData);
-    if (Array.isArray(products)) {
-        return products as Product[];
-    }
+    const db = await getDbConnection();
+    await setupDatabase(); // Garante que as tabelas existam
+    const [rows] = await db.execute<RowDataPacket[]>('SELECT * FROM products ORDER BY description ASC');
+    return Promise.all(rows.map(mapRowToProduct));
   } catch (error) {
-    if (error instanceof Error && (error as NodeJS.ErrnoException).code === 'ENOENT') {
-      // products.json doesn't exist, fall back to default data
-      return productsData as Product[];
-    }
-    console.error("Error reading or parsing products.json:", error);
+    console.error("Error fetching products from database:", error);
+    // Em caso de erro, retorna um array vazio para não quebrar a aplicação
+    return [];
   }
-  
-  // Fallback for any other errors or if data is not an array
-  return productsData as Product[];
 }
 
-
 export async function getProductBySku(sku: string): Promise<Product | undefined> {
-  const products = await getProducts();
-  return products.find((p) => p.sku === sku);
+  try {
+    const db = await getDbConnection();
+    await setupDatabase(); // Garante que as tabelas existam
+    const [rows] = await db.execute<RowDataPacket[]>('SELECT * FROM products WHERE sku = ?', [sku]);
+
+    if (rows.length > 0) {
+      return mapRowToProduct(rows[0]);
+    }
+    return undefined;
+  } catch (error) {
+    console.error(`Error fetching product with SKU ${sku}:`, error);
+    return undefined;
+  }
 }

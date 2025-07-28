@@ -1,7 +1,8 @@
 import { getIronSession, IronSession } from 'iron-session';
 import { cookies } from 'next/headers';
 import { SessionPayload, User } from '@/types';
-import users from '@/data/users.json';
+import { getDbConnection } from './db';
+import { RowDataPacket } from 'mysql2';
 
 const sessionOptions = {
   password: process.env.SECRET_COOKIE_PASSWORD || 'complex_password_at_least_32_characters_long',
@@ -36,8 +37,19 @@ export async function destroySession() {
   session.destroy();
 }
 
-export function findUserByCredentials(credentials: User): User | undefined {
-  return users.find(
-    (u) => u.username === credentials.username && u.password === credentials.password
+export async function findUserByCredentials(credentials: User): Promise<User | undefined> {
+  const db = await getDbConnection();
+  const [rows] = await db.execute<RowDataPacket[]>(
+    'SELECT * FROM users WHERE username = ? AND password = ?',
+    [credentials.username, credentials.password]
   );
+
+  if (rows.length > 0) {
+    const userRow = rows[0];
+    return {
+      username: userRow.username,
+    };
+  }
+
+  return undefined;
 }
