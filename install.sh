@@ -11,9 +11,10 @@
 #   1.  Verificação de dependências essenciais (Node.js, npm, Git).
 #   2.  Criação e configuração de um arquivo de ambiente (.env).
 #   3.  Geração de uma chave secreta segura para a sessão.
-#   4.  Instalação das dependências do projeto.
-#   5.  Build da aplicação para produção.
-#   6.  Fornecimento de instruções para iniciar o servidor.
+#   4.  Configuração das permissões de usuário iniciais.
+#   5.  Instalação das dependências do projeto.
+#   6.  Build da aplicação para produção.
+#   7.  Fornecimento de instruções para iniciar o servidor.
 #
 #   Para executar, dê permissão de execução com o comando:
 #   chmod +x install.sh
