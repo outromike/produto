@@ -78,11 +78,22 @@ export async function uploadReturnSchedules(formData: FormData): Promise<{ error
     try {
         const filePath = path.join(process.cwd(), 'src', 'data', 'devolucoes.json');
         
+        let existingSchedules: ReturnSchedule[] = [];
+        try {
+            const currentData = await fs.readFile(filePath, 'utf-8');
+            existingSchedules = JSON.parse(currentData);
+        } catch (error) {
+            // Se o arquivo não existir, continuamos com um array vazio, o que é esperado na primeira execução.
+        }
+
         const buffer = Buffer.from(await file.arrayBuffer());
         const content = buffer.toString('utf-8');
         const newSchedules = parseCSV(content);
 
-        await fs.writeFile(filePath, JSON.stringify(newSchedules, null, 2), 'utf-8');
+        // Concatena os agendamentos existentes com os novos
+        const allSchedules = existingSchedules.concat(newSchedules);
+
+        await fs.writeFile(filePath, JSON.stringify(allSchedules, null, 2), 'utf-8');
 
     } catch (error) {
         console.error('File processing error:', error);
