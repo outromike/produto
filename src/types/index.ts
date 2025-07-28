@@ -24,11 +24,13 @@ export type Product = {
 export type User = {
   username: string;
   password?: string;
+  name?: string;
+  email?: string;
   role: 'admin' | 'user';
 };
 
 export type SessionPayload = {
-  user: {
+  user: User & {
     username: string;
     role: 'admin' | 'user';
   };
