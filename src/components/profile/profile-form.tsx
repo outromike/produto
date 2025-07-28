@@ -73,7 +73,10 @@ export function ProfileForm({ user }: ProfileFormProps) {
 
   const onPasswordSubmit = (values: PasswordFormValues) => {
     startPasswordTransition(async () => {
-        const result = await changePassword(user.username, values);
+        const result = await changePassword(user.username, {
+          currentPassword: values.currentPassword,
+          newPassword: values.newPassword
+        });
         if (result.success) {
             toast({ title: "Sucesso!", description: "Sua senha foi alterada." });
             passwordForm.reset();

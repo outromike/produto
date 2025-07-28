@@ -4,7 +4,7 @@
 import { promises as fs } from 'fs';
 import path from 'path';
 import { User } from '@/types';
-import { getSession, setSession } from '@/lib/auth';
+import { getSession } from '@/lib/auth';
 import { revalidatePath } from 'next/cache';
 
 const USERS_FILE_PATH = path.join(process.cwd(), 'src', 'data', 'users.json');
@@ -26,6 +26,11 @@ async function saveUsers(users: User[]): Promise<void> {
 
 export async function updateUserInfo(username: string, data: { name: string; email: string; }): Promise<{ success: boolean; error?: string }> {
     try {
+        const session = await getSession();
+        if (!session.user || session.user.username !== username) {
+            return { success: false, error: "Acesso negado." };
+        }
+
         const users = await getUsers();
         const userIndex = users.findIndex(u => u.username === username);
 
@@ -34,17 +39,14 @@ export async function updateUserInfo(username: string, data: { name: string; ema
         }
 
         // Update user info in the array
-        users[userIndex] = { ...users[userIndex], ...data };
+        users[userIndex] = { ...users[userIndex], name: data.name, email: data.email };
         await saveUsers(users);
 
         // Update the session with the new user info
-        const session = await getSession();
-        if (session.user && session.user.username === username) {
-            session.user.name = data.name;
-            session.user.email = data.email;
-            await session.save();
-        }
-
+        session.user.name = data.name;
+        session.user.email = data.email;
+        await session.save();
+        
         revalidatePath('/dashboard/profile');
         
         return { success: true };
@@ -56,8 +58,17 @@ export async function updateUserInfo(username: string, data: { name: string; ema
 }
 
 
-export async function changePassword(username: string, data: { currentPassword: string; newPassword: string; }): Promise<{ success: boolean; error?: string }> {
+export async function changePassword(username: string, data: { currentPassword?: string; newPassword?: string; }): Promise<{ success: boolean; error?: string }> {
     try {
+        const session = await getSession();
+        if (!session.user || session.user.username !== username) {
+            return { success: false, error: "Acesso negado." };
+        }
+        
+        if (!data.currentPassword || !data.newPassword) {
+            return { success: false, error: "Senha atual e nova senha são obrigatórias." };
+        }
+
         const users = await getUsers();
         const userIndex = users.findIndex(u => u.username === username);
 
@@ -66,6 +77,8 @@ export async function changePassword(username: string, data: { currentPassword: 
         }
 
         const user = users[userIndex];
+        
+        // This is a simplified check. In a real app, use a secure password hashing library like bcrypt.
         if (user.password !== data.currentPassword) {
             return { success: false, error: "A senha atual está incorreta." };
         }

@@ -3,9 +3,14 @@ import { getSession } from "@/lib/auth";
 import { ProfileForm } from "@/components/profile/profile-form";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { UserCircle } from "lucide-react";
+import { redirect } from "next/navigation";
 
 export default async function ProfilePage() {
     const session = await getSession();
+    
+    if (!session.user) {
+        redirect('/login');
+    }
 
   return (
     <main className="container mx-auto max-w-2xl px-4 py-8 md:px-6">
@@ -24,7 +29,7 @@ export default async function ProfilePage() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          {session.user && <ProfileForm user={session.user} />}
+          <ProfileForm user={session.user} />
         </CardContent>
       </Card>
     </main>
