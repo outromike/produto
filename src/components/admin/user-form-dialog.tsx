@@ -5,15 +5,17 @@ import { useEffect, useTransition } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
-import { User } from '@/types';
+import { User, Permissions } from '@/types';
 import { addUser, updateUser } from '@/app/admin/users/actions';
 import { useToast } from '@/hooks/use-toast';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Loader2 } from 'lucide-react';
+import { Checkbox } from '../ui/checkbox';
+import { Separator } from '../ui/separator';
 
 interface UserFormDialogProps {
   isOpen: boolean;
@@ -22,15 +24,36 @@ interface UserFormDialogProps {
   onUserSaved: (user: User) => void;
 }
 
+const permissionsSchema = z.object({
+  schedules: z.boolean().default(false),
+  products: z.boolean().default(false),
+  receiving: z.boolean().default(false),
+  conference: z.boolean().default(false),
+  allocation: z.boolean().default(false),
+  dashboard: z.boolean().default(false),
+  reports: z.boolean().default(false),
+});
+
 const formSchema = z.object({
   username: z.string().min(3, { message: "O nome de usuário deve ter pelo menos 3 caracteres." }),
   name: z.string().optional(),
   email: z.string().email({ message: "Por favor, insira um e-mail válido." }).optional().or(z.literal('')),
   password: z.string().optional(),
   role: z.enum(['user', 'admin'], { required_error: "A permissão é obrigatória." }),
+  permissions: permissionsSchema,
 });
 
 type FormValues = z.infer<typeof formSchema>;
+
+const permissionLabels: { id: keyof Permissions; label: string; description: string }[] = [
+    { id: 'dashboard', label: 'Dashboard de Análise', description: 'Permite visualizar a página principal de análises do estoque.' },
+    { id: 'products', label: 'Consulta de Produtos', description: 'Permite visualizar e pesquisar na base de produtos.' },
+    { id: 'schedules', label: 'Gerenciar Agendamentos', description: 'Permite criar, editar e excluir agendamentos de devolução.' },
+    { id: 'receiving', label: 'Acessar Recebimento', description: 'Permite visualizar os cards de recebimento e iniciar uma conferência.' },
+    { id: 'conference', label: 'Executar Conferência', description: 'Permite registrar produtos, avarias e divergências durante a conferência.' },
+    { id: 'allocation', label: 'Alocar na Rua 08', description: 'Permite alocar os produtos recebidos nas posições do estoque.' },
+    { id: 'reports', label: 'Baixar Relatórios', description: 'Permite exportar os dados do sistema em formato Excel.' },
+];
 
 export function UserFormDialog({ isOpen, setIsOpen, user, onUserSaved }: UserFormDialogProps) {
   const [isPending, startTransition] = useTransition();
@@ -39,6 +62,12 @@ export function UserFormDialog({ isOpen, setIsOpen, user, onUserSaved }: UserFor
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
+    defaultValues: {
+        permissions: {
+            schedules: false, products: false, receiving: false,
+            conference: false, allocation: false, dashboard: false, reports: false
+        }
+    }
   });
   
   useEffect(() => {
@@ -47,8 +76,12 @@ export function UserFormDialog({ isOpen, setIsOpen, user, onUserSaved }: UserFor
         username: user.username,
         name: user.name || '',
         email: user.email || '',
-        password: '', // Password is not fetched, leave blank for editing
+        password: '',
         role: user.role,
+        permissions: user.permissions || {
+            schedules: false, products: false, receiving: false,
+            conference: false, allocation: false, dashboard: false, reports: false
+        }
       });
     } else {
       form.reset({
@@ -57,46 +90,61 @@ export function UserFormDialog({ isOpen, setIsOpen, user, onUserSaved }: UserFor
         email: '',
         password: '',
         role: 'user',
+        permissions: {
+            schedules: false, products: false, receiving: false,
+            conference: false, allocation: false, dashboard: false, reports: false
+        }
       });
     }
-  }, [user, form.reset]);
+  }, [user, form.reset, isOpen]);
+
+  const role = form.watch('role');
   
   const onSubmit = (values: FormValues) => {
     startTransition(async () => {
-      let result;
-      if (isEditMode) {
-        // Build the update payload, excluding empty password
-        const updateData: Partial<User> = {
-          name: values.name,
-          email: values.email,
-          role: values.role,
-        };
-        if (values.password && values.password.trim() !== '') {
-          updateData.password = values.password;
+        let result;
+        const finalValues = { ...values };
+        if (finalValues.role === 'admin') {
+            // Admin has all permissions, always
+            finalValues.permissions = {
+                schedules: true, products: true, receiving: true,
+                conference: true, allocation: true, dashboard: true, reports: true
+            };
         }
-        result = await updateUser(user.username, updateData);
-        if (result.success) onUserSaved({ ...user, ...updateData });
-      } else {
-        if (!values.password || values.password.trim() === '') {
-            form.setError("password", { message: "A senha é obrigatória para novos usuários."});
-            return;
-        }
-        result = await addUser(values as User);
-        if (result.success) onUserSaved(values as User);
-      }
 
-      if (result.success) {
-        toast({ title: "Sucesso!", description: `Usuário ${isEditMode ? 'atualizado' : 'adicionado'} com sucesso.` });
-        setIsOpen(false);
-      } else {
-        toast({ title: "Erro", description: result.error, variant: "destructive" });
-      }
+        if (isEditMode) {
+            const updateData: Partial<User> = {
+                name: finalValues.name,
+                email: finalValues.email,
+                role: finalValues.role,
+                permissions: finalValues.permissions,
+            };
+            if (finalValues.password && finalValues.password.trim() !== '') {
+                updateData.password = finalValues.password;
+            }
+            result = await updateUser(user.username, updateData);
+            if (result.success) onUserSaved({ ...user, ...updateData });
+        } else {
+            if (!finalValues.password || finalValues.password.trim() === '') {
+                form.setError("password", { message: "A senha é obrigatória para novos usuários."});
+                return;
+            }
+            result = await addUser(finalValues as Omit<User, 'password'> & { password: string });
+            if (result.success) onUserSaved(finalValues as User);
+        }
+
+        if (result.success) {
+            toast({ title: "Sucesso!", description: `Usuário ${isEditMode ? 'atualizado' : 'adicionado'} com sucesso.` });
+            setIsOpen(false);
+        } else {
+            toast({ title: "Erro", description: result.error, variant: "destructive" });
+        }
     });
   };
 
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
-      <DialogContent>
+      <DialogContent className="max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>{isEditMode ? 'Editar Usuário' : 'Adicionar Novo Usuário'}</DialogTitle>
           <DialogDescription>
@@ -105,57 +153,62 @@ export function UserFormDialog({ isOpen, setIsOpen, user, onUserSaved }: UserFor
         </DialogHeader>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-            <FormField
-              control={form.control}
-              name="username"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Nome de Usuário</FormLabel>
-                  <FormControl><Input {...field} disabled={isEditMode} /></FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="name"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Nome Completo</FormLabel>
-                  <FormControl><Input placeholder="Nome completo do usuário" {...field} /></FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-             <FormField
-              control={form.control}
-              name="email"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>E-mail</FormLabel>
-                  <FormControl><Input type="email" placeholder="email@exemplo.com" {...field} /></FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-             <FormField
-              control={form.control}
-              name="password"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Senha</FormLabel>
-                  <FormControl><Input type="password" placeholder={isEditMode ? 'Deixe em branco para não alterar' : '••••••••'} {...field} /></FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <FormField
+                control={form.control}
+                name="username"
+                render={({ field }) => (
+                    <FormItem>
+                    <FormLabel>Nome de Usuário</FormLabel>
+                    <FormControl><Input {...field} disabled={isEditMode} /></FormControl>
+                    <FormMessage />
+                    </FormItem>
+                )}
+                />
+                 <FormField
+                control={form.control}
+                name="password"
+                render={({ field }) => (
+                    <FormItem>
+                    <FormLabel>Senha</FormLabel>
+                    <FormControl><Input type="password" placeholder={isEditMode ? 'Deixe em branco para não alterar' : '••••••••'} {...field} /></FormControl>
+                    <FormMessage />
+                    </FormItem>
+                )}
+                />
+            </div>
+             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                 <FormField
+                control={form.control}
+                name="name"
+                render={({ field }) => (
+                    <FormItem>
+                    <FormLabel>Nome Completo</FormLabel>
+                    <FormControl><Input placeholder="Nome completo do usuário" {...field} /></FormControl>
+                    <FormMessage />
+                    </FormItem>
+                )}
+                />
+                <FormField
+                control={form.control}
+                name="email"
+                render={({ field }) => (
+                    <FormItem>
+                    <FormLabel>E-mail</FormLabel>
+                    <FormControl><Input type="email" placeholder="email@exemplo.com" {...field} /></FormControl>
+                    <FormMessage />
+                    </FormItem>
+                )}
+                />
+             </div>
+            
              <FormField
               control={form.control}
               name="role"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Permissão</FormLabel>
-                   <Select onValueChange={field.onChange} defaultValue={field.value} disabled={user?.username === 'admin'}>
+                  <FormLabel>Permissão Geral</FormLabel>
+                   <Select onValueChange={field.onChange} value={field.value} disabled={user?.username === 'admin'}>
                       <FormControl>
                         <SelectTrigger>
                           <SelectValue placeholder="Selecione a permissão" />
@@ -163,13 +216,48 @@ export function UserFormDialog({ isOpen, setIsOpen, user, onUserSaved }: UserFor
                       </FormControl>
                       <SelectContent>
                         <SelectItem value="user">Usuário</SelectItem>
-                        <SelectItem value="admin">Administrador</SelectItem>
+                        <SelectItem value="admin">Administrador (Acesso Total)</SelectItem>
                       </SelectContent>
                     </Select>
                   <FormMessage />
                 </FormItem>
               )}
             />
+            
+            {role === 'user' && (
+              <>
+                <Separator />
+                <div className="space-y-4">
+                  <FormLabel>Permissões Específicas do Módulo</FormLabel>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 rounded-md border p-4">
+                    {permissionLabels.map((item) => (
+                      <FormField
+                        key={item.id}
+                        control={form.control}
+                        name={`permissions.${item.id}`}
+                        render={({ field }) => (
+                          <FormItem className="flex flex-row items-start space-x-3 space-y-0">
+                            <FormControl>
+                              <Checkbox
+                                checked={field.value}
+                                onCheckedChange={field.onChange}
+                              />
+                            </FormControl>
+                            <div className="space-y-1 leading-none">
+                              <FormLabel>{item.label}</FormLabel>
+                              <FormDescription>
+                                {item.description}
+                              </FormDescription>
+                            </div>
+                          </FormItem>
+                        )}
+                      />
+                    ))}
+                  </div>
+                </div>
+              </>
+            )}
+
              <DialogFooter>
                 <Button type="button" variant="ghost" onClick={() => setIsOpen(false)}>Cancelar</Button>
                 <Button type="submit" disabled={isPending}>

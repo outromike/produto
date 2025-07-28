@@ -11,10 +11,6 @@ const sessionOptions = {
   password: process.env.SECRET_COOKIE_PASSWORD || 'complex_password_at_least_32_characters_long_for_dev',
   cookieName: 'elgin-app-session',
   cookieOptions: {
-    // secure: process.env.NODE_ENV === 'production',
-    // The line above is the ideal setting for production, but causes issues in local dev over HTTP.
-    // For this project, we'll set it to false to ensure cookies are set locally.
-    // In a real production deployment with HTTPS, this should be set to true.
     secure: false,
   },
 };

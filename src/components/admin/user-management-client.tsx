@@ -16,9 +16,16 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { PlusCircle, Pencil, Trash2, Loader2 } from 'lucide-react';
+import { PlusCircle, Pencil, Trash2, Loader2, KeyRound } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { deleteUser } from '@/app/admin/users/actions';
+import { Badge } from '../ui/badge';
+import {
+    Tooltip,
+    TooltipContent,
+    TooltipProvider,
+    TooltipTrigger,
+} from "@/components/ui/tooltip"
 
 interface UserManagementClientProps {
   initialUsers: User[];
@@ -43,13 +50,13 @@ export function UserManagementClient({ initialUsers }: UserManagementClientProps
     setIsDeleteAlertOpen(true);
   };
 
-  const handleUserSaved = (user: User) => {
+  const handleUserSaved = (savedUser: User) => {
     if (selectedUser) {
       // Edit
-      setUsers(users.map(u => (u.username === user.username ? user : u)));
+      setUsers(users.map(u => (u.username === savedUser.username ? savedUser : u)));
     } else {
       // Add
-      setUsers([...users, user]);
+      setUsers([...users, savedUser]);
     }
   };
 
@@ -96,9 +103,26 @@ export function UserManagementClient({ initialUsers }: UserManagementClientProps
                   <TableCell>{user.name || '-'}</TableCell>
                   <TableCell>{user.email || '-'}</TableCell>
                   <TableCell>
-                    <span className={`px-2 py-1 text-xs rounded-full ${user.role === 'admin' ? 'bg-primary/20 text-primary-foreground' : 'bg-muted'}`}>
-                      {user.role}
-                    </span>
+                    <TooltipProvider>
+                        <Tooltip>
+                            <TooltipTrigger>
+                                <Badge variant={user.role === 'admin' ? 'default' : 'secondary'} className="cursor-pointer">
+                                  {user.role === 'admin' && <KeyRound className="mr-1 h-3 w-3" />}
+                                  {user.role}
+                                </Badge>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                                <p className='text-sm font-medium mb-2'>Permissões:</p>
+                                {user.role === 'admin' ? <p className='text-xs'>Acesso total a todos os módulos.</p> : (
+                                    <ul className='grid grid-cols-2 gap-x-4 gap-y-1 text-xs'>
+                                        {Object.entries(user.permissions || {}).map(([key, value]) => (
+                                           <li key={key} className={`${value ? 'text-foreground' : 'text-muted-foreground line-through'}`}>{key}</li>
+                                        ))}
+                                    </ul>
+                                )}
+                            </TooltipContent>
+                        </Tooltip>
+                    </TooltipProvider>
                   </TableCell>
                   <TableCell className="text-right">
                     <Button variant="ghost" size="icon" onClick={() => handleOpenDialog(user)}>

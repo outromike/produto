@@ -1,5 +1,15 @@
 
 
+export type Permissions = {
+  schedules: boolean; // Gerenciar agendamentos (criar, editar, excluir)
+  products: boolean; // Consultar produtos
+  receiving: boolean; // Acessar a página de recebimento e iniciar conferência
+  conference: boolean; // Realizar a conferência (adicionar itens, etc.)
+  allocation: boolean; // Alocar produtos na Rua 08
+  dashboard: boolean; // Acessar a dashboard de análises
+  reports: boolean; // Baixar relatórios
+};
+
 export type Product = {
   sku: string;
   item: string; // From 'Item'
@@ -27,12 +37,14 @@ export type User = {
   name?: string;
   email?: string;
   role: 'admin' | 'user';
+  permissions: Permissions;
 };
 
 export type SessionPayload = {
   user: User & {
     username: string;
     role: 'admin' | 'user';
+    permissions: Permissions;
   };
   expires: Date;
 };

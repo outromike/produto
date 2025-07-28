@@ -3,15 +3,42 @@
 
 import { promises as fs } from 'fs';
 import path from 'path';
-import { User } from '@/types';
+import { User, Permissions } from '@/types';
 import { revalidatePath } from 'next/cache';
 
 const USERS_FILE_PATH = path.join(process.cwd(), 'src', 'data', 'users.json');
 
+// Helper function to get default permissions
+const getDefaultPermissions = (): Permissions => ({
+    schedules: false,
+    products: false,
+    receiving: false,
+    conference: false,
+    allocation: false,
+    dashboard: false,
+    reports: false,
+});
+
+// Helper function to get admin permissions (all true)
+const getAdminPermissions = (): Permissions => ({
+    schedules: true,
+    products: true,
+    receiving: true,
+    conference: true,
+    allocation: true,
+    dashboard: true,
+    reports: true,
+});
+
 export async function getAllUsers(): Promise<User[]> {
     try {
         const jsonData = await fs.readFile(USERS_FILE_PATH, 'utf-8');
-        return JSON.parse(jsonData);
+        const users: User[] = JSON.parse(jsonData);
+        // Ensure every user has the permissions object
+        return users.map(user => ({
+            ...user,
+            permissions: user.permissions || (user.role === 'admin' ? getAdminPermissions() : getDefaultPermissions()),
+        }));
     } catch (error) {
         console.error("Error reading users.json:", error);
         return [];
@@ -23,7 +50,7 @@ async function saveUsers(users: User[]): Promise<void> {
     await fs.writeFile(USERS_FILE_PATH, data, 'utf-8');
 }
 
-export async function addUser(data: Omit<User, 'role'> & { role: 'admin' | 'user' }): Promise<{ success: boolean; error?: string }> {
+export async function addUser(data: Omit<User, 'permissions'> & { permissions?: Permissions }): Promise<{ success: boolean; error?: string }> {
     try {
         const users = await getAllUsers();
         
@@ -38,6 +65,7 @@ export async function addUser(data: Omit<User, 'role'> & { role: 'admin' | 'user
             name: data.name || "",
             email: data.email || "",
             role: data.role,
+            permissions: data.role === 'admin' ? getAdminPermissions() : (data.permissions || getDefaultPermissions()),
         };
 
         users.push(newUser);
@@ -51,7 +79,7 @@ export async function addUser(data: Omit<User, 'role'> & { role: 'admin' | 'user
     }
 }
 
-export async function updateUser(username: string, data: Partial<User>): Promise<{ success: boolean; error?: string }> {
+export async function updateUser(username: string, data: Partial<Omit<User, 'username'>>): Promise<{ success: boolean; error?: string }> {
     try {
         const users = await getAllUsers();
         const userIndex = users.findIndex(u => u.username === username);
@@ -60,12 +88,18 @@ export async function updateUser(username: string, data: Partial<User>): Promise
             return { success: false, error: "Usuário não encontrado." };
         }
         
-        // Remove 'password' from data if it's empty to avoid overwriting with a blank password
-        if (data.password === "") {
-            delete data.password;
+        const updatePayload = { ...data };
+        
+        if (updatePayload.password === "") {
+            delete updatePayload.password;
+        }
+
+        // If role is changed to admin, grant all permissions
+        if (updatePayload.role === 'admin') {
+            updatePayload.permissions = getAdminPermissions();
         }
         
-        users[userIndex] = { ...users[userIndex], ...data };
+        users[userIndex] = { ...users[userIndex], ...updatePayload };
         await saveUsers(users);
 
         revalidatePath('/admin/users');
