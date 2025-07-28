@@ -1,4 +1,5 @@
 
+
 import { promises as fs } from 'fs';
 import path from 'path';
 import { ConferenceEntry, ReturnSchedule, StorageEntry } from '@/types';
@@ -9,7 +10,9 @@ async function getSchedules(): Promise<ReturnSchedule[]> {
     const filePath = path.join(process.cwd(), 'src', 'data', 'agendamentos.json');
     try {
         const jsonData = await fs.readFile(filePath, 'utf-8');
-        return JSON.parse(jsonData) as ReturnSchedule[];
+        // We parse and then sort by date descending to have the most recent first.
+        const schedules: ReturnSchedule[] = JSON.parse(jsonData);
+        return schedules.sort((a,b) => new Date(b.date).getTime() - new Date(a.date).getTime());
     } catch (error) {
         console.error("Error reading agendamentos.json:", error);
         return [];

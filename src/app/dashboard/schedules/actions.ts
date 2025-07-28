@@ -26,7 +26,7 @@ async function saveSchedules(schedules: ReturnSchedule[]): Promise<void> {
     await fs.writeFile(SCHEDULES_FILE_PATH, data, 'utf-8');
 }
 
-export async function addSchedule(data: Omit<ReturnSchedule, 'id' | 'createdAt'>, force = false): Promise<{ success: boolean; error?: string; createdSchedules?: ReturnSchedule[], duplicate?: ReturnSchedule }> {
+export async function addSchedule(data: Omit<ReturnSchedule, 'id' | 'createdAt' | 'destination'>, force = false): Promise<{ success: boolean; error?: string; createdSchedules?: ReturnSchedule[], duplicate?: ReturnSchedule }> {
   try {
     const allSchedules = await getSchedules();
     
@@ -126,3 +126,34 @@ export async function deleteSchedules(ids: string[]): Promise<{ success: boolean
     }
   }
 
+
+export async function updateSchedulesStatus(
+    scheduleIds: string[], 
+    destination: string, 
+    remessas?: Record<string, string>
+): Promise<{ success: boolean; error?: string }> {
+    try {
+        const schedules = await getSchedules();
+        
+        const updatedSchedules = schedules.map(schedule => {
+            if (scheduleIds.includes(schedule.id)) {
+                const newSchedule = { ...schedule, destination };
+                // If a manual shipment number was provided for this schedule, update it.
+                if (remessas && remessas[schedule.id]) {
+                    newSchedule.outgoingShipment = remessas[schedule.id];
+                }
+                return newSchedule;
+            }
+            return schedule;
+        });
+
+        await saveSchedules(updatedSchedules);
+        console.log(`Schedules ${scheduleIds.join(', ')} destined for ${destination}.`);
+        
+        return { success: true };
+
+    } catch (error) {
+        console.error("Failed to update schedule destinations:", error);
+        return { success: false, error: "Falha ao atualizar o destino dos agendamentos." };
+    }
+}

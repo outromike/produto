@@ -46,5 +46,17 @@
     "observations": "Todos os itens foram recusados.",
     "conferenceTimestamp": "2025-07-28T20:00:55.223Z",
     "allocatedVolume": 0
+  },
+  {
+    "id": "1753733359897-0.2506357800328253",
+    "scheduleId": "1753733325809-0",
+    "nfd": "01",
+    "productSku": "48ECOSPQBM00",
+    "productDescription": "ECOSPOT LED EMB.QD.5W BIV,3000K,C/LENT",
+    "receivedVolume": 3,
+    "productState": "Produto Bom",
+    "observations": "",
+    "conferenceTimestamp": "2025-07-28T20:09:19.897Z",
+    "allocatedVolume": 0
   }
 ]

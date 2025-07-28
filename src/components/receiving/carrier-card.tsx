@@ -15,12 +15,12 @@ import {
     AlertDialogTitle,
     AlertDialogTrigger,
   } from "@/components/ui/alert-dialog"
-import { Truck, Box, FileText, CheckCircle2, Warehouse } from "lucide-react";
+import { Truck, Box, FileText, CheckCircle2, Warehouse, Send } from "lucide-react";
 import { Button } from "../ui/button";
 import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { parseISO, format } from "date-fns";
-  
+import { DestinationModal } from "./destination-modal";
 
 interface CarrierCardProps {
     summary: CarrierScheduleSummary;
@@ -29,11 +29,16 @@ interface CarrierCardProps {
 
 export function CarrierCard({ summary, onAllocate }: CarrierCardProps) {
     const [isAlertOpen, setIsAlertOpen] = useState(false);
+    const [isDestinationModalOpen, setIsDestinationModalOpen] = useState(false);
     const router = useRouter();
 
     const handleStartConference = () => {
         router.push(`/dashboard/receiving/${encodeURIComponent(summary.carrier)}`);
     }
+    
+    // Check if any schedule in the summary has a valid BDV
+    const hasBdv = summary.schedules.some(s => s.bdv && s.bdv !== 'SEM BDV');
+    const schedulesWithBdv = summary.schedules.filter(s => s.bdv && s.bdv !== 'SEM BDV');
 
     const cardClasses = cn(
         "flex h-full flex-col overflow-hidden transition-all duration-300",
@@ -83,16 +88,31 @@ export function CarrierCard({ summary, onAllocate }: CarrierCardProps) {
                                 <div className="flex w-full items-center justify-center gap-2 text-xs font-semibold text-green-600">
                                    <CheckCircle2 className="h-4 w-4" /> Conferência Finalizada
                                 </div>
-                                <Button 
-                                    size="sm" 
-                                    onClick={(e) => {
-                                        e.stopPropagation(); // Prevent dialog from opening
-                                        onAllocate(summary);
-                                    }}
-                                >
-                                    <Warehouse className="mr-2 h-4 w-4" />
-                                    Alocar na Rua 08
-                                </Button>
+                                <div className="flex flex-col gap-2">
+                                     <Button 
+                                        size="sm" 
+                                        onClick={(e) => {
+                                            e.stopPropagation(); // Prevent dialog from opening
+                                            onAllocate(summary);
+                                        }}
+                                    >
+                                        <Warehouse className="mr-2 h-4 w-4" />
+                                        Alocar na Rua 08
+                                    </Button>
+                                    {hasBdv && (
+                                        <Button 
+                                            size="sm"
+                                            variant="secondary"
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                setIsDestinationModalOpen(true);
+                                            }}
+                                        >
+                                           <Send className="mr-2 h-4 w-4" />
+                                           Destinar Produtos
+                                        </Button>
+                                    )}
+                                </div>
                             </CardFooter>
                         )}
                         {summary.isAllocationCompleted && (
@@ -123,6 +143,14 @@ export function CarrierCard({ summary, onAllocate }: CarrierCardProps) {
                     </AlertDialogFooter>
                 </AlertDialogContent>
             </AlertDialog>
+            {hasBdv && (
+                 <DestinationModal 
+                    isOpen={isDestinationModalOpen}
+                    onClose={() => setIsDestinationModalOpen(false)}
+                    schedules={schedulesWithBdv}
+                    carrierName={summary.carrier}
+                 />
+            )}
         </>
     )
 }

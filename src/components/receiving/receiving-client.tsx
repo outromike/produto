@@ -8,7 +8,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { AllocationWizardModal } from "@/components/rua08/allocation-wizard-modal";
 import { Product, StorageEntry } from "@/types";
 import { DatePicker } from "../ui/date-picker";
-import { isToday, parseISO, format } from 'date-fns';
+import { isToday, parseISO, format, isSameDay } from 'date-fns';
 
 interface ReceivingClientProps {
   initialSummaries: CarrierScheduleSummary[];
@@ -46,7 +46,7 @@ export function ReceivingClient({ initialSummaries, allProducts, initialStorageD
   const completedSummaries = summaries.filter(s => {
       if (!s.isAllocationCompleted) return false;
       if (!selectedDate) return true; // Show all if no date is selected
-      return format(parseISO(s.date), 'yyyy-MM-dd') === format(selectedDate, 'yyyy-MM-dd');
+      return isSameDay(parseISO(s.date), selectedDate);
   });
 
   return (

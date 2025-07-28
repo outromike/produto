@@ -1,4 +1,5 @@
 
+
 export type Product = {
   sku: string;
   item: string; // From 'Item'
@@ -48,6 +49,7 @@ export type ReturnSchedule = {
     productState: string; // From 'ESTADO DO PRODUTO'
     invoiceVolume: number; // From 'VOL.NF.'
     createdAt: string; // Timestamp of creation
+    destination?: string; // Optional: "Multiog", "Joinville", "Descarte"
 };
 
 export type ConferenceEntry = {
