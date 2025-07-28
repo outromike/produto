@@ -111,6 +111,7 @@ export function ProductManagementClient() {
               <TableHead>SKU</TableHead>
               <TableHead>Descrição</TableHead>
               <TableHead>Unidade</TableHead>
+              <TableHead>Embalagem</TableHead>
               <TableHead>Categoria</TableHead>
               <TableHead className="text-right">Ações</TableHead>
             </TableRow>
@@ -118,7 +119,7 @@ export function ProductManagementClient() {
           <TableBody>
             {isSearching ? (
                 <TableRow>
-                    <TableCell colSpan={5} className="h-24 text-center">
+                    <TableCell colSpan={6} className="h-24 text-center">
                         <Loader2 className="mx-auto h-6 w-6 animate-spin text-muted-foreground" />
                     </TableCell>
                 </TableRow>
@@ -128,6 +129,7 @@ export function ProductManagementClient() {
                   <TableCell className="font-mono">{product.sku}</TableCell>
                   <TableCell className="font-medium hover:text-primary"><Link href={`/dashboard/products/${product.sku}`}>{product.description}</Link></TableCell>
                   <TableCell><Badge variant="outline">{product.unit}</Badge></TableCell>
+                  <TableCell><Badge variant="secondary">{product.packaging}</Badge></TableCell>
                   <TableCell>{product.category}</TableCell>
                   <TableCell className="text-right">
                     <Button variant="ghost" size="icon" onClick={() => handleOpenDialog(product)}>
@@ -146,7 +148,7 @@ export function ProductManagementClient() {
               ))
             ) : (
               <TableRow>
-                <TableCell colSpan={5} className="h-24 text-center">
+                <TableCell colSpan={6} className="h-24 text-center">
                   Nenhum produto encontrado. Digite na busca para começar.
                 </TableCell>
               </TableRow>
