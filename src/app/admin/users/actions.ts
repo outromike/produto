@@ -8,10 +8,10 @@ import { revalidatePath } from 'next/cache';
 
 const USERS_FILE_PATH = path.join(process.cwd(), 'src', 'data', 'users.json');
 
-// Helper function to get default permissions
 const getDefaultPermissions = (): Permissions => ({
     schedules: false,
     products: false,
+    productManagement: false,
     receiving: false,
     conference: false,
     allocation: false,
@@ -19,10 +19,10 @@ const getDefaultPermissions = (): Permissions => ({
     reports: false,
 });
 
-// Helper function to get admin permissions (all true)
 const getAdminPermissions = (): Permissions => ({
     schedules: true,
     products: true,
+    productManagement: true,
     receiving: true,
     conference: true,
     allocation: true,
@@ -34,7 +34,6 @@ export async function getAllUsers(): Promise<User[]> {
     try {
         const jsonData = await fs.readFile(USERS_FILE_PATH, 'utf-8');
         const users: User[] = JSON.parse(jsonData);
-        // Ensure every user has the permissions object
         return users.map(user => ({
             ...user,
             permissions: user.permissions || (user.role === 'admin' ? getAdminPermissions() : getDefaultPermissions()),
@@ -94,7 +93,6 @@ export async function updateUser(username: string, data: Partial<Omit<User, 'use
             delete updatePayload.password;
         }
 
-        // If role is changed to admin, grant all permissions
         if (updatePayload.role === 'admin') {
             updatePayload.permissions = getAdminPermissions();
         }

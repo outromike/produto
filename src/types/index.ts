@@ -3,6 +3,7 @@
 export type Permissions = {
   schedules: boolean; // Gerenciar agendamentos (criar, editar, excluir)
   products: boolean; // Consultar produtos
+  productManagement: boolean; // Adicionar, editar e excluir produtos
   receiving: boolean; // Acessar a página de recebimento e iniciar conferência
   conference: boolean; // Realizar a conferência (adicionar itens, etc.)
   allocation: boolean; // Alocar produtos na Rua 08

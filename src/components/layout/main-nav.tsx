@@ -3,7 +3,7 @@
 
 import Link from "next/link";
 import { Button } from "../ui/button";
-import { Home, AreaChart, CalendarClock, Inbox, PackageSearch, Warehouse, FileText } from "lucide-react";
+import { Home, AreaChart, CalendarClock, Inbox, PackageSearch, Warehouse, FileText, Settings } from "lucide-react";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import type { Permissions } from "@/types";
@@ -14,6 +14,7 @@ const navLinks = [
     { href: "/dashboard/schedules", icon: CalendarClock, label: "Agendamentos", permission: 'schedules' },
     { href: "/dashboard/receiving", icon: Inbox, label: "Recebimento", permission: 'receiving' },
     { href: "/dashboard/products", icon: PackageSearch, label: "Produtos", permission: 'products' },
+    { href: "/dashboard/products/management", icon: Settings, label: "Gerenciar Produtos", permission: 'productManagement' },
     { href: "/dashboard/rua08", icon: Warehouse, label: "Rua 08", permission: 'allocation' },
     { href: "/dashboard/reports", icon: FileText, label: "Relatórios", permission: 'reports' },
 ];

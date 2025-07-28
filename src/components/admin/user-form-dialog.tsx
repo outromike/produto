@@ -27,6 +27,7 @@ interface UserFormDialogProps {
 const permissionsSchema = z.object({
   schedules: z.boolean().default(false),
   products: z.boolean().default(false),
+  productManagement: z.boolean().default(false),
   receiving: z.boolean().default(false),
   conference: z.boolean().default(false),
   allocation: z.boolean().default(false),
@@ -48,9 +49,10 @@ type FormValues = z.infer<typeof formSchema>;
 const permissionLabels: { id: keyof Permissions; label: string; description: string }[] = [
     { id: 'dashboard', label: 'Dashboard de Análise', description: 'Permite visualizar a página principal de análises do estoque.' },
     { id: 'products', label: 'Consulta de Produtos', description: 'Permite visualizar e pesquisar na base de produtos.' },
+    { id: 'productManagement', label: 'Gerenciar Produtos', description: 'Permite criar, editar e excluir produtos.' },
     { id: 'schedules', label: 'Gerenciar Agendamentos', description: 'Permite criar, editar e excluir agendamentos de devolução.' },
     { id: 'receiving', label: 'Acessar Recebimento', description: 'Permite visualizar os cards de recebimento e iniciar uma conferência.' },
-    { id: 'conference', label: 'Executar Conferência', description: 'Permite registrar produtos, avarias e divergências durante a conferência.' },
+    { id: 'conference', label: 'Executar Conferência', description: 'Permite registrar produtos, avarias e divergências.' },
     { id: 'allocation', label: 'Alocar na Rua 08', description: 'Permite alocar os produtos recebidos nas posições do estoque.' },
     { id: 'reports', label: 'Baixar Relatórios', description: 'Permite exportar os dados do sistema em formato Excel.' },
 ];
@@ -60,13 +62,16 @@ export function UserFormDialog({ isOpen, setIsOpen, user, onUserSaved }: UserFor
   const { toast } = useToast();
   const isEditMode = !!user;
 
+  const defaultPermissions = {
+    schedules: false, products: false, receiving: false,
+    conference: false, allocation: false, dashboard: false, reports: false,
+    productManagement: false,
+  };
+
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-        permissions: {
-            schedules: false, products: false, receiving: false,
-            conference: false, allocation: false, dashboard: false, reports: false
-        }
+        permissions: defaultPermissions
     }
   });
   
@@ -78,10 +83,7 @@ export function UserFormDialog({ isOpen, setIsOpen, user, onUserSaved }: UserFor
         email: user.email || '',
         password: '',
         role: user.role,
-        permissions: user.permissions || {
-            schedules: false, products: false, receiving: false,
-            conference: false, allocation: false, dashboard: false, reports: false
-        }
+        permissions: { ...defaultPermissions, ...user.permissions }
       });
     } else {
       form.reset({
@@ -90,13 +92,10 @@ export function UserFormDialog({ isOpen, setIsOpen, user, onUserSaved }: UserFor
         email: '',
         password: '',
         role: 'user',
-        permissions: {
-            schedules: false, products: false, receiving: false,
-            conference: false, allocation: false, dashboard: false, reports: false
-        }
+        permissions: defaultPermissions
       });
     }
-  }, [user, form.reset, isOpen]);
+  }, [user, isOpen, form]);
 
   const role = form.watch('role');
   
@@ -105,10 +104,10 @@ export function UserFormDialog({ isOpen, setIsOpen, user, onUserSaved }: UserFor
         let result;
         const finalValues = { ...values };
         if (finalValues.role === 'admin') {
-            // Admin has all permissions, always
             finalValues.permissions = {
                 schedules: true, products: true, receiving: true,
-                conference: true, allocation: true, dashboard: true, reports: true
+                conference: true, allocation: true, dashboard: true, reports: true,
+                productManagement: true
             };
         }
 
