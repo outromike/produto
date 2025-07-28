@@ -4,7 +4,6 @@
 import { promises as fs } from 'fs';
 import path from 'path';
 import { ReturnSchedule } from '@/types';
-import { revalidatePath } from 'next/cache';
 
 const SCHEDULES_FILE_PATH = path.join(process.cwd(), 'src', 'data', 'agendamentos.json');
 
@@ -25,7 +24,7 @@ async function getSchedules(): Promise<ReturnSchedule[]> {
 async function saveSchedules(schedules: ReturnSchedule[]): Promise<void> {
     const data = JSON.stringify(schedules, null, 2);
     await fs.writeFile(SCHEDULES_FILE_PATH, data, 'utf-8');
-    revalidatePath('/dashboard/schedules'); 
+    // A revalidação foi removida para evitar problemas de sessão. O cliente irá recarregar a página.
 }
 
 // Ação de servidor para adicionar um ou mais agendamentos
@@ -116,4 +115,5 @@ export async function deleteSchedules(ids: string[]): Promise<{ success: boolean
       return { success: false, error: "Não foi possível excluir os agendamentos selecionados." };
     }
   }
+
 

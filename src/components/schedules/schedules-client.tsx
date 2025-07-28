@@ -30,7 +30,6 @@ import { ScheduleTable } from "./schedule-table";
 import { isToday, parseISO } from 'date-fns';
 import { deleteSchedule, deleteSchedules } from '@/app/dashboard/schedules/actions';
 import { useToast } from '@/hooks/use-toast';
-import { useRouter } from 'next/navigation';
 import { useDebouncedCallback } from 'use-debounce';
 
 const transportadoras = [
@@ -60,7 +59,6 @@ export function SchedulesClient({ initialSchedules }: SchedulesClientProps) {
   const [selectedSchedule, setSelectedSchedule] = useState<ReturnSchedule | null>(null);
   const [selectedSchedules, setSelectedSchedules] = useState<string[]>([]);
   const { toast } = useToast();
-  const router = useRouter();
 
   const [filters, setFilters] = useState({
     query: '',
@@ -109,7 +107,7 @@ export function SchedulesClient({ initialSchedules }: SchedulesClientProps) {
     const result = await deleteSchedule(selectedSchedule.id);
     if (result.success) {
       toast({ title: "Sucesso!", description: "Agendamento excluído." });
-      router.refresh();
+      window.location.reload(); // Recarrega a página para evitar problemas de sessão
     } else {
       toast({ title: "Erro", description: result.error, variant: "destructive" });
     }
@@ -127,8 +125,7 @@ export function SchedulesClient({ initialSchedules }: SchedulesClientProps) {
     const result = await deleteSchedules(selectedSchedules);
      if (result.success) {
       toast({ title: "Sucesso!", description: `${selectedSchedules.length} agendamento(s) excluído(s).` });
-      setSelectedSchedules([]);
-      router.refresh();
+      window.location.reload(); // Recarrega a página para evitar problemas de sessão
     } else {
       toast({ title: "Erro", description: result.error, variant: "destructive" });
     }
@@ -140,7 +137,7 @@ export function SchedulesClient({ initialSchedules }: SchedulesClientProps) {
     setIsFormOpen(open);
     if (!open) {
         setSelectedSchedule(null);
-        router.refresh();
+        // Não recarrega mais aqui para dar chance da ação do servidor concluir
     }
   }
 
