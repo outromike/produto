@@ -191,9 +191,9 @@ export function ConferenceForm({ schedule, existingConference, onFinish, onConfe
                       <CommandList>
                         <CommandEmpty>Nenhum produto encontrado.</CommandEmpty>
                         <CommandGroup>
-                          {suggestions.map((product) => (
+                          {suggestions.map((product, index) => (
                             <CommandItem
-                              key={product.sku}
+                              key={product.sku + '-' + index}
                               value={`${product.sku} - ${product.description}`}
                               onSelect={() => handleProductSelect(product)}
                             >
