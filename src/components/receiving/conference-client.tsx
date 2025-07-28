@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { ReturnSchedule, ConferenceEntry } from "@/types";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -31,50 +31,47 @@ export function ConferenceClient({ initialSchedules, carrierName, initialConfere
   const [conferences, setConferences] = useState(initialConferences);
 
   const [selectedSchedule, setSelectedSchedule] = useState<ReturnSchedule | null>(null);
-  const [conferenceToEdit, setConferenceToEdit] = useState<ConferenceEntry | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [isReviewAlertOpen, setIsReviewAlertOpen] = useState(false);
   
-  const conferencedNfds = new Set(conferences.map(c => c.nfd));
+  const conferencedNfds = useMemo(() => new Set(conferences.map(c => c.nfd)), [conferences]);
   const totalNotes = schedules.length;
   const totalVolume = schedules.reduce((sum, s) => sum + s.invoiceVolume, 0);
 
   const handleRowClick = (schedule: ReturnSchedule) => {
     setSelectedSchedule(schedule);
-    const existingConference = conferences.find(c => c.nfd === schedule.nfd);
-    
-    if (existingConference) {
-        setConferenceToEdit(existingConference);
-        setIsReviewAlertOpen(true);
-    } else {
-        setConferenceToEdit(null);
-        setIsModalOpen(true);
-    }
-  };
-
-  const handleStartReview = () => {
-    setIsReviewAlertOpen(false);
     setIsModalOpen(true);
-  }
+  };
 
   const handleCloseModal = () => {
     setIsModalOpen(false);
     setSelectedSchedule(null);
-    setConferenceToEdit(null);
   }
 
-  const handleConferenceSave = (newOrUpdatedConference: ConferenceEntry) => {
+  const handleConferenceUpdate = (updatedConference: ConferenceEntry) => {
     setConferences(prev => {
-        const existingIndex = prev.findIndex(c => c.id === newOrUpdatedConference.id);
+        const existingIndex = prev.findIndex(c => c.id === updatedConference.id);
         if (existingIndex > -1) {
             const newConferences = [...prev];
-            newConferences[existingIndex] = newOrUpdatedConference;
+            newConferences[existingIndex] = updatedConference;
             return newConferences;
-        } else {
-            return [...prev, newOrUpdatedConference];
         }
+        // This case should ideally not happen if we're just updating, but as a fallback:
+        return [...prev, updatedConference];
     });
   };
+
+  const handleConferenceAdd = (newConference: ConferenceEntry) => {
+     setConferences(prev => [...prev, newConference]);
+  }
+
+  const handleConferenceDelete = (deletedConferenceId: string) => {
+    setConferences(prev => prev.filter(c => c.id !== deletedConferenceId));
+  }
+
+  const conferencesForSelectedNfd = useMemo(() => {
+    if (!selectedSchedule) return [];
+    return conferences.filter(c => c.nfd === selectedSchedule.nfd);
+  }, [selectedSchedule, conferences]);
 
   return (
     <>
@@ -170,29 +167,11 @@ export function ConferenceClient({ initialSchedules, carrierName, initialConfere
         isOpen={isModalOpen}
         onClose={handleCloseModal}
         schedule={selectedSchedule}
-        conference={conferenceToEdit}
-        onConferenceSaved={handleConferenceSave}
+        initialConferencesForNfd={conferencesForSelectedNfd}
+        onConferenceAdd={handleConferenceAdd}
+        onConferenceUpdate={handleConferenceUpdate}
+        onConferenceDelete={handleConferenceDelete}
       />
-
-       <AlertDialog open={isReviewAlertOpen} onOpenChange={setIsReviewAlertOpen}>
-            <AlertDialogContent>
-            <AlertDialogHeader>
-                <AlertDialogTitle className="flex items-center gap-2">
-                    <AlertTriangle className="h-6 w-6 text-yellow-500" />
-                    Revisar Conferência?
-                </AlertDialogTitle>
-                <AlertDialogDescription>
-                    Esta NFD já foi conferida. Deseja revisar ou editar as informações registradas?
-                </AlertDialogDescription>
-            </AlertDialogHeader>
-            <AlertDialogFooter>
-                <AlertDialogCancel onClick={() => setConferenceToEdit(null)}>Cancelar</AlertDialogCancel>
-                <AlertDialogAction onClick={handleStartReview}>
-                    Sim, Revisar
-                </AlertDialogAction>
-            </AlertDialogFooter>
-            </AlertDialogContent>
-      </AlertDialog>
     </>
   );
 }

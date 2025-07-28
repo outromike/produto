@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useForm } from "react-hook-form";
+import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { useState, useTransition, useEffect } from "react";
@@ -15,8 +15,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
 import { saveConference, findProduct } from "@/app/dashboard/receiving/actions";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, AlertTriangle, CheckIcon } from "lucide-react";
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
+import { Loader2, CheckIcon, CircleX } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useDebouncedCallback } from "use-debounce";
 
@@ -37,17 +36,15 @@ type ConferenceFormValues = z.infer<typeof formSchema>;
 interface ConferenceFormProps {
   schedule: ReturnSchedule;
   existingConference: ConferenceEntry | null;
-  onFinish: () => void;
-  onConferenceSaved: (conference: ConferenceEntry) => void;
+  onSave: (conference: ConferenceEntry) => void;
+  onCancelEdit: () => void;
 }
 
-export function ConferenceForm({ schedule, existingConference, onFinish, onConferenceSaved }: ConferenceFormProps) {
+export function ConferenceForm({ schedule, existingConference, onSave, onCancelEdit }: ConferenceFormProps) {
   const [isPending, startTransition] = useTransition();
   const [productQuery, setProductQuery] = useState("");
   const [suggestions, setSuggestions] = useState<Product[]>([]);
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
-  const [showPartialReceiptAlert, setShowPartialReceiptAlert] = useState(false);
-  const [formData, setFormData] = useState<ConferenceFormValues | null>(null);
 
   const { toast } = useToast();
 
@@ -60,6 +57,8 @@ export function ConferenceForm({ schedule, existingConference, onFinish, onConfe
       observations: "",
     },
   });
+  
+  const selectedProductSku = useWatch({ control: form.control, name: "product.sku" });
 
   useEffect(() => {
     if (existingConference) {
@@ -82,13 +81,14 @@ export function ConferenceForm({ schedule, existingConference, onFinish, onConfe
           });
         setProductQuery("")
     }
-  }, [existingConference, form]);
+  }, [existingConference, form.reset]);
 
 
   const debouncedProductSearch = useDebouncedCallback(async (query: string) => {
     if (query.length > 2) {
       const results = await findProduct(query);
       setSuggestions(results);
+      if(results.length > 0) setIsPopoverOpen(true);
     } else {
       setSuggestions([]);
     }
@@ -109,7 +109,7 @@ export function ConferenceForm({ schedule, existingConference, onFinish, onConfe
   const processSubmit = (values: ConferenceFormValues) => {
     startTransition(async () => {
         const conferenceData = {
-            id: existingConference?.id || `${new Date().getTime()}-${Math.random()}`,
+            id: existingConference?.id || `${Date.now()}-${Math.random()}`,
             scheduleId: schedule.id,
             nfd: schedule.nfd,
             productSku: values.product.sku,
@@ -117,52 +117,30 @@ export function ConferenceForm({ schedule, existingConference, onFinish, onConfe
             receivedVolume: values.receivedVolume,
             productState: values.productState,
             observations: values.observations || "",
-            conferenceTimestamp: existingConference?.conferenceTimestamp || new Date().toISOString(),
+            conferenceTimestamp: new Date().toISOString(),
         };
 
         const result = await saveConference(conferenceData);
 
         if (result.success && result.savedConference) {
-            toast({ title: "Sucesso!", description: `Conferência ${existingConference ? 'atualizada' : 'salva'} com sucesso.` });
-            onConferenceSaved(result.savedConference);
-            if (!existingConference) { 
-                form.reset({
-                    product: { sku: "", description: "" },
-                    receivedVolume: 1,
-                    productState: "Produto Bom",
-                    observations: "",
-                });
-                setProductQuery("");
-            }
-            setShowPartialReceiptAlert(false);
-            setFormData(null);
+            toast({ title: "Sucesso!", description: `Item ${existingConference ? 'atualizado' : 'salvo'} com sucesso.` });
+            onSave(result.savedConference);
+            form.reset({
+              product: { sku: "", description: "" },
+              receivedVolume: 1,
+              productState: "Produto Bom",
+              observations: "",
+            });
+            setProductQuery("");
         } else {
             toast({ title: "Erro", description: result.error, variant: "destructive" });
         }
     });
   };
 
-  const onSubmit = (values: ConferenceFormValues) => {
-    if (values.receivedVolume !== schedule.invoiceVolume && !existingConference) {
-        setFormData(values);
-        setShowPartialReceiptAlert(true);
-    } else {
-        processSubmit(values);
-    }
-  };
-  
-  const handleForceSubmit = () => {
-    if (formData) {
-        processSubmit(formData);
-    }
-  };
-  
-  const selectedProductSku = form.watch('product.sku');
-
   return (
-    <>
-      <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+    <Form {...form}>
+      <form onSubmit={form.handleSubmit(processSubmit)} className="space-y-4 p-1">
           <FormField
             control={form.control}
             name="product.sku"
@@ -176,7 +154,7 @@ export function ConferenceForm({ schedule, existingConference, onFinish, onConfe
                         placeholder="Digite para buscar..."
                         value={productQuery}
                         onChange={(e) => handleProductSearch(e.target.value)}
-                        onClick={() => setIsPopoverOpen(true)}
+                        autoComplete="off"
                       />
                     </FormControl>
                   </PopoverTrigger>
@@ -186,6 +164,7 @@ export function ConferenceForm({ schedule, existingConference, onFinish, onConfe
                         placeholder="Buscar produto..."
                         value={productQuery}
                         onValueChange={handleProductSearch}
+                        className="h-9"
                       />
                       <CommandList>
                         <CommandEmpty>Nenhum produto encontrado.</CommandEmpty>
@@ -202,8 +181,10 @@ export function ConferenceForm({ schedule, existingConference, onFinish, onConfe
                                   selectedProductSku === product.sku ? "opacity-100" : "opacity-0"
                                 )}
                               />
-                              {product.description}
-                              <span className="text-xs text-muted-foreground ml-2">({product.sku})</span>
+                              <div className="flex-1">
+                                <p className="text-sm">{product.description}</p>
+                                <p className="text-xs text-muted-foreground">{product.sku}</p>
+                              </div>
                             </CommandItem>
                           ))}
                         </CommandGroup>
@@ -216,7 +197,7 @@ export function ConferenceForm({ schedule, existingConference, onFinish, onConfe
             )}
           />
 
-          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <FormField
               control={form.control}
               name="receivedVolume"
@@ -259,52 +240,28 @@ export function ConferenceForm({ schedule, existingConference, onFinish, onConfe
             name="observations"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Observações de Recebimento</FormLabel>
+                <FormLabel>Observações</FormLabel>
                 <FormControl>
-                  <Textarea placeholder="Adicione observações relevantes..." {...field} />
+                  <Textarea placeholder="Adicione observações relevantes..." {...field} rows={2}/>
                 </FormControl>
                 <FormMessage />
               </FormItem>
             )}
           />
             
-          <div className="flex justify-end gap-4 pt-4">
-            <Button type="button" variant="outline" onClick={onFinish}>
-                {existingConference ? "Fechar" : "Finalizar Conferência da NF"}
-            </Button>
-            <Button type="submit" disabled={isPending}>
+          <div className="flex justify-end gap-2 pt-2">
+            {existingConference && (
+                 <Button type="button" variant="ghost" onClick={onCancelEdit}>
+                    <CircleX className="mr-2 h-4 w-4" />
+                    Cancelar Edição
+                </Button>
+            )}
+            <Button type="submit" disabled={isPending} className="w-full sm:w-auto">
               {isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               {existingConference ? 'Salvar Alterações' : 'Salvar Produto'}
             </Button>
           </div>
         </form>
-      </Form>
-
-      <AlertDialog open={showPartialReceiptAlert} onOpenChange={setShowPartialReceiptAlert}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle className="flex items-center gap-2">
-              <AlertTriangle className="h-6 w-6 text-yellow-500" />
-              Recebimento Parcial
-            </AlertDialogTitle>
-            <AlertDialogDescription>
-              <div className="mt-2">A quantidade de volumes informada diverge do agendamento.</div>
-              <div className="mt-4 space-y-2 rounded-lg border bg-muted/50 p-4 text-sm">
-                <div><strong>Volumes Agendados:</strong> {schedule.invoiceVolume}</div>
-                <div><strong>Volumes Informados:</strong> {formData?.receivedVolume}</div>
-              </div>
-              <div className="mt-4 font-semibold">Deseja confirmar o recebimento parcial mesmo assim?</div>
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel onClick={() => setFormData(null)}>Cancelar</AlertDialogCancel>
-            <AlertDialogAction onClick={handleForceSubmit} disabled={isPending} className="bg-primary hover:bg-primary/90">
-              {isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin"/>}
-              Sim, receber parcialmente
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-    </>
+    </Form>
   );
 }

@@ -2,7 +2,6 @@ import { promises as fs } from 'fs';
 import path from 'path';
 import { ReturnSchedule, ConferenceEntry } from '@/types';
 import { isToday, parseISO } from 'date-fns';
-import { notFound } from 'next/navigation';
 import { ConferenceClient } from '@/components/receiving/conference-client';
 
 async function getSchedulesForCarrier(carrier: string): Promise<ReturnSchedule[]> {
@@ -42,9 +41,9 @@ export default async function ConferencePage({ params }: { params: { carrier: st
     const carrierName = decodeURIComponent(params.carrier);
     const schedules = await getSchedulesForCarrier(carrierName);
     
+    // Mostra uma mensagem amigável no cliente se não houver agendamentos.
     if (schedules.length === 0) {
-        // Isso pode acontecer se o usuário navegar diretamente para uma URL de um transportador sem agendamentos para hoje.
-        // Vamos mostrar uma mensagem amigável no cliente em vez de um 404 rígido.
+       // O ConferenceClient tratará o caso de `initialSchedules` ser um array vazio.
     }
     
     const todaySchedulesNfds = schedules.map(s => s.nfd);

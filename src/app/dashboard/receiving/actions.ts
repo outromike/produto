@@ -36,7 +36,7 @@ export async function saveConference(data: ConferenceEntry): Promise<{ success: 
 
         if (existingIndex > -1) {
             // Update existing conference
-            allConferences[existingIndex] = { ...allConferences[existingIndex], ...data, conferenceTimestamp: new Date().toISOString() };
+            allConferences[existingIndex] = data; // replace with new data entirely
             savedConference = allConferences[existingIndex];
         } else {
             // Add new conference
@@ -50,6 +50,23 @@ export async function saveConference(data: ConferenceEntry): Promise<{ success: 
     } catch (error) {
         console.error("Failed to save conference:", error);
         return { success: false, error: "Não foi possível salvar a conferência." };
+    }
+}
+
+export async function deleteConference(id: string): Promise<{ success: boolean; error?: string }> {
+    try {
+        const conferences = await getConferences();
+        const updatedConferences = conferences.filter(c => c.id !== id);
+
+        if (conferences.length === updatedConferences.length) {
+            return { success: false, error: "Conferência não encontrada para exclusão." };
+        }
+
+        await saveConferences(updatedConferences);
+        return { success: true };
+    } catch (error) {
+        console.error("Failed to delete conference:", error);
+        return { success: false, error: "Não foi possível excluir o item da conferência." };
     }
 }
 
