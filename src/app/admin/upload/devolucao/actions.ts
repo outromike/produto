@@ -68,11 +68,11 @@ const parseCSV = (csvContent: string): ReturnSchedule[] => {
     }).filter(s => s.date || s.carrier || s.client); // Filter out any empty rows
 };
 
-export async function uploadReturnSchedules(formData: FormData): Promise<{ success: boolean, error?: string }> {
+export async function uploadReturnSchedules(formData: FormData): Promise<{ error?: string }> {
     const file = formData.get('file') as File | null;
 
     if (!file || file.size === 0) {
-        return { success: false, error: 'O arquivo de agendamento de devolução deve ser enviado.' };
+        return { error: 'O arquivo de agendamento de devolução deve ser enviado.' };
     }
 
     try {
@@ -101,10 +101,10 @@ export async function uploadReturnSchedules(formData: FormData): Promise<{ succe
     } catch (error) {
         console.error('File processing error:', error);
         if (error instanceof Error) {
-            return { success: false, error: `Ocorreu um erro ao processar o arquivo: ${error.message}` };
+            return { error: `Ocorreu um erro ao processar o arquivo: ${error.message}` };
         }
-        return { success: false, error: 'Ocorreu um erro desconhecido ao processar o arquivo.' };
+        return { error: 'Ocorreu um erro desconhecido ao processar o arquivo.' };
     }
     
-    return { success: true };
+    redirect('/admin');
 }
