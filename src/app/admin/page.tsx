@@ -37,13 +37,15 @@ export default function AdminDashboardPage() {
            <CardHeader>
             <CardTitle>Gerenciamento de Usuários</CardTitle>
             <CardDescription>
-              Adicione, remova ou edite as permissões dos usuários. (Funcionalidade futura)
+              Adicione, remova ou edite as permissões dos usuários.
             </CardDescription>
           </CardHeader>
            <CardContent>
-            <Button disabled>
+            <Button asChild>
+              <Link href="/admin/users">
                 <Users className="mr-2 h-4 w-4" />
                 Gerenciar Usuários
+              </Link>
             </Button>
           </CardContent>
         </Card>
