@@ -25,11 +25,22 @@ const formSchema = z.object({
     description: z.string().min(1, "A descrição é obrigatória"),
   }),
   receivedVolume: z.coerce.number().min(1, "A quantidade de volumes recebidos é obrigatória."),
-  productState: z.enum(["Produto Bom", "Descarte", "Avariado"], {
+  productState: z.enum(["Produto Bom", "Descarte", "Avariado", "Recusado"], {
     required_error: "O estado do produto é obrigatório.",
   }),
   observations: z.string().optional(),
-});
+}).refine(
+    (data) => {
+        if (data.productState === "Recusado") {
+            return data.observations && data.observations.trim().length > 0;
+        }
+        return true;
+    },
+    {
+        message: "A observação é obrigatória quando o estado é 'Recusado'.",
+        path: ["observations"],
+    }
+);
 
 type ConferenceFormValues = z.infer<typeof formSchema>;
 
@@ -225,8 +236,9 @@ export function ConferenceForm({ schedule, existingConference, onSave, onCancelE
                     </FormControl>
                     <SelectContent>
                       <SelectItem value="Produto Bom">Produto Bom</SelectItem>
-                      <SelectItem value="Descarte">Descarte</SelectItem>
                       <SelectItem value="Avariado">Avariado</SelectItem>
+                      <SelectItem value="Recusado">Recusado</SelectItem>
+                      <SelectItem value="Descarte">Descarte</SelectItem>
                     </SelectContent>
                   </Select>
                   <FormMessage />

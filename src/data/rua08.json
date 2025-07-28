@@ -24,5 +24,18 @@
     "quantity": 1,
     "status": "Outro",
     "allocatedAt": "2025-07-28T19:38:36.249Z"
+  },
+  {
+    "id": "1753731802276-0.4722965200641338",
+    "building": "111",
+    "level": "1A",
+    "nfd": "1",
+    "salesNote": "1",
+    "shipment": "1",
+    "productSku": "42AFG4102000",
+    "productDescription": "AFG41 FRITADEIRA AIR FACIL 220V",
+    "quantity": 1,
+    "status": "Produto Bom OK",
+    "allocatedAt": "2025-07-28T19:43:22.276Z"
   }
 ]
