@@ -4,7 +4,7 @@
 import { useState, useMemo, useEffect } from 'react';
 import { ReturnSchedule } from "@/types";
 import { Button } from "@/components/ui/button";
-import { PlusCircle, Loader2, Trash2, X } from "lucide-react";
+import { PlusCircle, Loader2, Trash2, X, AlertTriangle } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -27,7 +27,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { ScheduleForm } from "./schedule-form";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ScheduleTable } from "./schedule-table";
-import { isToday, parseISO } from 'date-fns';
+import { isToday, parseISO, format } from 'date-fns';
 import { deleteSchedule, deleteSchedules } from '@/app/dashboard/schedules/actions';
 import { useToast } from '@/hooks/use-toast';
 import { useDebouncedCallback } from 'use-debounce';
@@ -56,9 +56,11 @@ export function SchedulesClient({ initialSchedules }: SchedulesClientProps) {
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [isDeleteAlertOpen, setIsDeleteAlertOpen] = useState(false);
   const [isBulkDeleteAlertOpen, setIsBulkDeleteAlertOpen] = useState(false);
+  const [isDuplicateAlertOpen, setIsDuplicateAlertOpen] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [scheduleToEdit, setScheduleToEdit] = useState<ReturnSchedule | null>(null);
   const [scheduleToDelete, setScheduleToDelete] = useState<ReturnSchedule | null>(null);
+  const [duplicateSchedule, setDuplicateSchedule] = useState<ReturnSchedule | null>(null);
   const [selectedScheduleIds, setSelectedScheduleIds] = useState<string[]>([]);
   const { toast } = useToast();
 
@@ -127,6 +129,11 @@ export function SchedulesClient({ initialSchedules }: SchedulesClientProps) {
   const handleSchedulesAdd = (newSchedules: ReturnSchedule[]) => {
       setSchedules(prev => [...prev, ...newSchedules]);
   };
+  
+  const handleDuplicate = (duplicate: ReturnSchedule) => {
+    setDuplicateSchedule(duplicate);
+    setIsDuplicateAlertOpen(true);
+  };
 
   const handleDeleteRequest = (schedule: ReturnSchedule) => {
     setScheduleToDelete(schedule);
@@ -189,6 +196,7 @@ export function SchedulesClient({ initialSchedules }: SchedulesClientProps) {
                 initialData={scheduleToEdit}
                 onScheduleUpdate={handleScheduleUpdate}
                 onSchedulesAdd={handleSchedulesAdd}
+                onDuplicate={handleDuplicate}
             />
           </DialogContent>
         </Dialog>
@@ -279,6 +287,28 @@ export function SchedulesClient({ initialSchedules }: SchedulesClientProps) {
                   <AlertDialogAction onClick={handleBulkDelete} disabled={isDeleting} className="bg-destructive hover:bg-destructive/90">
                       {isDeleting ? <><Loader2 className="mr-2 h-4 w-4 animate-spin"/> Excluindo...</> : 'Sim, excluir'}
                   </AlertDialogAction>
+              </AlertDialogFooter>
+          </AlertDialogContent>
+      </AlertDialog>
+
+        <AlertDialog open={isDuplicateAlertOpen} onOpenChange={setIsDuplicateAlertOpen}>
+          <AlertDialogContent>
+              <AlertDialogHeader>
+                  <AlertDialogTitle className="flex items-center gap-2">
+                    <AlertTriangle className="h-6 w-6 text-yellow-500" />
+                    NFD Duplicada
+                    </AlertDialogTitle>
+                  <AlertDialogDescription>
+                      A NFD <span className="font-bold text-foreground">{duplicateSchedule?.nfd}</span> já foi agendada. Por favor, verifique os detalhes abaixo.
+                      <div className="mt-4 space-y-2 rounded-lg border bg-muted/50 p-4 text-sm">
+                          <p><strong>Cliente:</strong> {duplicateSchedule?.customer}</p>
+                          <p><strong>Transportadora:</strong> {duplicateSchedule?.carrier}</p>
+                          <p><strong>Data do Agendamento:</strong> {duplicateSchedule ? format(parseISO(duplicateSchedule.date), 'dd/MM/yyyy') : ''}</p>
+                      </div>
+                  </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                  <AlertDialogAction onClick={() => setIsDuplicateAlertOpen(false)}>Entendido</AlertDialogAction>
               </AlertDialogFooter>
           </AlertDialogContent>
       </AlertDialog>

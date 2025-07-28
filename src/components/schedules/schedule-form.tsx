@@ -42,6 +42,7 @@ interface ScheduleFormProps {
     onScheduleUpdate: (schedule: ReturnSchedule) => void;
     onSchedulesAdd: (schedules: ReturnSchedule[]) => void;
     initialData?: ReturnSchedule | null;
+    onDuplicate: (duplicate: ReturnSchedule) => void;
 }
 
 const transportadoras = [
@@ -61,7 +62,7 @@ const motivosDevolucao = [
 
 const estadosProduto = ["Avariado", "Descarte", "Produto Bom", "___"];
 
-export function ScheduleForm({ setOpen, initialData, onScheduleUpdate, onSchedulesAdd }: ScheduleFormProps) {
+export function ScheduleForm({ setOpen, initialData, onScheduleUpdate, onSchedulesAdd, onDuplicate }: ScheduleFormProps) {
   const { toast } = useToast();
   const form = useForm<ScheduleFormValues>({
     resolver: zodResolver(formSchema),
@@ -101,7 +102,11 @@ export function ScheduleForm({ setOpen, initialData, onScheduleUpdate, onSchedul
             onSchedulesAdd(result.createdSchedules);
             setOpen(false);
         } else {
-            toast({ title: "Erro", description: result.error || "Não foi possível criar o(s) agendamento(s).", variant: "destructive" });
+            if (result.duplicate) {
+                onDuplicate(result.duplicate);
+            } else {
+                toast({ title: "Erro", description: result.error || "Não foi possível criar o(s) agendamento(s).", variant: "destructive" });
+            }
         }
     }
   };

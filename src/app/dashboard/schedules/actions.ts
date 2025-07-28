@@ -4,7 +4,6 @@
 import { promises as fs } from 'fs';
 import path from 'path';
 import { ReturnSchedule } from '@/types';
-import { revalidatePath } from 'next/cache';
 
 const SCHEDULES_FILE_PATH = path.join(process.cwd(), 'src', 'data', 'agendamentos.json');
 
@@ -25,10 +24,9 @@ async function getSchedules(): Promise<ReturnSchedule[]> {
 async function saveSchedules(schedules: ReturnSchedule[]): Promise<void> {
     const data = JSON.stringify(schedules, null, 2);
     await fs.writeFile(SCHEDULES_FILE_PATH, data, 'utf-8');
-    // A revalidação foi removida para evitar problemas com a sessão
 }
 
-export async function addSchedule(data: Omit<ReturnSchedule, 'id' | 'createdAt'>): Promise<{ success: boolean; error?: string; createdSchedules?: ReturnSchedule[] }> {
+export async function addSchedule(data: Omit<ReturnSchedule, 'id' | 'createdAt'>): Promise<{ success: boolean; error?: string; createdSchedules?: ReturnSchedule[], duplicate?: ReturnSchedule }> {
   try {
     const allSchedules = await getSchedules();
     
@@ -38,6 +36,19 @@ export async function addSchedule(data: Omit<ReturnSchedule, 'id' | 'createdAt'>
     if (nfds.length === 0) {
       return { success: false, error: "Nenhuma NFD válida foi fornecida." };
     }
+    
+    // Check for duplicates before adding
+    for (const nfd of nfds) {
+        const existingSchedule = allSchedules.find(s => s.nfd === nfd);
+        if (existingSchedule) {
+            return {
+                success: false,
+                error: `A NFD ${nfd} já foi agendada.`,
+                duplicate: existingSchedule
+            };
+        }
+    }
+
 
     const newSchedules: ReturnSchedule[] = nfds.map((nfd, index) => {
         const newSchedule: ReturnSchedule = {
