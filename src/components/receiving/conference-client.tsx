@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useMemo, useEffect } from "react";
@@ -8,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { format, parseISO } from "date-fns";
 import { ConferenceModal } from "./conference-modal";
-import { CheckCircle2, Pencil, AlertTriangle } from "lucide-react";
+import { CheckCircle2, Pencil, FileClock, Calendar, Box, Hash } from "lucide-react";
 import {
     AlertDialog,
     AlertDialogAction,
@@ -18,6 +19,7 @@ import {
     AlertDialogFooter,
     AlertDialogHeader,
     AlertDialogTitle,
+    AlertDialogTrigger,
   } from "@/components/ui/alert-dialog"
 
 interface ConferenceClientProps {
@@ -28,12 +30,17 @@ interface ConferenceClientProps {
 
 export function ConferenceClient({ initialSchedules, carrierName, initialConferences }: ConferenceClientProps) {
   const [schedules] = useState(initialSchedules);
-  const [conferences, setConferences] = useState(initialConferences);
+  const [conferences, setConferences] = useState<ConferenceEntry[]>(initialConferences);
 
   const [selectedSchedule, setSelectedSchedule] = useState<ReturnSchedule | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   
-  const conferencedNfds = useMemo(() => new Set(conferences.map(c => c.nfd)), [conferences]);
+  const conferencedNfds = useMemo(() => {
+    const nfdSet = new Set<string>();
+    conferences.forEach(c => nfdSet.add(c.nfd));
+    return nfdSet;
+  }, [conferences]);
+
   const totalNotes = schedules.length;
   const totalVolume = schedules.reduce((sum, s) => sum + s.invoiceVolume, 0);
 
@@ -48,30 +55,56 @@ export function ConferenceClient({ initialSchedules, carrierName, initialConfere
   }
 
   const handleConferenceUpdate = (updatedConference: ConferenceEntry) => {
-    setConferences(prev => {
-        const existingIndex = prev.findIndex(c => c.id === updatedConference.id);
-        if (existingIndex > -1) {
-            const newConferences = [...prev];
-            newConferences[existingIndex] = updatedConference;
-            return newConferences;
-        }
-        // This case should ideally not happen if we're just updating, but as a fallback:
-        return [...prev, updatedConference];
-    });
+    const newConferences = conferences.map(c => c.id === updatedConference.id ? updatedConference : c);
+    setConferences(newConferences);
+    // Add NFD to conferenced set if not already there
+    if (!conferencedNfds.has(updatedConference.nfd)) {
+        setConferences(prev => [...prev, updatedConference]);
+    }
   };
 
   const handleConferenceAdd = (newConference: ConferenceEntry) => {
      setConferences(prev => [...prev, newConference]);
   }
 
-  const handleConferenceDelete = (deletedConferenceId: string) => {
+  const handleConferenceDelete = (deletedConferenceId: string, nfd: string) => {
+    const remainingConferencesForNfd = conferences.filter(c => c.nfd === nfd && c.id !== deletedConferenceId);
     setConferences(prev => prev.filter(c => c.id !== deletedConferenceId));
+
+    if (remainingConferencesForNfd.length === 0) {
+        // All entries for this NFD were removed
+        conferencedNfds.delete(nfd);
+    }
   }
 
   const conferencesForSelectedNfd = useMemo(() => {
     if (!selectedSchedule) return [];
     return conferences.filter(c => c.nfd === selectedSchedule.nfd);
   }, [selectedSchedule, conferences]);
+
+  // Early return if no schedules are available for the carrier today.
+  if (schedules.length === 0) {
+    return (
+        <main className="container mx-auto px-4 py-8 md:px-6">
+            <div className="mb-6 space-y-2">
+                <Button variant="outline" asChild>
+                    <Link href="/dashboard/receiving">← Voltar para Recebimento</Link>
+                </Button>
+                <h1 className="text-3xl font-headline font-bold">Conferência de Recebimento</h1>
+                <p className="text-xl text-muted-foreground">
+                    Transportadora: <span className="font-semibold text-foreground">{carrierName}</span>
+                </p>
+            </div>
+             <div className="flex flex-col items-center justify-center rounded-lg border-2 border-dashed border-muted-foreground/30 bg-muted/20 py-20 text-center">
+                <FileClock className="mx-auto h-12 w-12 text-muted-foreground" />
+                <h3 className="mt-4 text-xl font-bold tracking-tight text-foreground">
+                    Sem Agendamentos para Hoje
+                </h3>
+                <p className="mt-2 text-muted-foreground">Não há notas fiscais agendadas para esta transportadora na data de hoje.</p>
+            </div>
+        </main>
+    )
+  }
 
   return (
     <>
@@ -86,31 +119,28 @@ export function ConferenceClient({ initialSchedules, carrierName, initialConfere
           </p>
         </div>
 
-        <div className="mb-8 grid grid-cols-1 gap-6 md:grid-cols-3">
-          <Card>
-            <CardHeader>
-              <CardTitle>Data</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-2xl font-bold">{schedules.length > 0 ? format(parseISO(schedules[0].date), 'dd/MM/yyyy') : 'N/A'}</p>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardHeader>
-              <CardTitle>Total de Notas (NFDs)</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-2xl font-bold">{totalNotes}</p>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardHeader>
-              <CardTitle>Total de Volumes</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-2xl font-bold">{totalVolume}</p>
-            </CardContent>
-          </Card>
+        <div className="mb-8 flex flex-col items-stretch gap-4 rounded-lg border bg-muted/30 p-4 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex items-center gap-3">
+                <Calendar className="h-5 w-5 text-muted-foreground"/>
+                <div className="text-sm">
+                    <span className="text-muted-foreground">Data:</span>{' '}
+                    <span className="font-bold">{format(parseISO(schedules[0].date), 'dd/MM/yyyy')}</span>
+                </div>
+            </div>
+             <div className="flex items-center gap-3">
+                <Hash className="h-5 w-5 text-muted-foreground"/>
+                <div className="text-sm">
+                    <span className="text-muted-foreground">Total de Notas (NFDs):</span>{' '}
+                    <span className="font-bold">{totalNotes}</span>
+                </div>
+            </div>
+             <div className="flex items-center gap-3">
+                <Box className="h-5 w-5 text-muted-foreground"/>
+                <div className="text-sm">
+                    <span className="text-muted-foreground">Total de Volumes:</span>{' '}
+                    <span className="font-bold">{totalVolume}</span>
+                </div>
+            </div>
         </div>
 
         <Card>
@@ -163,15 +193,18 @@ export function ConferenceClient({ initialSchedules, carrierName, initialConfere
         </Card>
       </main>
       
-      <ConferenceModal
-        isOpen={isModalOpen}
-        onClose={handleCloseModal}
-        schedule={selectedSchedule}
-        initialConferencesForNfd={conferencesForSelectedNfd}
-        onConferenceAdd={handleConferenceAdd}
-        onConferenceUpdate={handleConferenceUpdate}
-        onConferenceDelete={handleConferenceDelete}
-      />
+      {selectedSchedule && (
+        <ConferenceModal
+            isOpen={isModalOpen}
+            onClose={handleCloseModal}
+            schedule={selectedSchedule}
+            initialConferencesForNfd={conferencesForSelectedNfd}
+            onConferenceAdd={handleConferenceAdd}
+            onConferenceUpdate={handleConferenceUpdate}
+            onConferenceDelete={handleConferenceDelete}
+        />
+      )}
     </>
   );
 }
+
