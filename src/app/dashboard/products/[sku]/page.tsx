@@ -10,7 +10,6 @@ import { AiSuggestions } from "@/components/products/ai-suggestions";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 
-// A proteção de rota foi movida para o layout.tsx
 export default async function ProductDetailPage({ params }: { params: { sku: string } }) {
   const product = await getProductBySku(params.sku);
   const allProducts = await getProducts();

@@ -2,7 +2,6 @@
 import { getProducts } from '@/lib/products';
 import { DashboardClient } from '@/components/dashboard/dashboard-client';
 
-// A proteção de rota foi movida para o layout.tsx
 export default async function DashboardPage() {
   const products = await getProducts();
 

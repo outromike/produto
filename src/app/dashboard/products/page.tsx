@@ -6,7 +6,6 @@ import { PaginationComponent } from '@/components/products/pagination';
 
 const PRODUCTS_PER_PAGE = 12;
 
-// A proteção de rota foi movida para o layout.tsx
 export default async function ProductsPage({
   searchParams,
 }: {

@@ -1,9 +1,8 @@
-
 import { Header } from "@/components/layout/header-admin";
 import { getSession } from "@/lib/auth";
 
 // Este layout apenas monta a estrutura visual do painel de admin.
-// A proteção agora é feita diretamente na página com um diálogo de senha.
+// A proteção de rota agora é feita diretamente na página para evitar conflitos.
 export default async function AdminLayout({
   children,
 }: {

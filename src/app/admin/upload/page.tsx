@@ -1,4 +1,6 @@
 
+import { getSession } from "@/lib/auth";
+import { redirect } from "next/navigation";
 import { UploadForm } from "@/components/upload/upload-form";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
@@ -6,8 +8,12 @@ import { Info, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 
-// A proteção de rota foi movida para o layout.tsx
 export default async function UploadPage() {
+    const session = await getSession();
+
+    if (!session?.user || session.user.role !== 'admin') {
+        redirect('/login');
+    }
 
   return (
     <main className="container mx-auto max-w-2xl px-4 py-8 md:px-6">
