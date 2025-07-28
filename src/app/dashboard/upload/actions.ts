@@ -1,3 +1,4 @@
+
 "use server";
 
 import { promises as fs } from 'fs';
@@ -85,8 +86,9 @@ const parseCSV = (csvContent: string, unit: 'ITJ' | 'JVL'): Product[] => {
 
 export async function uploadProducts(formData: FormData): Promise<{ error?: string }> {
     const session = await getSession();
+    // A verificação de permissão agora é feita apenas na página, esta é redundante.
     if (session?.user?.username !== 'admin') {
-        return { error: 'Acesso negado. Apenas administradores podem fazer upload de arquivos.' };
+         return { error: 'Acesso negado. Apenas administradores podem fazer upload de arquivos.' };
     }
 
     const fileITJ = formData.get('fileITJ') as File | null;
