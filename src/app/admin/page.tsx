@@ -5,7 +5,7 @@ import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import { Upload, Shield, Users, Loader2, AlertCircle } from "lucide-react";
+import { Upload, Shield, Users, Loader2, AlertCircle, FileClock } from "lucide-react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -112,7 +112,7 @@ export default function AdminDashboardPage() {
         <h1 className="text-3xl font-headline font-bold">Painel do Administrador</h1>
       </div>
 
-      <div className="grid gap-6 md:grid-cols-2">
+      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
         <Card>
           <CardHeader>
             <CardTitle>Gerenciamento de Produtos</CardTitle>
@@ -124,17 +124,34 @@ export default function AdminDashboardPage() {
             <Button asChild>
               <Link href="/admin/upload">
                 <Upload className="mr-2 h-4 w-4" />
-                Ir para Upload de CSV
+                Upload de Produtos
               </Link>
             </Button>
           </CardContent>
         </Card>
 
         <Card>
+          <CardHeader>
+            <CardTitle>Agendamento de Devolução</CardTitle>
+            <CardDescription>
+              Faça o upload de planilhas de agendamento de devoluções. (Funcionalidade futura)
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Button asChild>
+              <Link href="/admin/upload/devolucao">
+                <FileClock className="mr-2 h-4 w-4" />
+                Upload de Agendamentos
+              </Link>
+            </Button>
+          </CardContent>
+        </Card>
+        
+        <Card>
            <CardHeader>
             <CardTitle>Gerenciamento de Usuários</CardTitle>
             <CardDescription>
-              Adicione, remova ou edite as permissões dos usuários do sistema. (Funcionalidade futura)
+              Adicione, remova ou edite as permissões dos usuários. (Funcionalidade futura)
             </CardDescription>
           </CardHeader>
            <CardContent>

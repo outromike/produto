@@ -1,4 +1,5 @@
 
+
 export type Product = {
   sku: string;
   item: string; // From 'Item'
@@ -18,6 +19,25 @@ export type Product = {
   quantity: number; // From 'Qtd. Itens'
   classification: 'A' | 'B' | 'C' | string; // From 'Clasificação ABC'
   unit: 'ITJ' | 'JVL'; // Determined by origin file
+};
+
+export type ReturnSchedule = {
+  date: string; // DATA
+  carrier: string; // TRANSPORTADORA
+  outboundShipment: string; // REMESSA DE SAIDA
+  salesNote: string; // NOTA VENDA
+  nfd: string; // NFD
+  client: string; // CLIENTE
+  bdv: string; // BDV
+  ov: string; // OV
+  returnReason: string; // MOTIVO DA DEVOLUÇÃO
+  productState: string; // ESTADO DO PRODUTO
+  nfVolume: string; // VOL.NF
+  status: string; // STATUS
+  storageDest: string; // DEST. ARMAZENAGEM
+  received: string; // RECEBIDO
+  receivedState: string; // ESTADO DO RECEBIDO
+  receiptNotes: string; // OBSERVAÇÕES DE RECEBIMENTO
 };
 
 export type User = {
