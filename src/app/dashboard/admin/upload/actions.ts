@@ -5,6 +5,7 @@ import { promises as fs } from 'fs';
 import path from 'path';
 import { Product } from '@/types';
 import { redirect } from 'next/navigation';
+import { getSession } from '@/lib/auth';
 
 // Helper to find header index with multiple possible names
 const findHeaderIndex = (headerRow: string[], possibleNames: string[]): number => {

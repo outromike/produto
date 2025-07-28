@@ -14,8 +14,9 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { SessionPayload } from "@/types";
 import { logout } from "@/app/login/actions";
-import { LogOut, User as UserIcon } from "lucide-react";
+import { LogOut, User as UserIcon, Shield } from "lucide-react";
 import { useTransition } from "react";
+import Link from "next/link";
 
 interface UserNavProps {
     user: SessionPayload['user'] | undefined;
@@ -48,6 +49,17 @@ export function UserNav({ user }: UserNavProps) {
             </p>
           </div>
         </DropdownMenuLabel>
+        <DropdownMenuSeparator />
+        <DropdownMenuGroup>
+           {user?.role === 'admin' && (
+            <DropdownMenuItem asChild>
+              <Link href="/dashboard/admin">
+                <Shield className="mr-2 h-4 w-4" />
+                <span>Painel do Admin</span>
+              </Link>
+            </DropdownMenuItem>
+          )}
+        </DropdownMenuGroup>
         <DropdownMenuSeparator />
         <DropdownMenuItem onSelect={(e) => { e.preventDefault(); handleLogout();}} disabled={isPending}>
           <LogOut className="mr-2 h-4 w-4" />

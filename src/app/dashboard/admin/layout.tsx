@@ -9,6 +9,7 @@ export default async function AdminLayout({
 }) {
   const session = await getSession();
   if (session?.user?.role !== 'admin') {
+    // Redireciona para uma página de acesso negado ou para a home do dashboard
     redirect('/dashboard/products');
   }
 

@@ -2,11 +2,21 @@
 import { UploadForm } from "@/components/upload/upload-form";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Info } from "lucide-react";
+import { Info, ArrowLeft } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import Link from "next/link";
 
 export default function UploadPage() {
   return (
     <main className="container mx-auto max-w-2xl px-4 py-8 md:px-6">
+       <div className="mb-4">
+        <Button variant="outline" asChild>
+          <Link href="/dashboard/admin">
+            <ArrowLeft className="mr-2 h-4 w-4" />
+            Voltar ao Painel do Admin
+          </Link>
+        </Button>
+      </div>
        <Card>
         <CardHeader>
           <CardTitle>Upload de Planilhas de Produtos</CardTitle>

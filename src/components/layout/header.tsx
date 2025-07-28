@@ -1,7 +1,7 @@
 
 import { UserNav } from "@/components/layout/user-nav";
 import { ThemeToggle } from "@/components/layout/theme-toggle";
-import { PackageSearch, Upload, Table, LayoutDashboard } from "lucide-react";
+import { PackageSearch, Table, LayoutDashboard } from "lucide-react";
 import Link from "next/link";
 import { SessionPayload } from "@/types";
 import { Button } from "../ui/button";
@@ -30,14 +30,6 @@ export function Header({ user }: HeaderProps) {
               Ver em Tabela
             </Link>
           </Button>
-        {user?.role === 'admin' && (
-          <Button variant="outline" size="sm" asChild>
-            <Link href="/dashboard/upload">
-              <Upload className="mr-2 h-4 w-4"/>
-              Upload de CSV
-            </Link>
-          </Button>
-        )}
         <ThemeToggle />
         <UserNav user={user} />
       </nav>
