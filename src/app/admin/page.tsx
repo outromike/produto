@@ -3,16 +3,10 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { Upload, Shield, Users } from "lucide-react";
-import { getSession } from "@/lib/auth";
-import { redirect } from "next/navigation";
 
+// A verificação de sessão foi movida para o layout.
+// A página agora é apenas responsável por exibir o conteúdo.
 export default async function AdminDashboardPage() {
-  const session = await getSession();
-  
-  if (!session?.user || session.user.role !== 'admin') {
-    redirect('/dashboard/products');
-  }
-
   return (
     <main className="container mx-auto max-w-4xl px-4 py-8 md:px-6">
       <div className="mb-6 flex items-center gap-4">
