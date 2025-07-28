@@ -2,7 +2,7 @@
 
 import { promises as fs } from 'fs';
 import path from 'path';
-import { ConferenceEntry, ReturnSchedule, StorageEntry } from '@/types';
+import { ConferenceEntry, ReturnSchedule, StorageEntry, User } from '@/types';
 import { ReceivingClient } from '@/components/receiving/receiving-client';
 import { getProducts } from '@/lib/products';
 import { getSession } from "@/lib/auth";
@@ -119,6 +119,7 @@ export default async function ReceivingPage() {
     return (
         <main className="container mx-auto px-4 py-8 md:px-6">
             <ReceivingClient 
+                user={session.user}
                 initialSummaries={carrierSummaries} 
                 allSchedules={allSchedules}
                 allProducts={allProducts}

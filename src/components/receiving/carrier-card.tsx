@@ -15,24 +15,29 @@ import {
     AlertDialogTitle,
     AlertDialogTrigger,
   } from "@/components/ui/alert-dialog"
-import { Truck, Box, FileText, CheckCircle2, Warehouse, Send } from "lucide-react";
+import { Truck, Box, FileText, CheckCircle2, Warehouse, Send, Lock } from "lucide-react";
 import { Button } from "../ui/button";
 import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { parseISO, format } from "date-fns";
 import { DestinationModal } from "./destination-modal";
+import { Permissions } from "@/types";
 
 interface CarrierCardProps {
     summary: CarrierScheduleSummary;
     onAllocate: (summary: CarrierScheduleSummary) => void;
+    permissions: Permissions;
 }
 
-export function CarrierCard({ summary, onAllocate }: CarrierCardProps) {
+export function CarrierCard({ summary, onAllocate, permissions }: CarrierCardProps) {
     const [isAlertOpen, setIsAlertOpen] = useState(false);
     const [isDestinationModalOpen, setIsDestinationModalOpen] = useState(false);
     const router = useRouter();
 
+    const canStartConference = permissions.conference;
+
     const handleStartConference = () => {
+        if (!canStartConference) return;
         router.push(`/dashboard/receiving/${encodeURIComponent(summary.carrier)}`);
     }
     
@@ -42,7 +47,8 @@ export function CarrierCard({ summary, onAllocate }: CarrierCardProps) {
 
     const cardClasses = cn(
         "flex h-full flex-col overflow-hidden transition-all duration-300",
-        !summary.isConferenceCompleted && "cursor-pointer hover:shadow-lg hover:-translate-y-1",
+        !summary.isConferenceCompleted && canStartConference && "cursor-pointer hover:shadow-lg hover:-translate-y-1",
+        !canStartConference && !summary.isConferenceCompleted && "cursor-not-allowed opacity-80",
         summary.isConferenceCompleted && !summary.isAllocationCompleted && "border-green-500/50 bg-green-500/10",
         summary.isAllocationCompleted && "border-blue-500/50 bg-blue-500/10 opacity-70"
     );
@@ -56,7 +62,7 @@ export function CarrierCard({ summary, onAllocate }: CarrierCardProps) {
     return (
         <>
             <AlertDialog open={isAlertOpen} onOpenChange={setIsAlertOpen}>
-                <AlertDialogTrigger asChild disabled={summary.isConferenceCompleted}>
+                <AlertDialogTrigger asChild disabled={summary.isConferenceCompleted || !canStartConference}>
                      <Card className={cardClasses}>
                         <CardHeader className="flex flex-row items-center gap-4 space-y-0 pb-4">
                             <div className={iconContainerClasses}>
@@ -68,6 +74,12 @@ export function CarrierCard({ summary, onAllocate }: CarrierCardProps) {
                             </div>
                         </CardHeader>
                         <CardContent className="flex-grow space-y-4">
+                             {!canStartConference && !summary.isConferenceCompleted && (
+                                <div className="flex items-center gap-2 text-xs text-amber-600">
+                                    <Lock className="h-3 w-3" />
+                                    <span>Sem permissão para conferir</span>
+                                </div>
+                            )}
                             <div className="flex items-center justify-between text-sm">
                                 <div className="flex items-center gap-2 text-muted-foreground">
                                     <FileText className="h-4 w-4" />

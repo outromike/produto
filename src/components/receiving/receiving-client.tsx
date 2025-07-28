@@ -6,7 +6,7 @@ import { CarrierScheduleSummary } from "@/app/dashboard/receiving/page";
 import { CarrierCard } from "./carrier-card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { AllocationWizardModal } from "@/components/rua08/allocation-wizard-modal";
-import { Product, ReturnSchedule, StorageEntry } from "@/types";
+import { Product, ReturnSchedule, StorageEntry, User } from "@/types";
 import { DatePicker } from "../ui/date-picker";
 import { isToday, parseISO, isSameDay } from 'date-fns';
 import { ScheduleTable } from "../schedules/schedule-table";
@@ -19,6 +19,7 @@ interface ReceivingClientProps {
   conferencedNfds: Set<string>;
   rejectedNfds: Set<string>;
   nfdReceivedVolumes: { [key: string]: number };
+  user: User;
 }
 
 export function ReceivingClient({ 
@@ -28,7 +29,8 @@ export function ReceivingClient({
     initialStorageData,
     conferencedNfds,
     rejectedNfds,
-    nfdReceivedVolumes
+    nfdReceivedVolumes,
+    user
 }: ReceivingClientProps) {
   const [summaries, setSummaries] = useState(initialSummaries);
   const [isAllocationModalOpen, setIsAllocationModalOpen] = useState(false);
@@ -88,7 +90,12 @@ export function ReceivingClient({
             {pendingSummaries.length > 0 ? (
               <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
                 {pendingSummaries.map((summary) => (
-                  <CarrierCard key={`${summary.carrier}-${summary.date}`} summary={summary} onAllocate={handleOpenAllocationModal} />
+                  <CarrierCard 
+                    key={`${summary.carrier}-${summary.date}`} 
+                    summary={summary} 
+                    onAllocate={handleOpenAllocationModal} 
+                    permissions={user.permissions}
+                  />
                 ))}
               </div>
             ) : (
@@ -105,7 +112,7 @@ export function ReceivingClient({
              {completedSummaries.length > 0 ? (
               <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
                 {completedSummaries.map((summary) => (
-                  <CarrierCard key={`${summary.carrier}-${summary.date}`} summary={summary} onAllocate={() => {}} />
+                  <CarrierCard key={`${summary.carrier}-${summary.date}`} summary={summary} onAllocate={() => {}} permissions={user.permissions}/>
                 ))}
               </div>
             ) : (

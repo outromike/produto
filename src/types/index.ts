@@ -41,12 +41,12 @@ export type User = {
 };
 
 export type SessionPayload = {
-  user: User & {
+  user?: User & {
     username: string;
     role: 'admin' | 'user';
     permissions: Permissions;
   };
-  expires: Date;
+  expires?: Date;
 };
 
 export type ReturnSchedule = {
