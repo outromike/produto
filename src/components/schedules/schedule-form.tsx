@@ -39,6 +39,8 @@ type ScheduleFormValues = z.infer<typeof formSchema>;
 
 interface ScheduleFormProps {
     setOpen: (open: boolean) => void;
+    onScheduleUpdate: (schedule: ReturnSchedule) => void;
+    onSchedulesAdd: (schedules: ReturnSchedule[]) => void;
     initialData?: ReturnSchedule | null;
 }
 
@@ -59,7 +61,7 @@ const motivosDevolucao = [
 
 const estadosProduto = ["Avariado", "Descarte", "Produto Bom", "___"];
 
-export function ScheduleForm({ setOpen, initialData }: ScheduleFormProps) {
+export function ScheduleForm({ setOpen, initialData, onScheduleUpdate, onSchedulesAdd }: ScheduleFormProps) {
   const { toast } = useToast();
   const form = useForm<ScheduleFormValues>({
     resolver: zodResolver(formSchema),
@@ -84,18 +86,19 @@ export function ScheduleForm({ setOpen, initialData }: ScheduleFormProps) {
   const onSubmit = async (data: ScheduleFormValues) => {
     if (initialData) {
         const result = await updateSchedule(initialData.id, data);
-        if (result.success) {
+        if (result.success && result.updatedSchedule) {
             toast({ title: "Sucesso!", description: "Agendamento atualizado com sucesso." });
+            onScheduleUpdate(result.updatedSchedule);
             setOpen(false);
         } else {
             toast({ title: "Erro", description: result.error || "Não foi possível atualizar o agendamento.", variant: "destructive" });
         }
     } else {
         const result = await addSchedule(data);
-        if (result.success) {
-            const count = data.nfd.trim().split(/\s+/).filter(Boolean).length;
+        if (result.success && result.createdSchedules) {
+            const count = result.createdSchedules.length;
             toast({ title: "Sucesso!", description: `${count} agendamento(s) criado(s) com sucesso.` });
-            form.reset();
+            onSchedulesAdd(result.createdSchedules);
             setOpen(false);
         } else {
             toast({ title: "Erro", description: result.error || "Não foi possível criar o(s) agendamento(s).", variant: "destructive" });

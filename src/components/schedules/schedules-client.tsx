@@ -78,7 +78,9 @@ export function SchedulesClient({ initialSchedules }: SchedulesClientProps) {
   }, 300);
 
   const filteredSchedules = useMemo(() => {
-    return schedules.filter(s => {
+    let sortedSchedules = [...schedules].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+    
+    return sortedSchedules.filter(s => {
       const queryLower = filters.query.toLowerCase();
       const searchMatch = filters.query ? 
         s.customer.toLowerCase().includes(queryLower) ||
@@ -101,6 +103,14 @@ export function SchedulesClient({ initialSchedules }: SchedulesClientProps) {
   const handleEdit = (schedule: ReturnSchedule) => {
     setScheduleToEdit(schedule);
     setIsFormOpen(true);
+  };
+  
+  const handleScheduleUpdate = (updatedSchedule: ReturnSchedule) => {
+      setSchedules(prev => prev.map(s => s.id === updatedSchedule.id ? updatedSchedule : s));
+  };
+  
+  const handleSchedulesAdd = (newSchedules: ReturnSchedule[]) => {
+      setSchedules(prev => [...prev, ...newSchedules]);
   };
 
   const handleDeleteRequest = (schedule: ReturnSchedule) => {
@@ -141,21 +151,11 @@ export function SchedulesClient({ initialSchedules }: SchedulesClientProps) {
     setIsBulkDeleteAlertOpen(false);
   };
 
-  const handleDialogClose = (open: boolean) => {
-    setIsFormOpen(open);
-    if (!open) {
-        // Quando o formulário é fechado (seja criando ou editando),
-        // recarregamos a página para garantir que os dados mais recentes sejam mostrados.
-        // Isso é mais simples do que gerenciar o estado de adição/edição localmente.
-        window.location.reload();
-    }
-  }
-
   return (
     <div className="space-y-6">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <h1 className="text-3xl font-headline font-bold">Agendamentos de Devolução</h1>
-        <Dialog open={isFormOpen} onOpenChange={handleDialogClose}>
+        <Dialog open={isFormOpen} onOpenChange={setIsFormOpen}>
           <DialogTrigger asChild>
              <Button onClick={() => {
                 setScheduleToEdit(null);
@@ -169,7 +169,12 @@ export function SchedulesClient({ initialSchedules }: SchedulesClientProps) {
             <DialogHeader>
               <DialogTitle>{scheduleToEdit ? 'Editar Agendamento' : 'Criar Novo(s) Agendamento(s)'}</DialogTitle>
             </DialogHeader>
-            <ScheduleForm setOpen={setIsFormOpen} initialData={scheduleToEdit} />
+            <ScheduleForm 
+                setOpen={setIsFormOpen} 
+                initialData={scheduleToEdit}
+                onScheduleUpdate={handleScheduleUpdate}
+                onSchedulesAdd={handleSchedulesAdd}
+            />
           </DialogContent>
         </Dialog>
       </div>

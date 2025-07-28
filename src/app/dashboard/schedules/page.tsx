@@ -8,15 +8,12 @@ async function getSchedules(): Promise<ReturnSchedule[]> {
     const filePath = path.join(process.cwd(), 'src', 'data', 'agendamentos.json');
     try {
         const jsonData = await fs.readFile(filePath, 'utf-8');
-        const schedules: ReturnSchedule[] = JSON.parse(jsonData);
-        // Sort by date, most recent first
-        return schedules.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+        return JSON.parse(jsonData) as ReturnSchedule[];
     } catch (error) {
         console.error("Error reading agendamentos.json:", error);
         return [];
     }
 }
-
 
 export default async function SchedulesPage() {
     const schedules = await getSchedules();

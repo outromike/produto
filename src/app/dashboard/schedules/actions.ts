@@ -14,7 +14,7 @@ async function getSchedules(): Promise<ReturnSchedule[]> {
         return JSON.parse(jsonData) as ReturnSchedule[];
     } catch (error) {
         if (typeof error === 'object' && error !== null && 'code' in error && error.code === 'ENOENT') {
-            await fs.writeFile(SCHEDULES_FILE_PATH, '[]', 'utf-8'); // Cria o arquivo se não existir
+            await fs.writeFile(SCHEDULES_FILE_PATH, '[]', 'utf-8');
             return [];
         }
         console.error("Error reading agendamentos.json:", error);
@@ -25,11 +25,10 @@ async function getSchedules(): Promise<ReturnSchedule[]> {
 async function saveSchedules(schedules: ReturnSchedule[]): Promise<void> {
     const data = JSON.stringify(schedules, null, 2);
     await fs.writeFile(SCHEDULES_FILE_PATH, data, 'utf-8');
-    // A revalidação foi removida para delegar o controle de atualização para o cliente
+    // A revalidação foi removida para evitar problemas com a sessão
 }
 
-// Ação de servidor para adicionar um ou mais agendamentos
-export async function addSchedule(data: Omit<ReturnSchedule, 'id' | 'createdAt'>): Promise<{ success: boolean; error?: string }> {
+export async function addSchedule(data: Omit<ReturnSchedule, 'id' | 'createdAt'>): Promise<{ success: boolean; error?: string; createdSchedules?: ReturnSchedule[] }> {
   try {
     const allSchedules = await getSchedules();
     
@@ -42,12 +41,9 @@ export async function addSchedule(data: Omit<ReturnSchedule, 'id' | 'createdAt'>
 
     const newSchedules: ReturnSchedule[] = nfds.map((nfd, index) => {
         const newSchedule: ReturnSchedule = {
-            // Replica os dados do formulário para cada agendamento
             ...data,
-            // Atribui a NFD e a remessa correspondente
             nfd: nfd,
-            outgoingShipment: remessas[index] || '', // Usa a remessa correspondente ou uma string vazia
-            // Gera um ID e timestamp únicos
+            outgoingShipment: remessas[index] || '',
             id: `${new Date().getTime()}-${index}`,
             createdAt: new Date().toISOString(),
         };
@@ -56,16 +52,14 @@ export async function addSchedule(data: Omit<ReturnSchedule, 'id' | 'createdAt'>
 
     const updatedSchedules = [...allSchedules, ...newSchedules];
     await saveSchedules(updatedSchedules);
-    revalidatePath('/dashboard/schedules'); // Revalida após salvar
-    return { success: true };
+    return { success: true, createdSchedules: newSchedules };
   } catch (error) {
     console.error("Failed to add schedule(s):", error);
     return { success: false, error: "Não foi possível criar o(s) agendamento(s)." };
   }
 }
 
-
-export async function updateSchedule(id: string, data: Partial<Omit<ReturnSchedule, 'id' | 'createdAt'>>): Promise<{ success: boolean; error?: string }> {
+export async function updateSchedule(id: string, data: Partial<Omit<ReturnSchedule, 'id' | 'createdAt'>>): Promise<{ success: boolean; error?: string, updatedSchedule?: ReturnSchedule }> {
   try {
     const schedules = await getSchedules();
     const scheduleIndex = schedules.findIndex(s => s.id === id);
@@ -73,11 +67,11 @@ export async function updateSchedule(id: string, data: Partial<Omit<ReturnSchedu
     if (scheduleIndex === -1) {
       return { success: false, error: "Agendamento não encontrado." };
     }
-
-    schedules[scheduleIndex] = { ...schedules[scheduleIndex], ...data };
+    
+    const updatedSchedule = { ...schedules[scheduleIndex], ...data };
+    schedules[scheduleIndex] = updatedSchedule;
     await saveSchedules(schedules);
-    revalidatePath('/dashboard/schedules'); // Revalida após salvar
-    return { success: true };
+    return { success: true, updatedSchedule };
   } catch (error) {
     console.error("Failed to update schedule:", error);
     return { success: false, error: "Não foi possível atualizar o agendamento." };
@@ -94,7 +88,6 @@ export async function deleteSchedule(id: string): Promise<{ success: boolean; er
     }
 
     await saveSchedules(updatedSchedules);
-    revalidatePath('/dashboard/schedules'); // Revalida após salvar
     return { success: true };
   } catch (error) {
     console.error("Failed to delete schedule:", error);
@@ -112,11 +105,9 @@ export async function deleteSchedules(ids: string[]): Promise<{ success: boolean
       }
   
       await saveSchedules(updatedSchedules);
-      revalidatePath('/dashboard/schedules'); // Revalida após salvar
       return { success: true };
     } catch (error) {
       console.error("Failed to delete schedules:", error);
       return { success: false, error: "Não foi possível excluir os agendamentos selecionados." };
     }
   }
-
