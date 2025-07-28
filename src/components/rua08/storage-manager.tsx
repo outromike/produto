@@ -17,7 +17,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Loader2, PlusCircle, Trash2, CheckIcon } from "lucide-react";
+import { Loader2, PlusCircle, Trash2, CheckIcon, ChevronsUpDown } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useDebouncedCallback } from "use-debounce";
 
@@ -43,6 +43,18 @@ interface StorageManagerProps {
     initialStorageData: StorageEntry[];
 }
 
+const buildings = [
+    "111", "109", "107", "105", "103", "101", "99", "97", "95", "93", "91", "89",
+    "87", "85", "83", "81", "79", "77", "75", "73"
+].map(b => ({ value: b, label: b }));
+
+const statuses = [
+    "Produto Bom OK", "Produto Bom SEM BDV", "Produto Bom Ag. Fiscal",
+    "Descarte OK", "Descarte SEM BDV", "Descarte Ag. Fiscal",
+    "Correios", "Vazio", "Outro"
+];
+
+
 export function StorageManager({ initialProducts, initialStorageData }: StorageManagerProps) {
     const { toast } = useToast();
     const [isPending, startTransition] = useTransition();
@@ -50,7 +62,8 @@ export function StorageManager({ initialProducts, initialStorageData }: StorageM
 
     const [productQuery, setProductQuery] = useState("");
     const [productSuggestions, setProductSuggestions] = useState<Product[]>([]);
-    const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+    const [isProductPopoverOpen, setIsProductPopoverOpen] = useState(false);
+    const [isBuildingPopoverOpen, setIsBuildingPopoverOpen] = useState(false);
 
     const form = useForm<StorageFormValues>({
         resolver: zodResolver(formSchema),
@@ -62,7 +75,7 @@ export function StorageManager({ initialProducts, initialStorageData }: StorageM
             shipment: "",
             product: { sku: "", description: "" },
             quantity: 1,
-            status: "Alocado"
+            status: ""
         },
     });
 
@@ -75,7 +88,7 @@ export function StorageManager({ initialProducts, initialStorageData }: StorageM
             p.description.toLowerCase().includes(lowerCaseQuery)
           ).slice(0, 10);
           setProductSuggestions(results);
-          if (results.length > 0) setIsPopoverOpen(true);
+          if (results.length > 0) setIsProductPopoverOpen(true);
         } else {
             setProductSuggestions([]);
         }
@@ -90,7 +103,7 @@ export function StorageManager({ initialProducts, initialStorageData }: StorageM
         form.setValue("product", { sku: product.sku, description: product.description });
         setProductQuery(product.description);
         setProductSuggestions([]);
-        setIsPopoverOpen(false);
+        setIsProductPopoverOpen(false);
     };
 
     const onSubmit = (values: StorageFormValues) => {
@@ -138,12 +151,68 @@ export function StorageManager({ initialProducts, initialStorageData }: StorageM
                     <Form {...form}>
                         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
                             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                                <FormField control={form.control} name="building" render={({ field }) => (
-                                    <FormItem><FormLabel>Prédio</FormLabel><FormControl><Input placeholder="Ex: 111" {...field} /></FormControl><FormMessage /></FormItem>
-                                )}/>
+                                <FormField
+                                    control={form.control}
+                                    name="building"
+                                    render={({ field }) => (
+                                    <FormItem className="flex flex-col">
+                                        <FormLabel>Prédio</FormLabel>
+                                        <Popover open={isBuildingPopoverOpen} onOpenChange={setIsBuildingPopoverOpen}>
+                                            <PopoverTrigger asChild>
+                                                <FormControl>
+                                                <Button
+                                                    variant="outline"
+                                                    role="combobox"
+                                                    className={cn(
+                                                    "justify-between",
+                                                    !field.value && "text-muted-foreground"
+                                                    )}
+                                                >
+                                                    {field.value
+                                                    ? buildings.find(
+                                                        (b) => b.value === field.value
+                                                      )?.label
+                                                    : "Selecione o prédio"}
+                                                    <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                                                </Button>
+                                                </FormControl>
+                                            </PopoverTrigger>
+                                            <PopoverContent className="p-0">
+                                                <Command>
+                                                <CommandInput placeholder="Buscar prédio..." />
+                                                <CommandEmpty>Nenhum prédio encontrado.</CommandEmpty>
+                                                <CommandGroup>
+                                                    {buildings.map((b) => (
+                                                    <CommandItem
+                                                        value={b.label}
+                                                        key={b.value}
+                                                        onSelect={() => {
+                                                        form.setValue("building", b.value)
+                                                        setIsBuildingPopoverOpen(false)
+                                                        }}
+                                                    >
+                                                        <CheckIcon
+                                                        className={cn(
+                                                            "mr-2 h-4 w-4",
+                                                            b.value === field.value
+                                                            ? "opacity-100"
+                                                            : "opacity-0"
+                                                        )}
+                                                        />
+                                                        {b.label}
+                                                    </CommandItem>
+                                                    ))}
+                                                </CommandGroup>
+                                                </Command>
+                                            </PopoverContent>
+                                        </Popover>
+                                        <FormMessage />
+                                    </FormItem>
+                                    )}
+                                />
                                  <FormField control={form.control} name="level" render={({ field }) => (
                                     <FormItem><FormLabel>Nível</FormLabel>
-                                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                    <Select onValueChange={field.onChange} value={field.value}>
                                         <FormControl><SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger></FormControl>
                                         <SelectContent>
                                             <SelectItem value="1A">1A</SelectItem><SelectItem value="1B">1B</SelectItem><SelectItem value="2">2</SelectItem>
@@ -164,7 +233,7 @@ export function StorageManager({ initialProducts, initialStorageData }: StorageM
                                 )}/>
                                 <FormField control={form.control} name="product.sku" render={({ field }) => (
                                     <FormItem className="flex flex-col lg:col-span-2"><FormLabel>Produto</FormLabel>
-                                        <Popover open={isPopoverOpen} onOpenChange={setIsPopoverOpen}><PopoverTrigger asChild><FormControl>
+                                        <Popover open={isProductPopoverOpen} onOpenChange={setIsProductPopoverOpen}><PopoverTrigger asChild><FormControl>
                                             <Input placeholder="SKU, Item ou Descrição..." value={productQuery} onChange={(e) => handleProductSearch(e.target.value)} autoComplete="off" />
                                         </FormControl></PopoverTrigger>
                                         <PopoverContent className="p-0 w-[--radix-popover-trigger-width]" align="start">
@@ -186,11 +255,10 @@ export function StorageManager({ initialProducts, initialStorageData }: StorageM
                                 )}/>
                                 <FormField control={form.control} name="status" render={({ field }) => (
                                     <FormItem><FormLabel>Status</FormLabel>
-                                    <Select onValueChange={field.onChange} defaultValue={field.value}>
-                                        <FormControl><SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger></FormControl>
+                                    <Select onValueChange={field.onChange} value={field.value}>
+                                        <FormControl><SelectTrigger><SelectValue placeholder="Selecione o status" /></SelectTrigger></FormControl>
                                         <SelectContent>
-                                            <SelectItem value="Alocado">Alocado</SelectItem><SelectItem value="Em trânsito">Em trânsito</SelectItem>
-                                            <SelectItem value="Aguardando">Aguardando</SelectItem>
+                                            {statuses.map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}
                                         </SelectContent>
                                     </Select><FormMessage /></FormItem>
                                 )}/>
@@ -241,4 +309,3 @@ export function StorageManager({ initialProducts, initialStorageData }: StorageM
         </div>
     );
 }
-
