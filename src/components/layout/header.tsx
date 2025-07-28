@@ -1,6 +1,3 @@
-
-"use client";
-
 import { UserNav } from "@/components/layout/user-nav";
 import { ThemeToggle } from "@/components/layout/theme-toggle";
 import { Button } from "@/components/ui/button";
@@ -8,10 +5,11 @@ import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { PackageSearch, Menu } from "lucide-react";
 import Link from "next/link";
 import { MainNav } from "./main-nav";
-import { useSession } from "@/hooks/use-session";
+import { getSession } from "@/lib/auth";
 
-export function Header() {
-  const { user } = useSession();
+export async function Header() {
+  const session = await getSession();
+  const user = session.user;
 
   return (
     <header className="sticky top-0 z-50 flex h-16 items-center gap-4 border-b bg-background/80 px-4 backdrop-blur md:px-6">

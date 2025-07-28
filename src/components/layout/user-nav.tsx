@@ -18,7 +18,6 @@ import { logout } from "@/app/login/actions";
 import { LogOut, Shield, UserCircle, Home, AreaChart, CalendarClock, Inbox, PackageSearch, FileText } from "lucide-react";
 import { useTransition } from "react";
 import Link from "next/link";
-import { useSession } from "@/hooks/use-session";
 
 const mobileNavLinks = [
     { href: "/dashboard", icon: Home, label: "Início" },
@@ -35,8 +34,6 @@ export function UserNav({ user }: { user: User | null }) {
     const handleLogout = () => {
         startTransition(async () => {
             await logout();
-            sessionStorage.removeItem('user-session');
-            window.dispatchEvent(new Event('session-changed'));
         });
     }
 
