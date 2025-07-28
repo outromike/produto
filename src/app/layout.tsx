@@ -8,8 +8,8 @@ const inter = Inter({ subsets: ['latin'], variable: '--font-inter' });
 const spaceGrotesk = Space_Grotesk({ subsets: ['latin'], variable: '--font-space-grotesk' });
 
 export const metadata: Metadata = {
-  title: 'Consulta de Produtos',
-  description: 'Consulte produtos de arquivos CSV.',
+  title: 'ELGIN APP',
+  description: 'Aplicação interna da Elgin para gerenciamento de produtos e logística.',
 };
 
 export default function RootLayout({

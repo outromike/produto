@@ -7,7 +7,6 @@ import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { PackageSearch, Menu } from "lucide-react";
 import Link from "next/link";
-import { getSession } from "@/lib/auth";
 import { MainNav } from "./main-nav";
 import { useSession } from "@/hooks/use-session";
 
@@ -16,13 +15,13 @@ export function Header() {
 
   return (
     <header className="sticky top-0 z-50 flex h-16 items-center gap-4 border-b bg-background/80 px-4 backdrop-blur md:px-6">
-      <nav className="hidden flex-col gap-6 text-lg font-medium md:flex md:flex-row md:items-center md:gap-5 md:text-sm lg:gap-6">
+      <div className="hidden flex-col gap-6 text-lg font-medium md:flex md:flex-row md:items-center md:gap-5 md:text-sm lg:gap-6">
         <Link href="/dashboard" className="flex items-center gap-2 font-headline text-lg font-semibold">
           <PackageSearch className="h-6 w-6 text-primary" />
-          <span className="sr-only">Consulta de Produtos</span>
+          <span className="sr-only">ELGIN APP</span>
         </Link>
         <MainNav />
-      </nav>
+      </div>
       
       <Sheet>
         <SheetTrigger asChild>
@@ -35,7 +34,7 @@ export function Header() {
           <nav className="grid gap-6 text-lg font-medium">
              <Link href="/dashboard" className="flex items-center gap-2 font-headline text-lg font-semibold">
                 <PackageSearch className="h-6 w-6 text-primary" />
-                <span>Consulta de Produtos</span>
+                <span>ELGIN APP</span>
             </Link>
             <MainNav />
           </nav>
