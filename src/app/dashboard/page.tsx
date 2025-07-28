@@ -1,52 +1,68 @@
 
 import Link from 'next/link';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { AreaChart, PackageSearch, CalendarClock, Inbox, Warehouse, FileText } from 'lucide-react';
+import { AreaChart, PackageSearch, CalendarClock, Inbox, Warehouse, FileText, Settings } from 'lucide-react';
+import { getSession } from '@/lib/auth';
+import type { Permissions } from '@/types';
 
-const hubLinks = [
+const allHubLinks = [
     {
       href: "/dashboard/analytics",
       icon: AreaChart,
       title: "Dashboard de Análises",
       description: "Visualize gráficos e métricas sobre o inventário de produtos.",
+      permission: 'dashboard' as keyof Permissions,
     },
     {
       href: "/dashboard/products",
       icon: PackageSearch,
       title: "Consulta de Produtos",
       description: "Pesquise, filtre e explore todos os produtos cadastrados.",
+      permission: 'products' as keyof Permissions,
     },
     {
         href: "/dashboard/schedules",
         icon: CalendarClock,
-        label: "Agendamentos",
         title: "Agendamentos",
         description: "Gerencie e crie novos agendamentos de devolução de notas.",
+        permission: 'schedules' as keyof Permissions,
     },
     {
         href: "/dashboard/receiving",
         icon: Inbox,
-        label: "Recebimento",
         title: "Recebimento",
         description: "Inicie e acompanhe a conferência de notas fiscais recebidas.",
+        permission: 'receiving' as keyof Permissions,
     },
     {
       href: "/dashboard/rua08",
       icon: Warehouse,
-      label: "Rua 08",
       title: "Alocação - Rua 08",
       description: "Visualize e gerencie a alocação de produtos no armazém.",
+      permission: 'allocation' as keyof Permissions,
+    },
+    {
+      href: "/dashboard/products/management",
+      icon: Settings,
+      title: "Gerenciar Produtos",
+      description: "Adicione, edite ou remova produtos da base de dados.",
+      permission: 'productManagement' as keyof Permissions,
     },
     {
       href: "/dashboard/reports",
       icon: FileText,
-      label: "Relatórios",
       title: "Exportar Relatórios",
       description: "Exporte dados de agendamentos, estoque e recebimentos para Excel.",
+      permission: 'reports' as keyof Permissions,
     }
   ];
 
-export default function DashboardHubPage() {
+export default async function DashboardHubPage() {
+    const session = await getSession();
+    const userPermissions = session.user?.permissions || {};
+
+    const visibleLinks = allHubLinks.filter(link => userPermissions[link.permission]);
+
   return (
     <main className="container mx-auto max-w-5xl px-4 py-8 md:px-6">
         <div className="mb-8 space-y-2">
@@ -54,7 +70,7 @@ export default function DashboardHubPage() {
             <p className="text-lg text-muted-foreground">Selecione uma das opções abaixo para começar.</p>
         </div>
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-            {hubLinks.map((link) => (
+            {visibleLinks.map((link) => (
                  <Link key={link.href} href={link.href} className="group">
                     <Card className="flex h-full flex-col transition-all duration-300 group-hover:shadow-lg group-hover:-translate-y-1">
                         <CardHeader>
@@ -73,3 +89,4 @@ export default function DashboardHubPage() {
     </main>
   );
 }
+
