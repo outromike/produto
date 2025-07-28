@@ -68,11 +68,11 @@ const parseCSV = (csvContent: string): ReturnSchedule[] => {
     }).filter(s => s.date || s.carrier || s.client); // Filter out any empty rows
 };
 
-export async function uploadReturnSchedules(formData: FormData): Promise<{ error?: string }> {
+export async function uploadReturnSchedules(formData: FormData): Promise<{ success: boolean, error?: string }> {
     const file = formData.get('file') as File | null;
 
     if (!file || file.size === 0) {
-        return { error: 'O arquivo de agendamento de devolução deve ser enviado.' };
+        return { success: false, error: 'O arquivo de agendamento de devolução deve ser enviado.' };
     }
 
     try {
@@ -81,9 +81,12 @@ export async function uploadReturnSchedules(formData: FormData): Promise<{ error
         let existingSchedules: ReturnSchedule[] = [];
         try {
             const currentData = await fs.readFile(filePath, 'utf-8');
-            existingSchedules = JSON.parse(currentData);
+            if (currentData) {
+                existingSchedules = JSON.parse(currentData);
+            }
         } catch (error) {
             // If the file does not exist, we continue with an empty array, which is expected on the first run.
+            console.log("devolucoes.json not found, creating a new one.");
         }
 
         const buffer = Buffer.from(await file.arrayBuffer());
@@ -98,10 +101,10 @@ export async function uploadReturnSchedules(formData: FormData): Promise<{ error
     } catch (error) {
         console.error('File processing error:', error);
         if (error instanceof Error) {
-            return { error: `Ocorreu um erro ao processar o arquivo: ${error.message}` };
+            return { success: false, error: `Ocorreu um erro ao processar o arquivo: ${error.message}` };
         }
-        return { error: 'Ocorreu um erro desconhecido ao processar o arquivo.' };
+        return { success: false, error: 'Ocorreu um erro desconhecido ao processar o arquivo.' };
     }
     
-    redirect('/admin');
+    return { success: true };
 }

@@ -18,6 +18,7 @@ import { useState, useTransition } from "react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { AlertCircle, Loader2 } from "lucide-react";
 import { uploadReturnSchedules } from "./actions";
+import { useRouter } from "next/navigation";
 
 const formSchema = z.object({
   file: z.custom<File | undefined>().refine(file => file instanceof File && file.size > 0, {
@@ -28,6 +29,7 @@ const formSchema = z.object({
 export function DevolucaoUploadForm() {
   const [error, setError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
+  const router = useRouter();
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -46,7 +48,11 @@ export function DevolucaoUploadForm() {
 
     startTransition(async () => {
       const result = await uploadReturnSchedules(formData);
-      if (result?.error) {
+      if (result.success) {
+        // On success, redirect the user using the client-side router
+        router.push('/admin');
+        router.refresh(); // Refresh the page to reflect changes if necessary
+      } else if (result.error) {
         setError(result.error);
       }
     });
