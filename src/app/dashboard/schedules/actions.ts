@@ -6,46 +6,75 @@ import path from 'path';
 import { ReturnSchedule } from '@/types';
 import { revalidatePath } from 'next/cache';
 
+const SCHEDULES_FILE_PATH = path.join(process.cwd(), 'src', 'data', 'agendamentos.json');
+
 async function getSchedules(): Promise<ReturnSchedule[]> {
-    const filePath = path.join(process.cwd(), 'src', 'data', 'agendamentos.json');
     try {
-        const jsonData = await fs.readFile(filePath, 'utf-8');
-        return JSON.parse(jsonData);
+        const jsonData = await fs.readFile(SCHEDULES_FILE_PATH, 'utf-8');
+        return JSON.parse(jsonData) as ReturnSchedule[];
     } catch (error) {
-        // If file doesn't exist, return empty array
         if (error.code === 'ENOENT') {
-            return [];
+            return []; // Retorna um array vazio se o arquivo não existir
         }
         console.error("Error reading agendamentos.json:", error);
-        return [];
+        throw new Error("Não foi possível ler os agendamentos.");
     }
 }
 
 async function saveSchedules(schedules: ReturnSchedule[]): Promise<void> {
-    const filePath = path.join(process.cwd(), 'src', 'data', 'agendamentos.json');
     const data = JSON.stringify(schedules, null, 2);
-    await fs.writeFile(filePath, data, 'utf-8');
+    await fs.writeFile(SCHEDULES_FILE_PATH, data, 'utf-8');
+    revalidatePath('/dashboard/schedules'); // Revalida o cache
 }
 
 export async function addSchedule(data: Omit<ReturnSchedule, 'id' | 'createdAt'>): Promise<{ success: boolean; error?: string }> {
   try {
     const schedules = await getSchedules();
-    
     const newSchedule: ReturnSchedule = {
       ...data,
-      id: new Date().getTime().toString(), // Simple unique ID
+      id: new Date().getTime().toString(),
       createdAt: new Date().toISOString(),
     };
-
     schedules.push(newSchedule);
     await saveSchedules(schedules);
-    
-    // Revalidate the path to trigger data refetch on the client
-    revalidatePath('/dashboard/schedules');
-
     return { success: true };
   } catch (error) {
     console.error("Failed to add schedule:", error);
-    return { success: false, error: "Não foi possível salvar o agendamento." };
+    return { success: false, error: "Não foi possível criar o agendamento." };
+  }
+}
+
+export async function updateSchedule(id: string, data: Partial<Omit<ReturnSchedule, 'id' | 'createdAt'>>): Promise<{ success: boolean; error?: string }> {
+  try {
+    const schedules = await getSchedules();
+    const scheduleIndex = schedules.findIndex(s => s.id === id);
+
+    if (scheduleIndex === -1) {
+      return { success: false, error: "Agendamento não encontrado." };
+    }
+
+    schedules[scheduleIndex] = { ...schedules[scheduleIndex], ...data };
+    await saveSchedules(schedules);
+    return { success: true };
+  } catch (error) {
+    console.error("Failed to update schedule:", error);
+    return { success: false, error: "Não foi possível atualizar o agendamento." };
+  }
+}
+
+export async function deleteSchedule(id: string): Promise<{ success: boolean; error?: string }> {
+  try {
+    const schedules = await getSchedules();
+    const updatedSchedules = schedules.filter(s => s.id !== id);
+
+    if (schedules.length === updatedSchedules.length) {
+        return { success: false, error: "Agendamento não encontrado para exclusão." };
+    }
+
+    await saveSchedules(updatedSchedules);
+    return { success: true };
+  } catch (error) {
+    console.error("Failed to delete schedule:", error);
+    return { success: false, error: "Não foi possível excluir o agendamento." };
   }
 }

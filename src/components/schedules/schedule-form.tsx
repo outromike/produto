@@ -15,8 +15,9 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
-import { addSchedule } from "@/app/dashboard/schedules/actions";
+import { addSchedule, updateSchedule } from "@/app/dashboard/schedules/actions";
 import { Loader2 } from "lucide-react";
+import { ReturnSchedule } from "@/types";
 
 const formSchema = z.object({
   date: z.string().min(1, "A data é obrigatória."),
@@ -36,13 +37,17 @@ type ScheduleFormValues = z.infer<typeof formSchema>;
 
 interface ScheduleFormProps {
     setOpen: (open: boolean) => void;
+    initialData?: ReturnSchedule;
 }
 
-export function ScheduleForm({ setOpen }: ScheduleFormProps) {
+export function ScheduleForm({ setOpen, initialData }: ScheduleFormProps) {
   const { toast } = useToast();
   const form = useForm<ScheduleFormValues>({
     resolver: zodResolver(formSchema),
-    defaultValues: {
+    defaultValues: initialData ? {
+        ...initialData,
+        date: initialData.date.split('T')[0] // Garante que a data esteja no formato YYYY-MM-DD
+    } : {
       date: new Date().toISOString().split('T')[0],
       carrier: "",
       outgoingShipment: "",
@@ -58,11 +63,14 @@ export function ScheduleForm({ setOpen }: ScheduleFormProps) {
   });
 
   const onSubmit = async (data: ScheduleFormValues) => {
-    const result = await addSchedule(data);
+    const result = initialData
+      ? await updateSchedule(initialData.id, data)
+      : await addSchedule(data);
+
     if (result.success) {
       toast({
         title: "Sucesso!",
-        description: "Agendamento criado com sucesso.",
+        description: `Agendamento ${initialData ? 'atualizado' : 'criado'} com sucesso.`,
         variant: 'default'
       });
       form.reset();
@@ -70,7 +78,7 @@ export function ScheduleForm({ setOpen }: ScheduleFormProps) {
     } else {
       toast({
         title: "Erro",
-        description: result.error || "Não foi possível criar o agendamento.",
+        description: result.error || `Não foi possível ${initialData ? 'atualizar' : 'criar'} o agendamento.`,
         variant: "destructive",
       });
     }
@@ -161,7 +169,7 @@ export function ScheduleForm({ setOpen }: ScheduleFormProps) {
         <div className="flex justify-end pt-4">
           <Button type="submit" disabled={form.formState.isSubmitting}>
             {form.formState.isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-            Salvar Agendamento
+            {initialData ? 'Salvar Alterações' : 'Criar Agendamento'}
           </Button>
         </div>
       </form>
