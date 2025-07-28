@@ -50,3 +50,15 @@ export type ReturnSchedule = {
     invoiceVolume: number; // From 'VOL.NF.'
     createdAt: string; // Timestamp of creation
 };
+
+export type ConferenceEntry = {
+    id: string; // Unique identifier
+    scheduleId: string; // Links to the ReturnSchedule
+    nfd: string; // From the schedule
+    productSku: string;
+    productDescription: string;
+    receivedVolume: number;
+    productState: 'Produto Bom' | 'Descarte' | 'Avariado';
+    observations: string;
+    conferenceTimestamp: string; // ISO 8601 format
+};
