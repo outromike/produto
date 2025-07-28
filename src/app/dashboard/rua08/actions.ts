@@ -3,15 +3,15 @@
 
 import { promises as fs } from 'fs';
 import path from 'path';
-import { StorageLocation, StorageEntry } from '@/types';
+import { StorageEntry } from '@/types';
 
 const STORAGE_FILE_PATH = path.join(process.cwd(), 'src', 'data', 'rua08.json');
 
-async function getStorageData(): Promise<StorageLocation[]> {
+async function getStorageData(): Promise<StorageEntry[]> {
     try {
         await fs.access(STORAGE_FILE_PATH);
         const jsonData = await fs.readFile(STORAGE_FILE_PATH, 'utf-8');
-        return JSON.parse(jsonData) as StorageLocation[];
+        return JSON.parse(jsonData) as StorageEntry[];
     } catch (error) {
         if (typeof error === 'object' && error !== null && 'code' in error && error.code === 'ENOENT') {
             await fs.writeFile(STORAGE_FILE_PATH, '[]', 'utf-8');
@@ -22,70 +22,48 @@ async function getStorageData(): Promise<StorageLocation[]> {
     }
 }
 
-async function saveStorageData(locations: StorageLocation[]): Promise<void> {
-    const data = JSON.stringify(locations, null, 2);
+async function saveStorageData(entries: StorageEntry[]): Promise<void> {
+    const data = JSON.stringify(entries, null, 2);
     await fs.writeFile(STORAGE_FILE_PATH, data, 'utf-8');
 }
 
-export async function allocateProducts(locationId: string, entries: StorageEntry[]): Promise<{ success: boolean; error?: string, updatedLocation?: StorageLocation }> {
+export async function addStorageEntry(entry: StorageEntry): Promise<{ success: boolean; error?: string; createdEntry?: StorageEntry }> {
     try {
-        const allLocations = await getStorageData();
-        let location = allLocations.find(l => l.id === locationId);
+        const allEntries = await getStorageData();
+        
+        allEntries.push(entry);
 
-        if (!location) {
-            // Create a new location if it doesn't exist
-            location = {
-                id: locationId,
-                entries: [],
-                status: 'empty', 
-                capacity: 1 // Default capacity, can be changed later
-            };
-            allLocations.push(location);
-        }
+        await saveStorageData(allEntries);
         
-        // Add new entries, overwriting existing ones for the same product SKU and NFD for simplicity
-        entries.forEach(newEntry => {
-            const existingIndex = location!.entries.findIndex(
-                e => e.productSku === newEntry.productSku && e.nfd === newEntry.nfd
-            );
-            if (existingIndex > -1) {
-                location!.entries[existingIndex] = newEntry;
-            } else {
-                location!.entries.push(newEntry);
-            }
-        });
-        
-        // Update status - simple logic for now
-        location.status = location.entries.length > 0 ? 'partial' : 'empty';
-
-        await saveStorageData(allLocations);
-        
-        return { success: true, updatedLocation: location };
+        return { success: true, createdEntry: entry };
 
     } catch (error) {
-        console.error("Failed to allocate products:", error);
-        return { success: false, error: "Não foi possível alocar os produtos." };
+        console.error("Failed to add storage entry:", error);
+        if (error instanceof Error) {
+            return { success: false, error: error.message };
+        }
+        return { success: false, error: "Não foi possível adicionar a entrada de armazenamento." };
     }
 }
 
-export async function clearLocation(locationId: string): Promise<{ success: boolean; error?: string }> {
+export async function deleteStorageEntry(id: string): Promise<{ success: boolean; error?: string }> {
      try {
-        const allLocations = await getStorageData();
-        const locationIndex = allLocations.findIndex(l => l.id === locationId);
+        const allEntries = await getStorageData();
+        const updatedEntries = allEntries.filter(e => e.id !== id);
 
-        if (locationIndex === -1) {
-            return { success: false, error: "Localização não encontrada." };
+        if (allEntries.length === updatedEntries.length) {
+            return { success: false, error: "Entrada não encontrada para exclusão." };
         }
 
-        allLocations[locationIndex].entries = [];
-        allLocations[locationIndex].status = 'empty';
-
-        await saveStorageData(allLocations);
+        await saveStorageData(updatedEntries);
         
         return { success: true };
 
     } catch (error) {
-        console.error("Failed to clear location:", error);
-        return { success: false, error: "Não foi possível limpar a localização." };
+        console.error("Failed to delete storage entry:", error);
+        if (error instanceof Error) {
+            return { success: false, error: error.message };
+        }
+        return { success: false, error: "Não foi possível excluir a entrada de armazenamento." };
     }
 }

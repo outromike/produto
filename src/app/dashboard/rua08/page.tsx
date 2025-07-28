@@ -1,32 +1,20 @@
-
-// This page will be responsible for fetching all necessary data and passing it to the client component.
-
-import { Rua08Client } from "@/components/rua08/rua08-client";
+// src/app/dashboard/rua08/page.tsx
 import { promises as fs } from "fs";
 import path from "path";
-import { ConferenceEntry, StorageLocation, ReturnSchedule } from "@/types";
+import { Product, StorageEntry } from "@/types";
+import { getProducts } from "@/lib/products";
+import { StorageManager } from "@/components/rua08/storage-manager";
 
-async function getConferences(): Promise<ConferenceEntry[]> {
-    const filePath = path.join(process.cwd(), 'src', 'data', 'conferences.json');
-    try {
-        const jsonData = await fs.readFile(filePath, 'utf-8');
-        return JSON.parse(jsonData) as ConferenceEntry[];
-    } catch (error) {
-        if (typeof error === 'object' && error !== null && 'code' in error && error.code === 'ENOENT') {
-            return [];
-        }
-        console.error("Error reading conferences.json:", error);
-        return [];
-    }
-}
-
-async function getStorageData(): Promise<StorageLocation[]> {
+async function getStorageData(): Promise<StorageEntry[]> {
     const filePath = path.join(process.cwd(), 'src', 'data', 'rua08.json');
     try {
+        await fs.access(filePath);
         const jsonData = await fs.readFile(filePath, 'utf-8');
-        return JSON.parse(jsonData) as StorageLocation[];
+        return JSON.parse(jsonData) as StorageEntry[];
     } catch (error) {
-         if (typeof error === 'object' && error !== null && 'code' in error && error.code === 'ENOENT') {
+        if (typeof error === 'object' && error !== null && 'code' in error && error.code === 'ENOENT') {
+            // Se o arquivo não existe, cria um array vazio.
+            await fs.writeFile(filePath, '[]', 'utf-8');
             return [];
         }
         console.error("Error reading rua08.json:", error);
@@ -34,16 +22,14 @@ async function getStorageData(): Promise<StorageLocation[]> {
     }
 }
 
-
 export default async function Rua08Page() {
-
-    const conferences = await getConferences();
+    const products = await getProducts();
     const storageData = await getStorageData();
 
     return (
         <main className="container mx-auto px-4 py-8 md:px-6">
-            <Rua08Client 
-                initialConferences={conferences}
+            <StorageManager 
+                initialProducts={products}
                 initialStorageData={storageData}
             />
         </main>

@@ -64,13 +64,21 @@ export type ConferenceEntry = {
 };
 
 export type StorageEntry = {
+    id: string; // uuid
+    building: string;
+    level: string;
     nfd: string;
+    salesNote: string;
+    shipment: string;
     productSku: string;
     productDescription: string;
     quantity: number;
-    timestamp: string;
+    status: string;
+    allocatedAt: string; // ISO 8601 format
 };
 
+// This type is no longer needed with the table format.
+// We are storing individual entries now.
 export type StorageLocation = {
     id: string; // e.g., "111-6" for column 111, level 6
     entries: StorageEntry[];
