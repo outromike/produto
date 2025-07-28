@@ -6,11 +6,13 @@ import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { PackageSearch, Menu } from "lucide-react";
 import Link from "next/link";
 import { MainNav } from "./main-nav";
-import { getSession } from "@/lib/auth";
+import type { User } from "@/types";
 
-export async function Header() {
-  const session = await getSession();
+interface HeaderProps {
+  user: User | null;
+}
 
+export function Header({ user }: HeaderProps) {
   return (
     <header className="sticky top-0 z-50 flex h-16 items-center gap-4 border-b bg-background/80 px-4 backdrop-blur md:px-6">
       <div className="hidden flex-col gap-6 text-lg font-medium md:flex md:flex-row md:items-center md:gap-5 md:text-sm lg:gap-6">
@@ -41,7 +43,7 @@ export async function Header() {
 
       <div className="ml-auto flex items-center gap-2">
         <ThemeToggle />
-        <UserNav user={session.user} />
+        <UserNav user={user} />
       </div>
     </header>
   );

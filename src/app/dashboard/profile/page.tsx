@@ -6,9 +6,12 @@ import { UserCircle } from "lucide-react";
 import { redirect } from "next/navigation";
 
 export default async function ProfilePage() {
+    // A proteção da rota é feita pelo layout.tsx.
+    // Aqui, apenas buscamos a sessão para obter os dados do usuário.
     const session = await getSession();
-    
+
     if (!session.user) {
+        // Embora o layout já redirecione, esta é uma salvaguarda adicional.
         redirect('/login');
     }
 
