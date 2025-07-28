@@ -8,7 +8,7 @@ import { redirect } from 'next/navigation';
 
 // Helper to find header index with multiple possible names
 const findHeaderIndex = (headerRow: string[], possibleNames: string[]): number => {
-    for (const name of name) {
+    for (const name of possibleNames) {
         const index = headerRow.findIndex(header => header.trim().toLowerCase() === name.toLowerCase());
         if (index !== -1) return index;
     }
