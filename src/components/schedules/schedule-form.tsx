@@ -14,18 +14,20 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { addSchedule, updateSchedule } from "@/app/dashboard/schedules/actions";
-import { Loader2 } from "lucide-react";
+import { ClipboardPaste, Loader2 } from "lucide-react";
 import { ReturnSchedule } from "@/types";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 const formSchema = z.object({
   date: z.string().min(1, "A data é obrigatória."),
   carrier: z.string().min(1, "A transportadora é obrigatória."),
+  // Os campos de remessa e nfd agora são textareas e podem conter múltiplas linhas
   outgoingShipment: z.string().optional(),
   salesNote: z.string().optional(),
-  nfd: z.string().min(1, "O número da NFD é obrigatório."),
+  nfd: z.string().min(1, "Pelo menos uma NFD é obrigatória."),
   customer: z.string().min(1, "O nome do cliente é obrigatório."),
   bdv: z.string().optional(),
   ov: z.string().optional(),
@@ -38,7 +40,7 @@ type ScheduleFormValues = z.infer<typeof formSchema>;
 
 interface ScheduleFormProps {
     setOpen: (open: boolean) => void;
-    initialData?: ReturnSchedule;
+    initialData?: ReturnSchedule | null;
 }
 
 const transportadoras = [
@@ -64,7 +66,7 @@ export function ScheduleForm({ setOpen, initialData }: ScheduleFormProps) {
     resolver: zodResolver(formSchema),
     defaultValues: initialData ? {
         ...initialData,
-        date: initialData.date.split('T')[0] // Garante que a data esteja no formato YYYY-MM-DD
+        date: initialData.date.split('T')[0]
     } : {
       date: new Date().toISOString().split('T')[0],
       carrier: "",
@@ -81,24 +83,26 @@ export function ScheduleForm({ setOpen, initialData }: ScheduleFormProps) {
   });
 
   const onSubmit = async (data: ScheduleFormValues) => {
-    const result = initialData
-      ? await updateSchedule(initialData.id, data)
-      : await addSchedule(data);
-
-    if (result.success) {
-      toast({
-        title: "Sucesso!",
-        description: `Agendamento ${initialData ? 'atualizado' : 'criado'} com sucesso.`,
-        variant: 'default'
-      });
-      form.reset();
-      setOpen(false);
+    // Se 'initialData' existe, estamos editando. A edição em lote não é suportada.
+    if (initialData) {
+        const result = await updateSchedule(initialData.id, data);
+        if (result.success) {
+            toast({ title: "Sucesso!", description: "Agendamento atualizado com sucesso." });
+            setOpen(false);
+        } else {
+            toast({ title: "Erro", description: result.error || "Não foi possível atualizar o agendamento.", variant: "destructive" });
+        }
     } else {
-      toast({
-        title: "Erro",
-        description: result.error || `Não foi possível ${initialData ? 'atualizar' : 'criar'} o agendamento.`,
-        variant: "destructive",
-      });
+        // Lógica para criação em lote
+        const result = await addSchedule(data);
+        if (result.success) {
+            const count = data.nfd.trim().split('\n').length;
+            toast({ title: "Sucesso!", description: `${count} agendamento(s) criado(s) com sucesso.` });
+            form.reset();
+            setOpen(false);
+        } else {
+            toast({ title: "Erro", description: result.error || "Não foi possível criar o(s) agendamento(s).", variant: "destructive" });
+        }
     }
   };
 
@@ -136,24 +140,45 @@ export function ScheduleForm({ setOpen, initialData }: ScheduleFormProps) {
                     <FormMessage />
                 </FormItem>
             )}/>
-            <FormField control={form.control} name="nfd" render={({ field }) => (
+            
+            {/* Campos que aceitam múltiplos valores */}
+             <FormField control={form.control} name="nfd" render={({ field }) => (
                 <FormItem>
-                    <FormLabel>NFD (Nota de Devolução)</FormLabel>
-                    <FormControl><Input placeholder="Número da NFD" {...field} /></FormControl>
+                    <FormLabel className="flex items-center gap-2">
+                        NFD (Nota de Devolução)
+                        <ClipboardPaste className="h-4 w-4 text-muted-foreground" />
+                    </FormLabel>
+                    <FormControl>
+                        <Textarea 
+                            placeholder="Cole uma ou mais NFDs, uma por linha." 
+                            {...field}
+                            rows={initialData ? 1 : 3}
+                        />
+                    </FormControl>
                     <FormMessage />
                 </FormItem>
             )}/>
+             <FormField control={form.control} name="outgoingShipment" render={({ field }) => (
+                <FormItem>
+                     <FormLabel className="flex items-center gap-2">
+                        Remessa de Saída
+                        <ClipboardPaste className="h-4 w-4 text-muted-foreground" />
+                    </FormLabel>
+                    <FormControl>
+                        <Textarea 
+                            placeholder="Cole as remessas, uma por linha (opcional)." 
+                            {...field}
+                            rows={initialData ? 1 : 3}
+                        />
+                    </FormControl>
+                    <FormMessage />
+                </FormItem>
+            )}/>
+
             <FormField control={form.control} name="salesNote" render={({ field }) => (
                 <FormItem>
                     <FormLabel>Nota Venda</FormLabel>
                     <FormControl><Input placeholder="Número da nota de venda" {...field} /></FormControl>
-                    <FormMessage />
-                </FormItem>
-            )}/>
-            <FormField control={form.control} name="outgoingShipment" render={({ field }) => (
-                <FormItem>
-                    <FormLabel>Remessa de Saída</FormLabel>
-                    <FormControl><Input placeholder="Número da remessa" {...field} /></FormControl>
                     <FormMessage />
                 </FormItem>
             )}/>
@@ -214,11 +239,10 @@ export function ScheduleForm({ setOpen, initialData }: ScheduleFormProps) {
         <div className="flex justify-end pt-4">
           <Button type="submit" disabled={form.formState.isSubmitting}>
             {form.formState.isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-            {initialData ? 'Salvar Alterações' : 'Criar Agendamento'}
+            {initialData ? 'Salvar Alterações' : 'Criar Agendamento(s)'}
           </Button>
         </div>
       </form>
     </Form>
   );
 }
-

@@ -67,7 +67,6 @@ export function SchedulesClient({ initialSchedules }: SchedulesClientProps) {
             title: "Sucesso!",
             description: "Agendamento excluído com sucesso.",
         });
-        // Força a recarga da página para obter os dados atualizados do servidor.
         router.refresh(); 
     } else {
         toast({
@@ -82,12 +81,12 @@ export function SchedulesClient({ initialSchedules }: SchedulesClientProps) {
   }
 
   const handleDialogClose = (open: boolean) => {
+    setIsFormOpen(open);
     if (!open) {
+        // Reseta o agendamento selecionado e atualiza a página ao fechar
         setSelectedSchedule(null);
-        // Recarrega a página ao fechar o formulário (seja de criação ou edição) para mostrar os dados atualizados.
         router.refresh();
     }
-    setIsFormOpen(open);
   }
 
   return (
@@ -96,14 +95,17 @@ export function SchedulesClient({ initialSchedules }: SchedulesClientProps) {
         <h1 className="text-3xl font-headline font-bold">Agendamentos de Devolução</h1>
         <Dialog open={isFormOpen} onOpenChange={handleDialogClose}>
           <DialogTrigger asChild>
-            <Button>
+             <Button onClick={() => {
+                setSelectedSchedule(null);
+                setIsFormOpen(true);
+            }}>
               <PlusCircle className="mr-2" />
               Novo Agendamento
             </Button>
           </DialogTrigger>
           <DialogContent className="sm:max-w-4xl">
             <DialogHeader>
-              <DialogTitle>{selectedSchedule ? 'Editar Agendamento' : 'Criar Novo Agendamento'}</DialogTitle>
+              <DialogTitle>{selectedSchedule ? 'Editar Agendamento' : 'Criar Novo(s) Agendamento(s)'}</DialogTitle>
             </DialogHeader>
             <ScheduleForm setOpen={setIsFormOpen} initialData={selectedSchedule} />
           </DialogContent>
