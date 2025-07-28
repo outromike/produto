@@ -84,13 +84,13 @@ export function UserManagementClient({ initialUsers }: UserManagementClientProps
           Adicionar Usuário
         </Button>
       </div>
-      <div className="rounded-md border">
+      <div className="rounded-md border overflow-x-auto">
         <Table>
           <TableHeader>
             <TableRow>
               <TableHead>Username</TableHead>
               <TableHead>Nome</TableHead>
-              <TableHead>E-mail</TableHead>
+              <TableHead className="hidden sm:table-cell">E-mail</TableHead>
               <TableHead>Permissão</TableHead>
               <TableHead className="text-right">Ações</TableHead>
             </TableRow>
@@ -101,7 +101,7 @@ export function UserManagementClient({ initialUsers }: UserManagementClientProps
                 <TableRow key={user.username}>
                   <TableCell className="font-mono">{user.username}</TableCell>
                   <TableCell>{user.name || '-'}</TableCell>
-                  <TableCell>{user.email || '-'}</TableCell>
+                  <TableCell className="hidden sm:table-cell">{user.email || '-'}</TableCell>
                   <TableCell>
                     <TooltipProvider>
                         <Tooltip>

@@ -33,14 +33,14 @@ export function MainNav({ permissions }: MainNavProps) {
     }
 
     return (
-        <nav className="flex flex-col gap-2 md:flex-row">
+        <nav className="flex flex-col gap-2 md:flex-row md:items-center">
             {navLinks.filter(link => hasAccess(link.permission as keyof Permissions | null)).map(({ href, icon: Icon, label }) => (
                 <Button 
                     key={href} 
                     variant={pathname.startsWith(href) && href !== "/dashboard" || pathname === href ? "secondary" : "ghost"} 
                     size="sm" 
                     asChild
-                    className="justify-start"
+                    className="justify-start text-base md:text-sm"
                 >
                     <Link href={href}>
                         <Icon className="mr-2 h-4 w-4" />

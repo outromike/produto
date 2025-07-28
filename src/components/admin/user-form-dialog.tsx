@@ -16,6 +16,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Loader2 } from 'lucide-react';
 import { Checkbox } from '../ui/checkbox';
 import { Separator } from '../ui/separator';
+import { ScrollArea } from '../ui/scroll-area';
 
 interface UserFormDialogProps {
   isOpen: boolean;
@@ -143,13 +144,14 @@ export function UserFormDialog({ isOpen, setIsOpen, user, onUserSaved }: UserFor
 
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
-      <DialogContent className="max-h-[90vh] overflow-y-auto">
+       <DialogContent className="max-h-[90vh] flex flex-col">
         <DialogHeader>
           <DialogTitle>{isEditMode ? 'Editar Usuário' : 'Adicionar Novo Usuário'}</DialogTitle>
           <DialogDescription>
             {isEditMode ? `Alterando dados para ${user?.username}. Deixe a senha em branco para não a alterar.` : 'Preencha os campos para criar uma nova conta.'}
           </DialogDescription>
         </DialogHeader>
+        <ScrollArea className="flex-grow pr-6">
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -244,7 +246,7 @@ export function UserFormDialog({ isOpen, setIsOpen, user, onUserSaved }: UserFor
                             </FormControl>
                             <div className="space-y-1 leading-none">
                               <FormLabel>{item.label}</FormLabel>
-                              <FormDescription>
+                              <FormDescription className="text-xs">
                                 {item.description}
                               </FormDescription>
                             </div>
@@ -257,7 +259,7 @@ export function UserFormDialog({ isOpen, setIsOpen, user, onUserSaved }: UserFor
               </>
             )}
 
-             <DialogFooter>
+            <DialogFooter className="pt-4 sticky bottom-0 bg-background">
                 <Button type="button" variant="ghost" onClick={() => setIsOpen(false)}>Cancelar</Button>
                 <Button type="submit" disabled={isPending}>
                     {isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin"/>}
@@ -266,6 +268,7 @@ export function UserFormDialog({ isOpen, setIsOpen, user, onUserSaved }: UserFor
             </DialogFooter>
           </form>
         </Form>
+        </ScrollArea>
       </DialogContent>
     </Dialog>
   );

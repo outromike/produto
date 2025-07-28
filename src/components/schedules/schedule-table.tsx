@@ -37,7 +37,7 @@ export function ScheduleTable({
     nfdReceivedVolumes
 }: ScheduleTableProps) {
   
-  const handleSelectAll = (checked: boolean) => {
+  const handleSelectAll = (checked: boolean | string) => {
     setSelectedSchedules(checked ? schedules.map(s => s.id) : []);
   };
 
@@ -115,7 +115,7 @@ export function ScheduleTable({
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead padding="checkbox" className="w-12">
+            <TableHead padding="checkbox" className="w-12 sticky left-0 bg-background z-10">
               <Checkbox
                 checked={isAllSelected}
                 onCheckedChange={handleSelectAll}
@@ -132,14 +132,14 @@ export function ScheduleTable({
             <TableHead>Estado do Produto</TableHead>
             <TableHead>Vol.</TableHead>
             <TableHead>Recebimento</TableHead>
-            <TableHead className="text-right">Ações</TableHead>
+            <TableHead className="text-right sticky right-0 bg-background z-10">Ações</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
           {schedules.length > 0 ? (
             schedules.map((schedule) => (
               <TableRow key={schedule.id} data-state={selectedSchedules.includes(schedule.id) && "selected"}>
-                 <TableCell padding="checkbox">
+                 <TableCell padding="checkbox" className="sticky left-0 bg-background z-10">
                   <Checkbox
                     checked={selectedSchedules.includes(schedule.id)}
                     onCheckedChange={(checked) => handleSelectOne(schedule.id, !!checked)}
@@ -160,7 +160,7 @@ export function ScheduleTable({
                     {renderStatusIcon(schedule)}
                   </div>
                 </TableCell>
-                <TableCell className="text-right">
+                <TableCell className="text-right sticky right-0 bg-background z-10">
                     <DropdownMenu>
                         <DropdownMenuTrigger asChild>
                             <Button variant="ghost" className="h-8 w-8 p-0">

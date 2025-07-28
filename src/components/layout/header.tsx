@@ -15,8 +15,8 @@ interface HeaderProps {
 export function Header({ user }: HeaderProps) {
   return (
     <header className="sticky top-0 z-50 flex h-16 items-center gap-4 border-b bg-background/80 px-4 backdrop-blur md:px-6">
-      <div className="hidden flex-col gap-6 text-lg font-medium md:flex md:flex-row md:items-center md:gap-5 md:text-sm lg:gap-6">
-        <Link href="/dashboard" className="flex items-center gap-2 font-headline text-lg font-semibold">
+      <div className="hidden items-center gap-2 md:flex">
+         <Link href="/dashboard" className="flex items-center gap-2 font-headline text-lg font-semibold">
           <PackageSearch className="h-6 w-6 text-primary" />
           <span className="sr-only">ELGIN APP</span>
         </Link>
@@ -30,14 +30,12 @@ export function Header({ user }: HeaderProps) {
             <span className="sr-only">Abrir menu de navegação</span>
           </Button>
         </SheetTrigger>
-        <SheetContent side="left">
-          <nav className="grid gap-6 text-lg font-medium">
-             <Link href="/dashboard" className="flex items-center gap-2 font-headline text-lg font-semibold">
+        <SheetContent side="left" className="flex flex-col">
+            <Link href="/dashboard" className="flex items-center gap-2 font-headline text-lg font-semibold mb-4">
                 <PackageSearch className="h-6 w-6 text-primary" />
                 <span>ELGIN APP</span>
             </Link>
             <MainNav permissions={user?.permissions} />
-          </nav>
         </SheetContent>
       </Sheet>
 

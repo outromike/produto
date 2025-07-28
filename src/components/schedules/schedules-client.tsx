@@ -281,9 +281,9 @@ export function SchedulesClient({
       </div>
 
       <Tabs defaultValue="today">
-        <TabsList>
-          <TabsTrigger value="today">Hoje</TabsTrigger>
-          <TabsTrigger value="all">Outros Agendamentos</TabsTrigger>
+        <TabsList className="w-full sm:w-auto">
+          <TabsTrigger value="today" className="w-full sm:w-auto">Hoje</TabsTrigger>
+          <TabsTrigger value="all" className="w-full sm:w-auto">Outros Agendamentos</TabsTrigger>
         </TabsList>
         <TabsContent value="today">
           <ScheduleTable schedules={todaySchedules} onEdit={handleEdit} onDelete={handleDeleteRequest} selectedSchedules={selectedScheduleIds} setSelectedSchedules={setSelectedScheduleIds} conferencedNfds={conferencedNfds} rejectedNfds={rejectedNfds} nfdReceivedVolumes={nfdReceivedVolumes}/>
@@ -357,4 +357,3 @@ export function SchedulesClient({
     </div>
   );
 }
-
