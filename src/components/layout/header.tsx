@@ -2,7 +2,7 @@
 
 import { UserNav } from "@/components/layout/user-nav";
 import { ThemeToggle } from "@/components/layout/theme-toggle";
-import { PackageSearch, Table, LayoutDashboard, CalendarClock } from "lucide-react";
+import { PackageSearch, Table, LayoutDashboard, CalendarClock, Inbox } from "lucide-react";
 import Link from "next/link";
 import { getSession } from "@/lib/auth";
 import { Button } from "../ui/button";
@@ -27,6 +27,12 @@ export async function Header() {
             <Link href="/dashboard/schedules">
               <CalendarClock className="mr-2 h-4 w-4"/>
               Agendamentos
+            </Link>
+          </Button>
+           <Button variant="outline" size="sm" asChild>
+            <Link href="/dashboard/receiving">
+              <Inbox className="mr-2 h-4 w-4"/>
+              Recebimento
             </Link>
           </Button>
         <Button variant="outline" size="sm" asChild>
