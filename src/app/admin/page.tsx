@@ -2,14 +2,12 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import Link from "next/link";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import Link from "next/link";
 import { Upload, Shield, Users, Loader2, AlertCircle, FileClock } from "lucide-react";
 import {
   AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
   AlertDialogContent,
   AlertDialogDescription,
   AlertDialogFooter,
@@ -21,15 +19,13 @@ import { Label } from "@/components/ui/label";
 import { verifyAdminPassword } from "@/lib/auth";
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 
-
 export default function AdminDashboardPage() {
   const [isAuthorized, setIsAuthorized] = useState(false);
   const [showPasswordDialog, setShowPasswordDialog] = useState(true);
   const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
+  const [authError, setAuthError] = useState("");
   const [isVerifying, setIsVerifying] = useState(false);
 
-  // Check sessionStorage on component mount
   useEffect(() => {
     if (sessionStorage.getItem("admin-authorized") === "true") {
       setIsAuthorized(true);
@@ -39,27 +35,26 @@ export default function AdminDashboardPage() {
 
   const handlePasswordCheck = async () => {
     setIsVerifying(true);
-    setError("");
+    setAuthError("");
     try {
       const { success } = await verifyAdminPassword(password);
       if (success) {
-        sessionStorage.setItem("admin-authorized", "true"); // Persist authorization
+        sessionStorage.setItem("admin-authorized", "true");
         setIsAuthorized(true);
         setShowPasswordDialog(false);
       } else {
-        setError("Senha incorreta. Tente novamente.");
+        setAuthError("Senha incorreta. Tente novamente.");
       }
     } catch (err) {
-      setError("Ocorreu um erro ao verificar a senha.");
+      setAuthError("Ocorreu um erro ao verificar a senha.");
     } finally {
       setIsVerifying(false);
     }
   };
-  
-  // If not authorized, show the password dialog
+
   if (!isAuthorized) {
     return (
-        <AlertDialog open={showPasswordDialog} onOpenChange={setShowPasswordDialog}>
+      <AlertDialog open={showPasswordDialog} onOpenChange={setShowPasswordDialog}>
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Acesso Restrito</AlertDialogTitle>
@@ -67,33 +62,33 @@ export default function AdminDashboardPage() {
               Para acessar o painel de administrador, por favor, insira a senha de acesso.
             </AlertDialogDescription>
           </AlertDialogHeader>
-            <div className="space-y-4 py-4">
-                {error && (
-                    <Alert variant="destructive">
-                        <AlertCircle className="h-4 w-4" />
-                        <AlertTitle>Erro</AlertTitle>
-                        <AlertDescription>{error}</AlertDescription>
-                    </Alert>
-                )}
-                <div className="space-y-2">
-                    <Label htmlFor="admin-password">Senha do Administrador</Label>
-                    <Input
-                    id="admin-password"
-                    type="password"
-                    placeholder="••••••••"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    onKeyDown={(e) => {
-                        if (e.key === 'Enter') {
-                            handlePasswordCheck();
-                        }
-                    }}
-                    />
-                </div>
+          <div className="space-y-4 py-4">
+            {authError && (
+              <Alert variant="destructive">
+                <AlertCircle className="h-4 w-4" />
+                <AlertTitle>Erro</AlertTitle>
+                <AlertDescription>{authError}</AlertDescription>
+              </Alert>
+            )}
+            <div className="space-y-2">
+              <Label htmlFor="admin-password">Senha do Administrador</Label>
+              <Input
+                id="admin-password"
+                type="password"
+                placeholder="••••••••"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    handlePasswordCheck();
+                  }
+                }}
+              />
             </div>
+          </div>
           <AlertDialogFooter>
             <Button variant="outline" asChild>
-                <Link href="/dashboard/products">Voltar</Link>
+              <Link href="/dashboard/products">Voltar</Link>
             </Button>
             <Button onClick={handlePasswordCheck} disabled={isVerifying}>
               {isVerifying ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Verificando...</> : "Acessar"}
@@ -104,7 +99,6 @@ export default function AdminDashboardPage() {
     );
   }
 
-  // If authorized, show the admin content
   return (
     <main className="container mx-auto max-w-4xl px-4 py-8 md:px-6">
       <div className="mb-6 flex items-center gap-4">
@@ -134,11 +128,11 @@ export default function AdminDashboardPage() {
           <CardHeader>
             <CardTitle>Agendamento de Devolução</CardTitle>
             <CardDescription>
-              Faça o upload da planilha de agendamentos de devolução. (Funcionalidade futura)
+              Faça o upload da planilha de agendamentos de devolução.
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <Button asChild>
+             <Button asChild>
               <Link href="/admin/upload/devolucao">
                 <FileClock className="mr-2 h-4 w-4" />
                 Agendar Devoluções
