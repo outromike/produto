@@ -1,39 +1,110 @@
 
-import { getSession } from "@/lib/auth";
-import { redirect } from "next/navigation";
+"use client";
+
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import { Upload, Shield, Users } from "lucide-react";
+import { Upload, Shield, Users, Loader2, AlertCircle } from "lucide-react";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { verifyAdminPassword } from "@/lib/auth";
+import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 
-export default async function AdminDashboardPage() {
-  const session = await getSession();
 
-  // 1. Redireciona para o login se não houver sessão
-  if (!session?.user) {
-    redirect('/login');
-  }
+export default function AdminDashboardPage() {
+  const [isAuthorized, setIsAuthorized] = useState(false);
+  const [showPasswordDialog, setShowPasswordDialog] = useState(true);
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+  const [isVerifying, setIsVerifying] = useState(false);
 
-  // 2. Verifica se o usuário tem a permissão de admin
-  if (session.user.role !== 'admin') {
+  // Check sessionStorage on component mount
+  useEffect(() => {
+    if (sessionStorage.getItem("admin-authorized") === "true") {
+      setIsAuthorized(true);
+      setShowPasswordDialog(false);
+    }
+  }, []);
+
+  const handlePasswordCheck = async () => {
+    setIsVerifying(true);
+    setError("");
+    try {
+      const { success } = await verifyAdminPassword(password);
+      if (success) {
+        sessionStorage.setItem("admin-authorized", "true"); // Persist authorization
+        setIsAuthorized(true);
+        setShowPasswordDialog(false);
+      } else {
+        setError("Senha incorreta. Tente novamente.");
+      }
+    } catch (err) {
+      setError("Ocorreu um erro ao verificar a senha.");
+    } finally {
+      setIsVerifying(false);
+    }
+  };
+  
+  // If not authorized, show the password dialog
+  if (!isAuthorized) {
     return (
-      <main className="container mx-auto max-w-4xl px-4 py-8 md:px-6 text-center">
-        <Card>
-          <CardHeader>
-            <CardTitle>Acesso Negado</CardTitle>
-            <CardDescription>Você não tem permissão para acessar esta página.</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <Button asChild>
-              <Link href="/dashboard/products">Voltar aos Produtos</Link>
+        <AlertDialog open={showPasswordDialog} onOpenChange={setShowPasswordDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Acesso Restrito</AlertDialogTitle>
+            <AlertDialogDescription>
+              Para acessar o painel de administrador, por favor, insira a senha de acesso.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+            <div className="space-y-4 py-4">
+                {error && (
+                    <Alert variant="destructive">
+                        <AlertCircle className="h-4 w-4" />
+                        <AlertTitle>Erro</AlertTitle>
+                        <AlertDescription>{error}</AlertDescription>
+                    </Alert>
+                )}
+                <div className="space-y-2">
+                    <Label htmlFor="admin-password">Senha do Administrador</Label>
+                    <Input
+                    id="admin-password"
+                    type="password"
+                    placeholder="••••••••"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    onKeyDown={(e) => {
+                        if (e.key === 'Enter') {
+                            handlePasswordCheck();
+                        }
+                    }}
+                    />
+                </div>
+            </div>
+          <AlertDialogFooter>
+            <Button variant="outline" asChild>
+                <Link href="/dashboard/products">Voltar</Link>
             </Button>
-          </CardContent>
-        </Card>
-      </main>
+            <Button onClick={handlePasswordCheck} disabled={isVerifying}>
+              {isVerifying ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Verificando...</> : "Acessar"}
+            </Button>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     );
   }
 
-  // 3. Se for admin, mostra o conteúdo do painel
+  // If authorized, show the admin content
   return (
     <main className="container mx-auto max-w-4xl px-4 py-8 md:px-6">
       <div className="mb-6 flex items-center gap-4">

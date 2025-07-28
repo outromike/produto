@@ -62,11 +62,10 @@ export async function findUserByCredentials(credentials: Pick<User, 'username' |
 }
 
 export async function verifyAdminPassword(password: string): Promise<{ success: boolean }> {
-    const users = await getUsers();
-    const adminUser = users.find(u => u.username === 'admin');
-
-    if (adminUser && adminUser.password === password) {
+    const correctPassword = process.env.ADMIN_ACCESS_PASSWORD;
+    if (password === correctPassword) {
         return { success: true };
     }
     return { success: false };
 }
+
