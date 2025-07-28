@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo, useEffect, useTransition } from 'react';
 import { ReturnSchedule } from "@/types";
 import { Button } from "@/components/ui/button";
 import { PlusCircle, Loader2, Trash2, X, AlertTriangle } from "lucide-react";
@@ -28,7 +28,7 @@ import { ScheduleForm } from "./schedule-form";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ScheduleTable } from "./schedule-table";
 import { isToday, parseISO, format } from 'date-fns';
-import { deleteSchedule, deleteSchedules } from '@/app/dashboard/schedules/actions';
+import { addSchedule, deleteSchedule, deleteSchedules } from '@/app/dashboard/schedules/actions';
 import { useToast } from '@/hooks/use-toast';
 import { useDebouncedCallback } from 'use-debounce';
 
@@ -57,10 +57,14 @@ export function SchedulesClient({ initialSchedules }: SchedulesClientProps) {
   const [isDeleteAlertOpen, setIsDeleteAlertOpen] = useState(false);
   const [isBulkDeleteAlertOpen, setIsBulkDeleteAlertOpen] = useState(false);
   const [isDuplicateAlertOpen, setIsDuplicateAlertOpen] = useState(false);
-  const [isDeleting, setIsDeleting] = useState(false);
+  const [isDeleting, startDeleteTransition] = useTransition();
+
   const [scheduleToEdit, setScheduleToEdit] = useState<ReturnSchedule | null>(null);
   const [scheduleToDelete, setScheduleToDelete] = useState<ReturnSchedule | null>(null);
   const [duplicateSchedule, setDuplicateSchedule] = useState<ReturnSchedule | null>(null);
+  const [formDataForDuplicate, setFormDataForDuplicate] = useState<any>(null);
+
+
   const [selectedScheduleIds, setSelectedScheduleIds] = useState<string[]>([]);
   const { toast } = useToast();
 
@@ -130,8 +134,9 @@ export function SchedulesClient({ initialSchedules }: SchedulesClientProps) {
       setSchedules(prev => [...prev, ...newSchedules]);
   };
   
-  const handleDuplicate = (duplicate: ReturnSchedule) => {
+  const handleDuplicate = (duplicate: ReturnSchedule, formData: any) => {
     setDuplicateSchedule(duplicate);
+    setFormDataForDuplicate(formData);
     setIsDuplicateAlertOpen(true);
   };
 
@@ -142,17 +147,17 @@ export function SchedulesClient({ initialSchedules }: SchedulesClientProps) {
 
   const handleDelete = async () => {
     if (!scheduleToDelete) return;
-    setIsDeleting(true);
-    const result = await deleteSchedule(scheduleToDelete.id);
-    if (result.success) {
-      toast({ title: "Sucesso!", description: "Agendamento excluído." });
-      setSchedules(prev => prev.filter(s => s.id !== scheduleToDelete.id));
-    } else {
-      toast({ title: "Erro", description: result.error, variant: "destructive" });
-    }
-    setIsDeleting(false);
-    setIsDeleteAlertOpen(false);
-    setScheduleToDelete(null);
+    startDeleteTransition(async () => {
+        const result = await deleteSchedule(scheduleToDelete.id);
+        if (result.success) {
+            toast({ title: "Sucesso!", description: "Agendamento excluído." });
+            setSchedules(prev => prev.filter(s => s.id !== scheduleToDelete.id));
+        } else {
+            toast({ title: "Erro", description: result.error, variant: "destructive" });
+        }
+        setIsDeleteAlertOpen(false);
+        setScheduleToDelete(null);
+    });
   };
   
   const handleBulkDeleteRequest = () => {
@@ -160,17 +165,30 @@ export function SchedulesClient({ initialSchedules }: SchedulesClientProps) {
   };
 
   const handleBulkDelete = async () => {
-    setIsDeleting(true);
-    const result = await deleteSchedules(selectedScheduleIds);
-     if (result.success) {
-      toast({ title: "Sucesso!", description: `${selectedScheduleIds.length} agendamento(s) excluído(s).` });
-      setSchedules(prev => prev.filter(s => !selectedScheduleIds.includes(s.id)));
-      setSelectedScheduleIds([]);
+    startDeleteTransition(async () => {
+        const result = await deleteSchedules(selectedScheduleIds);
+        if (result.success) {
+            toast({ title: "Sucesso!", description: `${selectedScheduleIds.length} agendamento(s) excluído(s).` });
+            setSchedules(prev => prev.filter(s => !selectedScheduleIds.includes(s.id)));
+            setSelectedScheduleIds([]);
+        } else {
+            toast({ title: "Erro", description: result.error, variant: "destructive" });
+        }
+        setIsBulkDeleteAlertOpen(false);
+    });
+  };
+  
+  const handleForceSchedule = async () => {
+    if (!formDataForDuplicate) return;
+    const result = await addSchedule(formDataForDuplicate, true);
+    if (result.success && result.createdSchedules) {
+      toast({ title: "Sucesso!", description: "Agendamento forçado criado com sucesso." });
+      handleSchedulesAdd(result.createdSchedules);
     } else {
-      toast({ title: "Erro", description: result.error, variant: "destructive" });
+       toast({ title: "Erro", description: result.error || "Não foi possível criar o(s) agendamento(s).", variant: "destructive" });
     }
-    setIsDeleting(false);
-    setIsBulkDeleteAlertOpen(false);
+    setIsDuplicateAlertOpen(false);
+    setFormDataForDuplicate(null);
   };
 
   return (
@@ -305,10 +323,14 @@ export function SchedulesClient({ initialSchedules }: SchedulesClientProps) {
                           <p><strong>Transportadora:</strong> {duplicateSchedule?.carrier}</p>
                           <p><strong>Data do Agendamento:</strong> {duplicateSchedule ? format(parseISO(duplicateSchedule.date), 'dd/MM/yyyy') : ''}</p>
                       </div>
+                      <p className="mt-4">Deseja agendar mesmo assim?</p>
                   </AlertDialogDescription>
               </AlertDialogHeader>
               <AlertDialogFooter>
-                  <AlertDialogAction onClick={() => setIsDuplicateAlertOpen(false)}>Entendido</AlertDialogAction>
+                  <AlertDialogCancel onClick={() => setFormDataForDuplicate(null)}>Cancelar</AlertDialogCancel>
+                  <AlertDialogAction onClick={handleForceSchedule}>
+                    Agendar mesmo assim
+                  </AlertDialogAction>
               </AlertDialogFooter>
           </AlertDialogContent>
       </AlertDialog>

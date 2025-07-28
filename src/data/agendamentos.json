@@ -1,1 +1,17 @@
-[]
+[
+  {
+    "date": "2025-07-28",
+    "carrier": "ALFA",
+    "outgoingShipment": "1",
+    "salesNote": "1",
+    "nfd": "1",
+    "customer": "1",
+    "bdv": "1",
+    "ov": "1",
+    "returnReason": "Motivos Comerciais",
+    "productState": "Descarte",
+    "invoiceVolume": 1,
+    "id": "1753718647927-0",
+    "createdAt": "2025-07-28T16:04:07.927Z"
+  }
+]

@@ -26,7 +26,7 @@ async function saveSchedules(schedules: ReturnSchedule[]): Promise<void> {
     await fs.writeFile(SCHEDULES_FILE_PATH, data, 'utf-8');
 }
 
-export async function addSchedule(data: Omit<ReturnSchedule, 'id' | 'createdAt'>): Promise<{ success: boolean; error?: string; createdSchedules?: ReturnSchedule[], duplicate?: ReturnSchedule }> {
+export async function addSchedule(data: Omit<ReturnSchedule, 'id' | 'createdAt'>, force = false): Promise<{ success: boolean; error?: string; createdSchedules?: ReturnSchedule[], duplicate?: ReturnSchedule }> {
   try {
     const allSchedules = await getSchedules();
     
@@ -37,15 +37,17 @@ export async function addSchedule(data: Omit<ReturnSchedule, 'id' | 'createdAt'>
       return { success: false, error: "Nenhuma NFD válida foi fornecida." };
     }
     
-    // Check for duplicates before adding
-    for (const nfd of nfds) {
-        const existingSchedule = allSchedules.find(s => s.nfd === nfd);
-        if (existingSchedule) {
-            return {
-                success: false,
-                error: `A NFD ${nfd} já foi agendada.`,
-                duplicate: existingSchedule
-            };
+    // Check for duplicates before adding, only if not forced
+    if (!force) {
+        for (const nfd of nfds) {
+            const existingSchedule = allSchedules.find(s => s.nfd === nfd);
+            if (existingSchedule) {
+                return {
+                    success: false,
+                    error: `A NFD ${nfd} já foi agendada.`,
+                    duplicate: existingSchedule
+                };
+            }
         }
     }
 
@@ -53,6 +55,7 @@ export async function addSchedule(data: Omit<ReturnSchedule, 'id' | 'createdAt'>
     const newSchedules: ReturnSchedule[] = nfds.map((nfd, index) => {
         const newSchedule: ReturnSchedule = {
             ...data,
+            bdv: data.bdv || 'SEM BDV',
             nfd: nfd,
             outgoingShipment: remessas[index] || '',
             id: `${new Date().getTime()}-${index}`,
@@ -79,7 +82,7 @@ export async function updateSchedule(id: string, data: Partial<Omit<ReturnSchedu
       return { success: false, error: "Agendamento não encontrado." };
     }
     
-    const updatedSchedule = { ...schedules[scheduleIndex], ...data };
+    const updatedSchedule = { ...schedules[scheduleIndex], ...data, bdv: data.bdv || 'SEM BDV' };
     schedules[scheduleIndex] = updatedSchedule;
     await saveSchedules(schedules);
     return { success: true, updatedSchedule };
@@ -122,3 +125,4 @@ export async function deleteSchedules(ids: string[]): Promise<{ success: boolean
       return { success: false, error: "Não foi possível excluir os agendamentos selecionados." };
     }
   }
+

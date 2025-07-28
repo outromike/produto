@@ -42,7 +42,7 @@ interface ScheduleFormProps {
     onScheduleUpdate: (schedule: ReturnSchedule) => void;
     onSchedulesAdd: (schedules: ReturnSchedule[]) => void;
     initialData?: ReturnSchedule | null;
-    onDuplicate: (duplicate: ReturnSchedule) => void;
+    onDuplicate: (duplicate: ReturnSchedule, formData: ScheduleFormValues) => void;
 }
 
 const transportadoras = [
@@ -68,6 +68,7 @@ export function ScheduleForm({ setOpen, initialData, onScheduleUpdate, onSchedul
     resolver: zodResolver(formSchema),
     defaultValues: initialData ? {
         ...initialData,
+        bdv: initialData.bdv === 'SEM BDV' ? '' : initialData.bdv,
         date: initialData.date.split('T')[0]
     } : {
       date: new Date().toISOString().split('T')[0],
@@ -103,7 +104,7 @@ export function ScheduleForm({ setOpen, initialData, onScheduleUpdate, onSchedul
             setOpen(false);
         } else {
             if (result.duplicate) {
-                onDuplicate(result.duplicate);
+                onDuplicate(result.duplicate, data);
             } else {
                 toast({ title: "Erro", description: result.error || "Não foi possível criar o(s) agendamento(s).", variant: "destructive" });
             }
