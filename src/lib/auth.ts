@@ -10,8 +10,6 @@ import { promises as fs } from 'fs';
 const sessionOptions = {
   password: process.env.SECRET_COOKIE_PASSWORD || 'complex_password_at_least_32_characters_long_for_dev',
   cookieName: 'elgin-app-session',
-  // O cookie seguro é crucial para produção!
-  // Em desenvolvimento (HTTP), 'secure' deve ser false.
   cookieOptions: {
     secure: process.env.NODE_ENV === 'production',
   },
@@ -52,10 +50,17 @@ export async function findUserByCredentials(credentials: Pick<User, 'username' |
     );
 }
 
+// Verifica a senha do admin e, se correta, define um cookie de autorização.
 export async function verifyAdminPassword(password: string): Promise<{ success: boolean }> {
     const correctPassword = process.env.ADMIN_ACCESS_PASSWORD;
     if (password === correctPassword) {
-        return { success: true };
+      cookies().set('admin-authorized', 'true', {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        path: '/admin',
+        maxAge: 60 * 60, // 1 hora
+      });
+      return { success: true };
     }
     return { success: false };
 }
