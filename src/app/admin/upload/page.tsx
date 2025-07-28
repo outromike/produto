@@ -6,7 +6,6 @@ import { Info, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 
-// A proteção agora é herdada do layout /admin, não precisa mais de verificação aqui.
 export default async function UploadPage() {
   return (
     <main className="container mx-auto max-w-2xl px-4 py-8 md:px-6">
@@ -20,21 +19,29 @@ export default async function UploadPage() {
       </div>
        <Card>
         <CardHeader>
-          <CardTitle>Upload de Planilhas de Produtos</CardTitle>
+          <CardTitle>Upload de Arquivos</CardTitle>
           <CardDescription>
-            Faça o upload dos arquivos CSV para as unidades de Itajaí (ITJ) e Joinville (JVL) para atualizar a base de dados de produtos.
+            Faça o upload dos arquivos CSV para atualizar a base de dados de produtos ou agendamentos.
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
             <Alert>
                 <Info className="h-4 w-4" />
-                <AlertTitle>Instruções</AlertTitle>
+                <AlertTitle>Instruções para Produtos</AlertTitle>
                 <AlertDescription>
                     <ul className="list-disc pl-5 space-y-1 mt-2">
-                        <li>Certifique-se de que os arquivos estão no formato CSV.</li>
-                        <li>O sistema identificará as colunas automaticamente com base nos cabeçalhos.</li>
+                        <li>Certifique-se de que os arquivos de produtos estão no formato CSV.</li>
                         <li>Os produtos da mesma unidade (ITJ ou JVL) no arquivo antigo serão substituídos pelos novos.</li>
-                        <li>Se você enviar apenas um arquivo, os dados da outra unidade serão preservados.</li>
+                        <li>Se você enviar apenas um arquivo de produto, os dados da outra unidade serão preservados.</li>
+                    </ul>
+                </AlertDescription>
+            </Alert>
+             <Alert>
+                <Info className="h-4 w-4" />
+                <AlertTitle>Instruções para Agendamentos</AlertTitle>
+                <AlertDescription>
+                    <ul className="list-disc pl-5 space-y-1 mt-2">
+                         <li>Envie o arquivo de agendamentos de devolução em formato CSV.</li>
                     </ul>
                 </AlertDescription>
             </Alert>

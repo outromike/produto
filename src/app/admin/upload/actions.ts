@@ -8,14 +8,14 @@ import { redirect } from 'next/navigation';
 
 // Helper to find header index with multiple possible names
 const findHeaderIndex = (headerRow: string[], possibleNames: string[]): number => {
-    for (const name of possibleNames) {
+    for (const name of name) {
         const index = headerRow.findIndex(header => header.trim().toLowerCase() === name.toLowerCase());
         if (index !== -1) return index;
     }
     return -1;
 };
 
-const parseCSV = (csvContent: string, unit: 'ITJ' | 'JVL'): Product[] => {
+const parseProductCSV = (csvContent: string, unit: 'ITJ' | 'JVL'): Product[] => {
     const lines = csvContent.trim().split(/\r\n|\n/);
     if (lines.length < 2) return [];
 
@@ -46,7 +46,7 @@ const parseCSV = (csvContent: string, unit: 'ITJ' | 'JVL'): Product[] => {
     };
 
     if (headerMapping.sku === -1 || headerMapping.description === -1) {
-        throw new Error("CSV parsing failed: Missing required headers (SKU or Description).");
+        throw new Error("CSV de produto inválido: Faltam os cabeçalhos obrigatórios (SKU ou Descrição).");
     }
 
     return dataRows.map(line => {
@@ -80,58 +80,57 @@ const parseCSV = (csvContent: string, unit: 'ITJ' | 'JVL'): Product[] => {
             unit,
         };
         return product;
-    }).filter(p => p.sku && p.description); // Filter out any empty rows
+    }).filter(p => p.sku && p.description);
 };
 
-export async function uploadProducts(formData: FormData): Promise<{ error?: string }> {
-    // A verificação de permissão agora é feita na página do admin com uma senha,
-    // então a verificação de sessão aqui pode ser removida para evitar conflitos.
-
+export async function uploadFiles(formData: FormData): Promise<{ error?: string }> {
     const fileITJ = formData.get('fileITJ') as File | null;
     const fileJVL = formData.get('fileJVL') as File | null;
+    const fileAgendamento = formData.get('fileAgendamento') as File | null;
+    let productsUpdated = false;
+    let schedulesUpdated = false;
 
-    if (!fileITJ && !fileJVL) {
-        return { error: 'Pelo menos um arquivo (ITJ ou JVL) deve ser enviado.' };
+    if (!fileITJ && !fileJVL && !fileAgendamento) {
+        return { error: 'Pelo menos um arquivo deve ser enviado.' };
     }
 
-    let allProducts: Product[] = [];
-
     try {
-        // Tenta ler o arquivo JSON existente para mesclar os dados
-        const filePath = path.join(process.cwd(), 'src', 'data', 'products.json');
-        let existingProducts: Product[] = [];
-        try {
-            const currentData = await fs.readFile(filePath, 'utf-8');
-            existingProducts = JSON.parse(currentData);
-        } catch (e) {
-            // Arquivo não existe ou está vazio, o que é normal na primeira vez
-        }
-
-        if (fileITJ && fileITJ.size > 0) {
-            const bufferITJ = Buffer.from(await fileITJ.arrayBuffer());
-            const contentITJ = bufferITJ.toString('utf-8');
-            const productsITJ = parseCSV(contentITJ, 'ITJ');
-            // Remove produtos antigos da unidade ITJ antes de adicionar os novos
-            existingProducts = existingProducts.filter(p => p.unit !== 'ITJ');
-            allProducts = existingProducts.concat(productsITJ);
-        }
-
-        if (fileJVL && fileJVL.size > 0) {
-            const bufferJVL = Buffer.from(await fileJVL.arrayBuffer());
-            const contentJVL = bufferJVL.toString('utf-8');
-            const productsJVL = parseCSV(contentJVL, 'JVL');
-             // Se já houver produtos de ITJ, mescla. Senão, começa do zero.
-            if (allProducts.length > 0) {
-                 allProducts = allProducts.filter(p => p.unit !== 'JVL');
-                 allProducts = allProducts.concat(productsJVL);
-            } else {
-                 existingProducts = existingProducts.filter(p => p.unit !== 'JVL');
-                 allProducts = existingProducts.concat(productsJVL);
+        if (fileITJ || fileJVL) {
+            const filePath = path.join(process.cwd(), 'src', 'data', 'products.json');
+            let existingProducts: Product[] = [];
+            try {
+                const currentData = await fs.readFile(filePath, 'utf-8');
+                existingProducts = JSON.parse(currentData);
+            } catch (e) {
+                // Arquivo não existe ou está vazio
             }
+            
+            let allProducts: Product[] = [...existingProducts];
+
+            if (fileITJ && fileITJ.size > 0) {
+                const bufferITJ = Buffer.from(await fileITJ.arrayBuffer());
+                const contentITJ = bufferITJ.toString('utf-8');
+                const productsITJ = parseProductCSV(contentITJ, 'ITJ');
+                allProducts = allProducts.filter(p => p.unit !== 'ITJ').concat(productsITJ);
+            }
+
+            if (fileJVL && fileJVL.size > 0) {
+                const bufferJVL = Buffer.from(await fileJVL.arrayBuffer());
+                const contentJVL = bufferJVL.toString('utf-8');
+                const productsJVL = parseProductCSV(contentJVL, 'JVL');
+                allProducts = allProducts.filter(p => p.unit !== 'JVL').concat(productsJVL);
+            }
+            
+            await fs.writeFile(filePath, JSON.stringify(allProducts, null, 2), 'utf-8');
+            productsUpdated = true;
         }
-        
-        // Escreve os dados combinados e atualizados no arquivo
-        await fs.writeFile(filePath, JSON.stringify(allProducts, null, 2), 'utf-8');
+
+        if (fileAgendamento && fileAgendamento.size > 0) {
+             const scheduleFilePath = path.join(process.cwd(), 'src', 'data', 'agendamentos.json');
+             // Por enquanto, apenas salva um JSON vazio para confirmar o recebimento
+             await fs.writeFile(scheduleFilePath, JSON.stringify([], null, 2), 'utf-8');
+             schedulesUpdated = true;
+        }
 
     } catch (error) {
         console.error('File processing error:', error);
@@ -141,6 +140,5 @@ export async function uploadProducts(formData: FormData): Promise<{ error?: stri
         return { error: 'Ocorreu um erro desconhecido ao processar os arquivos.' };
     }
     
-    // Redireciona para a página de produtos após o upload bem-sucedido
-    redirect('/dashboard/products');
+    redirect('/admin');
 }
