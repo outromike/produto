@@ -21,11 +21,14 @@ async function getSchedulesForCarrier(carrier: string): Promise<ReturnSchedule[]
     }
 }
 
-async function getConferences(): Promise<ConferenceEntry[]> {
+async function getConferencesForSchedules(scheduleNfds: string[]): Promise<ConferenceEntry[]> {
     const filePath = path.join(process.cwd(), 'src', 'data', 'conferences.json');
     try {
         const jsonData = await fs.readFile(filePath, 'utf-8');
-        return JSON.parse(jsonData) as ConferenceEntry[];
+        const allConferences = JSON.parse(jsonData) as ConferenceEntry[];
+        const scheduleNfdSet = new Set(scheduleNfds);
+        // Retorna todas as conferências cujas NFDs estão nos agendamentos de hoje
+        return allConferences.filter(c => scheduleNfdSet.has(c.nfd));
     } catch (error) {
         if (typeof error === 'object' && error !== null && 'code' in error && error.code === 'ENOENT') {
             return [];
@@ -38,26 +41,20 @@ async function getConferences(): Promise<ConferenceEntry[]> {
 export default async function ConferencePage({ params }: { params: { carrier: string } }) {
     const carrierName = decodeURIComponent(params.carrier);
     const schedules = await getSchedulesForCarrier(carrierName);
-    const conferences = await getConferences();
     
-    // Extrai os NFDs de hoje que já tem pelo menos uma conferência
-    const todaySchedulesNfds = new Set(schedules.map(s => s.nfd));
-    const conferencedNfds = new Set(
-        conferences
-            .filter(c => todaySchedulesNfds.has(c.nfd))
-            .map(c => c.nfd)
-    );
-
     if (schedules.length === 0) {
         // Isso pode acontecer se o usuário navegar diretamente para uma URL de um transportador sem agendamentos para hoje.
         // Vamos mostrar uma mensagem amigável no cliente em vez de um 404 rígido.
     }
+    
+    const todaySchedulesNfds = schedules.map(s => s.nfd);
+    const initialConferences = await getConferencesForSchedules(todaySchedulesNfds);
 
     return (
         <ConferenceClient 
             initialSchedules={schedules} 
             carrierName={carrierName} 
-            initialConferencedNfds={Array.from(conferencedNfds)}
+            initialConferences={initialConferences}
         />
     );
 }

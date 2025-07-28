@@ -3,8 +3,8 @@
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { useState, useTransition, useEffect } from "react";
-import { ReturnSchedule, Product } from "@/types";
+import { useState, useTransition } from "react";
+import { ReturnSchedule, Product, ConferenceEntry } from "@/types";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -36,7 +36,7 @@ type ConferenceFormValues = z.infer<typeof formSchema>;
 interface ConferenceFormProps {
   schedule: ReturnSchedule;
   onFinish: () => void;
-  onConferenceSaved: (nfd: string) => void;
+  onConferenceSaved: (conference: ConferenceEntry) => void;
 }
 
 export function ConferenceForm({ schedule, onFinish, onConferenceSaved }: ConferenceFormProps) {
@@ -75,7 +75,7 @@ export function ConferenceForm({ schedule, onFinish, onConferenceSaved }: Confer
 
   const handleProductSelect = (product: Product) => {
     form.setValue("product", { sku: product.sku, description: product.description });
-    setProductQuery('');
+    setProductQuery(product.description);
     setSuggestions([]);
     setIsPopoverOpen(false);
   };
@@ -92,9 +92,9 @@ export function ConferenceForm({ schedule, onFinish, onConferenceSaved }: Confer
             observations: values.observations || "",
         });
 
-        if (result.success) {
+        if (result.success && result.savedConference) {
             toast({ title: "Sucesso!", description: "Produto da conferência salvo com sucesso." });
-            onConferenceSaved(schedule.nfd); // Notifica o componente pai que a conferência foi salva
+            onConferenceSaved(result.savedConference);
             form.reset({
                 product: { sku: "", description: "" },
                 receivedVolume: 1,
@@ -126,7 +126,7 @@ export function ConferenceForm({ schedule, onFinish, onConferenceSaved }: Confer
     }
   };
   
-  const selectedProduct = form.watch('product');
+  const selectedProductSku = form.watch('product.sku');
 
   return (
     <>
@@ -138,19 +138,24 @@ export function ConferenceForm({ schedule, onFinish, onConferenceSaved }: Confer
             render={({ field }) => (
               <FormItem className="flex flex-col">
                 <FormLabel>Produto (SKU, Item ou Descrição)</FormLabel>
-                 <Popover open={isPopoverOpen} onOpenChange={setIsPopoverOpen}>
+                <Popover open={isPopoverOpen} onOpenChange={setIsPopoverOpen}>
                   <PopoverTrigger asChild>
                     <FormControl>
-                        <Input
-                            placeholder="Digite para buscar..."
-                            value={productQuery}
-                            onChange={(e) => handleProductSearch(e.target.value)}
-                        />
+                      <Input
+                        placeholder="Digite para buscar..."
+                        value={productQuery}
+                        onChange={(e) => handleProductSearch(e.target.value)}
+                        onClick={() => setIsPopoverOpen(true)}
+                      />
                     </FormControl>
                   </PopoverTrigger>
                   <PopoverContent className="p-0 w-[--radix-popover-trigger-width]" align="start">
                     <Command>
-                      <CommandInput placeholder="Buscar produto..." value={productQuery} onValueChange={handleProductSearch}/>
+                      <CommandInput
+                        placeholder="Buscar produto..."
+                        value={productQuery}
+                        onValueChange={handleProductSearch}
+                      />
                       <CommandList>
                         <CommandEmpty>Nenhum produto encontrado.</CommandEmpty>
                         <CommandGroup>
@@ -160,8 +165,14 @@ export function ConferenceForm({ schedule, onFinish, onConferenceSaved }: Confer
                               value={`${product.sku} - ${product.description}`}
                               onSelect={() => handleProductSelect(product)}
                             >
-                               <CheckIcon className={cn("mr-2 h-4 w-4", field.value === product.sku ? "opacity-100" : "opacity-0")}/>
-                              {product.description} <span className="text-xs text-muted-foreground ml-2">({product.sku})</span>
+                              <CheckIcon
+                                className={cn(
+                                  "mr-2 h-4 w-4",
+                                  selectedProductSku === product.sku ? "opacity-100" : "opacity-0"
+                                )}
+                              />
+                              {product.description}
+                              <span className="text-xs text-muted-foreground ml-2">({product.sku})</span>
                             </CommandItem>
                           ))}
                         </CommandGroup>
@@ -169,8 +180,6 @@ export function ConferenceForm({ schedule, onFinish, onConferenceSaved }: Confer
                     </Command>
                   </PopoverContent>
                 </Popover>
-                 <Input readOnly disabled className="mt-2" placeholder="SKU do produto selecionado" value={selectedProduct.sku} />
-                 <Input readOnly disabled className="mt-2" placeholder="Descrição do produto selecionado" value={selectedProduct.description} />
                 <FormMessage />
               </FormItem>
             )}
@@ -196,18 +205,18 @@ export function ConferenceForm({ schedule, onFinish, onConferenceSaved }: Confer
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Estado do Produto</FormLabel>
-                   <Select onValueChange={field.onChange} defaultValue={field.value}>
-                        <FormControl>
-                            <SelectTrigger>
-                                <SelectValue placeholder="Selecione o estado" />
-                            </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                           <SelectItem value="Produto Bom">Produto Bom</SelectItem>
-                           <SelectItem value="Descarte">Descarte</SelectItem>
-                           <SelectItem value="Avariado">Avariado</SelectItem>
-                        </SelectContent>
-                    </Select>
+                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Selecione o estado" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value="Produto Bom">Produto Bom</SelectItem>
+                      <SelectItem value="Descarte">Descarte</SelectItem>
+                      <SelectItem value="Avariado">Avariado</SelectItem>
+                    </SelectContent>
+                  </Select>
                   <FormMessage />
                 </FormItem>
               )}
@@ -229,7 +238,7 @@ export function ConferenceForm({ schedule, onFinish, onConferenceSaved }: Confer
           />
             
           <div className="flex justify-end gap-4 pt-4">
-             <Button type="button" variant="outline" onClick={onFinish}>Finalizar Conferência da NF</Button>
+            <Button type="button" variant="outline" onClick={onFinish}>Finalizar Conferência da NF</Button>
             <Button type="submit" disabled={isPending}>
               {isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               Salvar Produto
@@ -239,29 +248,29 @@ export function ConferenceForm({ schedule, onFinish, onConferenceSaved }: Confer
       </Form>
 
       <AlertDialog open={showPartialReceiptAlert} onOpenChange={setShowPartialReceiptAlert}>
-          <AlertDialogContent>
-              <AlertDialogHeader>
-                  <AlertDialogTitle className="flex items-center gap-2">
-                    <AlertTriangle className="h-6 w-6 text-yellow-500" />
-                    Recebimento Parcial
-                  </AlertDialogTitle>
-                  <AlertDialogDescription>
-                    <p className="mt-2">A quantidade de volumes informada diverge do agendamento.</p>
-                     <div className="mt-4 space-y-2 rounded-lg border bg-muted/50 p-4 text-sm">
-                        <p><strong>Volumes Agendados:</strong> {schedule.invoiceVolume}</p>
-                        <p><strong>Volumes Informados:</strong> {formData?.receivedVolume}</p>
-                     </div>
-                     <p className="mt-4 font-semibold">Deseja confirmar o recebimento parcial mesmo assim?</p>
-                  </AlertDialogDescription>
-              </AlertDialogHeader>
-              <AlertDialogFooter>
-                  <AlertDialogCancel onClick={() => setFormData(null)}>Cancelar</AlertDialogCancel>
-                  <AlertDialogAction onClick={handleForceSubmit} disabled={isPending} className="bg-primary hover:bg-primary/90">
-                    {isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin"/> }
-                    Sim, receber parcialmente
-                  </AlertDialogAction>
-              </AlertDialogFooter>
-          </AlertDialogContent>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="flex items-center gap-2">
+              <AlertTriangle className="h-6 w-6 text-yellow-500" />
+              Recebimento Parcial
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              <p className="mt-2">A quantidade de volumes informada diverge do agendamento.</p>
+              <div className="mt-4 space-y-2 rounded-lg border bg-muted/50 p-4 text-sm">
+                <p><strong>Volumes Agendados:</strong> {schedule.invoiceVolume}</p>
+                <p><strong>Volumes Informados:</strong> {formData?.receivedVolume}</p>
+              </div>
+              <p className="mt-4 font-semibold">Deseja confirmar o recebimento parcial mesmo assim?</p>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => setFormData(null)}>Cancelar</AlertDialogCancel>
+            <AlertDialogAction onClick={handleForceSubmit} disabled={isPending} className="bg-primary hover:bg-primary/90">
+              {isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin"/>}
+              Sim, receber parcialmente
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
       </AlertDialog>
     </>
   );

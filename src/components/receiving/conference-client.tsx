@@ -1,32 +1,57 @@
 "use client";
 
 import { useState } from "react";
-import { ReturnSchedule, Product } from "@/types";
+import { ReturnSchedule, ConferenceEntry } from "@/types";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { format, parseISO } from "date-fns";
 import { ConferenceModal } from "./conference-modal";
-import { CheckCircle2 } from "lucide-react";
+import { CheckCircle2, Pencil } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface ConferenceClientProps {
   initialSchedules: ReturnSchedule[];
   carrierName: string;
-  initialConferencedNfds: string[];
+  initialConferences: ConferenceEntry[];
 }
 
-export function ConferenceClient({ initialSchedules, carrierName, initialConferencedNfds }: ConferenceClientProps) {
-  const [schedules, setSchedules] = useState(initialSchedules);
-  const [selectedSchedule, setSelectedSchedule] = useState<ReturnSchedule | null>(null);
-  const [completedNfds, setCompletedNfds] = useState<Set<string>>(new Set(initialConferencedNfds));
+export function ConferenceClient({ initialSchedules, carrierName, initialConferences }: ConferenceClientProps) {
+  const [schedules] = useState(initialSchedules);
+  const [conferences, setConferences] = useState(initialConferences);
 
+  const [selectedSchedule, setSelectedSchedule] = useState<ReturnSchedule | null>(null);
+  const [conferenceToEdit, setConferenceToEdit] = useState<ConferenceEntry | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  
+  const conferencedNfds = new Set(conferences.map(c => c.nfd));
   const totalNotes = schedules.length;
   const totalVolume = schedules.reduce((sum, s) => sum + s.invoiceVolume, 0);
 
-  const handleConferenceSaved = (nfd: string) => {
-    setCompletedNfds(prev => new Set(prev).add(nfd));
+  const handleOpenModal = (schedule: ReturnSchedule) => {
+      setSelectedSchedule(schedule);
+      // Para simplificar, vamos permitir adicionar múltiplos produtos por NFD.
+      // A revisão/edição será por entrada de conferência individual.
+      // Por enquanto, clicar sempre abre para uma nova conferência.
+      // A lógica de edição pode ser adicionada em uma tabela de conferências realizadas.
+      setConferenceToEdit(null); 
+      setIsModalOpen(true);
+  }
+
+  const handleConferenceSave = (newOrUpdatedConference: ConferenceEntry) => {
+    setConferences(prev => {
+        const existingIndex = prev.findIndex(c => c.id === newOrUpdatedConference.id);
+        if (existingIndex > -1) {
+            // Atualiza a conferência existente
+            const newConferences = [...prev];
+            newConferences[existingIndex] = newOrUpdatedConference;
+            return newConferences;
+        } else {
+            // Adiciona a nova conferência
+            return [...prev, newOrUpdatedConference];
+        }
+    });
   };
 
   return (
@@ -72,14 +97,14 @@ export function ConferenceClient({ initialSchedules, carrierName, initialConfere
         <Card>
           <CardHeader>
             <CardTitle>Notas Fiscais para Conferência</CardTitle>
-            <CardDescription>Lista de todas as NFDs agendadas para hoje com esta transportadora. Clique em uma para iniciar.</CardDescription>
+            <CardDescription>Clique em uma nota fiscal para registrar ou revisar os produtos recebidos.</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="rounded-md border">
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>NFD</TableHead>
+                    <TableHead className="w-[150px]">NFD</TableHead>
                     <TableHead>Cliente</TableHead>
                     <TableHead>Motivo da Devolução</TableHead>
                     <TableHead>Volumes</TableHead>
@@ -92,15 +117,15 @@ export function ConferenceClient({ initialSchedules, carrierName, initialConfere
                   {schedules.map(schedule => (
                     <TableRow 
                       key={schedule.id} 
-                      onClick={() => setSelectedSchedule(schedule)} 
-                      className={cn(
-                        "cursor-pointer hover:bg-muted/50",
-                        completedNfds.has(schedule.nfd) && "bg-green-500/10 text-muted-foreground hover:bg-green-500/20"
-                      )}
+                      onClick={() => handleOpenModal(schedule)} 
+                      className="cursor-pointer hover:bg-muted/50"
                     >
                       <TableCell className="font-mono font-semibold">
                         <div className="flex items-center gap-2">
-                          {completedNfds.has(schedule.nfd) && <CheckCircle2 className="h-4 w-4 text-green-500" />}
+                          {conferencedNfds.has(schedule.nfd) ? 
+                            <CheckCircle2 className="h-4 w-4 text-green-500" /> :
+                            <Pencil className="h-4 w-4 text-yellow-500" />
+                          }
                           <span>{schedule.nfd}</span>
                         </div>
                       </TableCell>
@@ -120,10 +145,10 @@ export function ConferenceClient({ initialSchedules, carrierName, initialConfere
       </main>
       
       <ConferenceModal
-        isOpen={!!selectedSchedule}
-        onClose={() => setSelectedSchedule(null)}
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
         schedule={selectedSchedule}
-        onConferenceSaved={handleConferenceSaved}
+        onConferenceSaved={handleConferenceSave}
       />
     </>
   );

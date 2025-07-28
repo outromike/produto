@@ -12,7 +12,6 @@ async function getConferences(): Promise<ConferenceEntry[]> {
         const jsonData = await fs.readFile(CONFERENCES_FILE_PATH, 'utf-8');
         return JSON.parse(jsonData) as ConferenceEntry[];
     } catch (error) {
-        // Se o arquivo não existir, criamos um array vazio.
         if (typeof error === 'object' && error !== null && 'code' in error && error.code === 'ENOENT') {
             await fs.writeFile(CONFERENCES_FILE_PATH, '[]', 'utf-8');
             return [];
@@ -27,7 +26,7 @@ async function saveConferences(conferences: ConferenceEntry[]): Promise<void> {
     await fs.writeFile(CONFERENCES_FILE_PATH, data, 'utf-8');
 }
 
-export async function saveConference(data: Omit<ConferenceEntry, 'id' | 'conferenceTimestamp'>): Promise<{ success: boolean; error?: string; createdConference?: ConferenceEntry }> {
+export async function saveConference(data: Omit<ConferenceEntry, 'id' | 'conferenceTimestamp'>): Promise<{ success: boolean; error?: string; savedConference?: ConferenceEntry }> {
     try {
         const allConferences = await getConferences();
         
@@ -40,7 +39,7 @@ export async function saveConference(data: Omit<ConferenceEntry, 'id' | 'confere
         const updatedConferences = [...allConferences, newConference];
         await saveConferences(updatedConferences);
         
-        return { success: true, createdConference: newConference };
+        return { success: true, savedConference: newConference };
     } catch (error) {
         console.error("Failed to save conference:", error);
         return { success: false, error: "Não foi possível salvar a conferência." };
