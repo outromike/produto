@@ -12,6 +12,7 @@ export async function uploadReturnSchedules(formData: FormData): Promise<{ error
 
     try {
         const buffer = Buffer.from(await file.arrayBuffer());
+        // Simplesmente loga o sucesso do recebimento do arquivo por enquanto.
         console.log(`Arquivo ${file.name} recebido com sucesso com ${buffer.length} bytes.`);
         
     } catch (error) {
@@ -22,5 +23,6 @@ export async function uploadReturnSchedules(formData: FormData): Promise<{ error
         return { error: 'Ocorreu um erro desconhecido ao processar o arquivo.' };
     }
     
+    // Redireciona em caso de sucesso
     redirect('/admin');
 }
