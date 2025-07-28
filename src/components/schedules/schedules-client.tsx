@@ -29,6 +29,7 @@ import { ScheduleTable } from "./schedule-table";
 import { isToday, parseISO } from 'date-fns';
 import { deleteSchedule } from '@/app/dashboard/schedules/actions';
 import { useToast } from '@/hooks/use-toast';
+import { useRouter } from 'next/navigation';
 
 interface SchedulesClientProps {
   initialSchedules: ReturnSchedule[];
@@ -40,6 +41,7 @@ export function SchedulesClient({ initialSchedules }: SchedulesClientProps) {
   const [isDeleting, setIsDeleting] = useState(false);
   const [selectedSchedule, setSelectedSchedule] = useState<ReturnSchedule | null>(null);
   const { toast } = useToast();
+  const router = useRouter();
 
   const todaySchedules = initialSchedules.filter(s => isToday(parseISO(s.date)));
   const otherSchedules = initialSchedules.filter(s => !isToday(parseISO(s.date)));
@@ -65,6 +67,8 @@ export function SchedulesClient({ initialSchedules }: SchedulesClientProps) {
             title: "Sucesso!",
             description: "Agendamento excluído com sucesso.",
         });
+        // Força a recarga da página para obter os dados atualizados do servidor.
+        router.refresh(); 
     } else {
         toast({
             title: "Erro",
@@ -80,6 +84,8 @@ export function SchedulesClient({ initialSchedules }: SchedulesClientProps) {
   const handleDialogClose = (open: boolean) => {
     if (!open) {
         setSelectedSchedule(null);
+        // Recarrega a página ao fechar o formulário (seja de criação ou edição) para mostrar os dados atualizados.
+        router.refresh();
     }
     setIsFormOpen(open);
   }

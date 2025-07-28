@@ -13,8 +13,10 @@ async function getSchedules(): Promise<ReturnSchedule[]> {
         const jsonData = await fs.readFile(SCHEDULES_FILE_PATH, 'utf-8');
         return JSON.parse(jsonData) as ReturnSchedule[];
     } catch (error) {
-        if (error.code === 'ENOENT') {
-            return []; // Retorna um array vazio se o arquivo não existir
+        // Se o arquivo não existir (ENOENT), retorne um array vazio.
+        // Isso é esperado na primeira execução ou se o arquivo for deletado.
+        if (typeof error === 'object' && error !== null && 'code' in error && error.code === 'ENOENT') {
+            return [];
         }
         console.error("Error reading agendamentos.json:", error);
         throw new Error("Não foi possível ler os agendamentos.");
@@ -24,7 +26,9 @@ async function getSchedules(): Promise<ReturnSchedule[]> {
 async function saveSchedules(schedules: ReturnSchedule[]): Promise<void> {
     const data = JSON.stringify(schedules, null, 2);
     await fs.writeFile(SCHEDULES_FILE_PATH, data, 'utf-8');
-    revalidatePath('/dashboard/schedules'); // Revalida o cache
+    // Revalida o cache da página de agendamentos para que a próxima visita
+    // já tenha os dados atualizados no servidor.
+    revalidatePath('/dashboard/schedules'); 
 }
 
 export async function addSchedule(data: Omit<ReturnSchedule, 'id' | 'createdAt'>): Promise<{ success: boolean; error?: string }> {
