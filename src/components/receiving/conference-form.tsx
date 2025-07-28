@@ -1,6 +1,6 @@
 "use client";
 
-import { useForm, Controller } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { useState, useTransition, useEffect } from "react";
@@ -17,6 +17,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Loader2, AlertTriangle, CheckIcon } from "lucide-react";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { cn } from "@/lib/utils";
+import { useDebouncedCallback } from "use-debounce";
 
 const formSchema = z.object({
   product: z.object({
@@ -57,21 +58,24 @@ export function ConferenceForm({ schedule, onFinish }: ConferenceFormProps) {
     },
   });
 
-  const handleProductSearch = async (query: string) => {
-    setProductQuery(query);
+  const debouncedProductSearch = useDebouncedCallback(async (query: string) => {
     if (query.length > 2) {
       const results = await findProduct(query);
       setSuggestions(results);
     } else {
       setSuggestions([]);
     }
+  }, 300);
+
+  const handleProductSearch = (query: string) => {
+      setProductQuery(query);
+      debouncedProductSearch(query);
   };
 
   const handleProductSelect = (product: Product) => {
     form.setValue("product", { sku: product.sku, description: product.description });
     setProductQuery(`${product.sku} - ${product.description}`);
     setIsPopoverOpen(false);
-    setSuggestions([]);
   };
 
   const processSubmit = (values: ConferenceFormValues) => {
@@ -95,6 +99,7 @@ export function ConferenceForm({ schedule, onFinish }: ConferenceFormProps) {
                 observations: "",
             });
             setProductQuery("");
+            setSuggestions([]);
             setShowPartialReceiptAlert(false);
             setFormData(null);
         } else {
@@ -135,12 +140,13 @@ export function ConferenceForm({ schedule, onFinish }: ConferenceFormProps) {
                             placeholder="Digite para buscar..."
                             value={productQuery}
                             onChange={(e) => handleProductSearch(e.target.value)}
+                            onClick={() => setIsPopoverOpen(true)}
                         />
                     </FormControl>
                   </PopoverTrigger>
                   <PopoverContent className="p-0 w-[--radix-popover-trigger-width]" align="start">
                     <Command>
-                      <CommandInput placeholder="Buscar produto..." onValueChange={handleProductSearch}/>
+                      <CommandInput placeholder="Buscar produto..." value={productQuery} onValueChange={handleProductSearch}/>
                       <CommandList>
                         <CommandEmpty>Nenhum produto encontrado.</CommandEmpty>
                         <CommandGroup>
