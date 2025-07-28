@@ -107,8 +107,6 @@ export function ConferenceForm({ schedule, existingConference, onFinish, onConfe
 
   const processSubmit = (values: ConferenceFormValues) => {
     startTransition(async () => {
-        // Here you would check if it's an update or new entry and call the appropriate server action
-        // For now, let's assume `saveConference` can handle both based on an ID
         const conferenceData = {
             id: existingConference?.id || `${new Date().getTime()}-${Math.random()}`,
             scheduleId: schedule.id,
@@ -126,7 +124,7 @@ export function ConferenceForm({ schedule, existingConference, onFinish, onConfe
         if (result.success && result.savedConference) {
             toast({ title: "Sucesso!", description: `Conferência ${existingConference ? 'atualizada' : 'salva'} com sucesso.` });
             onConferenceSaved(result.savedConference);
-            if (!existingConference) { // Only reset for new entries, not for edits
+            if (!existingConference) { 
                 form.reset({
                     product: { sku: "", description: "" },
                     receivedVolume: 1,
@@ -182,7 +180,7 @@ export function ConferenceForm({ schedule, existingConference, onFinish, onConfe
                     </FormControl>
                   </PopoverTrigger>
                   <PopoverContent className="p-0 w-[--radix-popover-trigger-width]" align="start">
-                    <Command>
+                    <Command filter={() => 1}>
                       <CommandInput
                         placeholder="Buscar produto..."
                         value={productQuery}
@@ -194,7 +192,7 @@ export function ConferenceForm({ schedule, existingConference, onFinish, onConfe
                           {suggestions.map((product, index) => (
                             <CommandItem
                               key={product.sku + '-' + index}
-                              value={`${product.sku} - ${product.description}`}
+                              value={`${product.description} ${product.sku} ${product.item}`}
                               onSelect={() => handleProductSelect(product)}
                             >
                               <CheckIcon
