@@ -50,17 +50,3 @@ export async function findUserByCredentials(credentials: Pick<User, 'username' |
     );
 }
 
-// Verifica a senha do admin e, se correta, define um cookie de autorização.
-export async function verifyAdminPassword(password: string): Promise<{ success: boolean }> {
-    const correctPassword = process.env.ADMIN_ACCESS_PASSWORD;
-    if (password === correctPassword) {
-      cookies().set('admin-authorized', 'true', {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === 'production',
-        path: '/admin',
-        maxAge: 60 * 60, // 1 hora
-      });
-      return { success: true };
-    }
-    return { success: false };
-}

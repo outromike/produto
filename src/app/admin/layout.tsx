@@ -1,6 +1,7 @@
+
 import { Header } from "@/components/layout/header-admin";
 import { redirect } from 'next/navigation';
-import { cookies } from 'next/headers';
+import { getSession } from '@/lib/auth';
 
 // Este layout protege TODAS as rotas dentro de /admin
 // A verificação de autorização é feita aqui.
@@ -9,13 +10,12 @@ export default async function AdminLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const cookieStore = cookies();
-  const adminAuthCookie = cookieStore.get('admin-authorized');
+  const session = await getSession();
 
-  // Se o cookie de autorização do admin não existir ou não for válido,
-  // redireciona para a página de autenticação de admin.
-  if (adminAuthCookie?.value !== 'true') {
-    redirect('/admin/auth');
+  // Se não houver usuário logado ou se o usuário não for 'admin',
+  // redireciona para a página principal do dashboard.
+  if (!session.user || session.user.role !== 'admin') {
+    redirect('/dashboard');
   }
 
   return (

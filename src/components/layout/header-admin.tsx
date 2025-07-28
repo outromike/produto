@@ -14,14 +14,13 @@ export async function Header() {
         <Shield className="h-6 w-6 text-primary" />
         <span>Painel do Administrador</span>
       </Link>
-      <nav className="ml-auto flex items-center gap-2">
-        <Link href="/dashboard/products" className="flex items-center gap-2 font-semibold">
-            <PackageSearch className="h-6 w-6" />
-            <span>Consulta de Produtos</span>
+      <div className="ml-auto flex items-center gap-2">
+        <Link href="/dashboard" className="text-sm font-medium hover:text-primary transition-colors">
+            Voltar ao Dashboard
         </Link>
         <ThemeToggle />
-        <UserNav user={session?.user} />
-      </nav>
+        <UserNav user={session.user} />
+      </div>
     </header>
   );
 }
