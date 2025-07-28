@@ -4,7 +4,7 @@
 import { useState, useMemo, useEffect } from 'react';
 import { ReturnSchedule } from "@/types";
 import { Button } from "@/components/ui/button";
-import { PlusCircle, Loader2, Trash2 } from "lucide-react";
+import { PlusCircle, Loader2, Trash2, X } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -66,16 +66,31 @@ export function SchedulesClient({ initialSchedules }: SchedulesClientProps) {
     setSchedules(initialSchedules);
   }, [initialSchedules]);
 
-
   const [filters, setFilters] = useState({
     query: '',
     carrier: 'all',
     returnReason: 'all',
   });
+  
+  const [queryInput, setQueryInput] = useState('');
 
-  const handleFilterChange = useDebouncedCallback((key: string, value: string) => {
-    setFilters(prev => ({...prev, [key]: value}));
+  const debouncedFilterChange = useDebouncedCallback((value: string) => {
+    setFilters(prev => ({...prev, query: value}));
   }, 300);
+
+  const handleFilterChange = (key: string, value: string) => {
+    setFilters(prev => ({...prev, [key]: value}));
+  };
+
+  const clearFilters = () => {
+    setFilters({
+      query: '',
+      carrier: 'all',
+      returnReason: 'all',
+    });
+    setQueryInput('');
+  };
+
 
   const filteredSchedules = useMemo(() => {
     let sortedSchedules = [...schedules].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
@@ -183,26 +198,34 @@ export function SchedulesClient({ initialSchedules }: SchedulesClientProps) {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             <Input 
                 placeholder="Buscar por cliente, NFD, remessa..."
-                onChange={(e) => handleFilterChange('query', e.target.value)}
+                value={queryInput}
+                onChange={(e) => {
+                    setQueryInput(e.target.value);
+                    debouncedFilterChange(e.target.value)
+                }}
                 className="lg:col-span-2"
             />
-            <Select onValueChange={(value) => handleFilterChange('carrier', value)} defaultValue="all">
+            <Select onValueChange={(value) => handleFilterChange('carrier', value)} value={filters.carrier}>
                 <SelectTrigger><SelectValue placeholder="Transportadora" /></SelectTrigger>
                 <SelectContent>
                     <SelectItem value="all">Todas as Transportadoras</SelectItem>
                     {transportadoras.map(t => <SelectItem key={t} value={t}>{t}</SelectItem>)}
                 </SelectContent>
             </Select>
-            <Select onValueChange={(value) => handleFilterChange('returnReason', value)} defaultValue="all">
+            <Select onValueChange={(value) => handleFilterChange('returnReason', value)} value={filters.returnReason}>
                 <SelectTrigger><SelectValue placeholder="Motivo da Devolução" /></SelectTrigger>
                 <SelectContent>
                     <SelectItem value="all">Todos os Motivos</SelectItem>
                     {motivosDevolucao.map(m => <SelectItem key={m} value={m}>{m}</SelectItem>)}
                 </SelectContent>
             </Select>
+            <Button variant="ghost" onClick={clearFilters} className="lg:col-span-4">
+                <X className="mr-2 h-4 w-4" />
+                Limpar Filtros
+            </Button>
         </div>
          {selectedScheduleIds.length > 0 && (
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-4 pt-4 border-t">
                 <span className="text-sm text-muted-foreground">{selectedScheduleIds.length} agendamento(s) selecionado(s)</span>
                  <Button variant="destructive" size="sm" onClick={handleBulkDeleteRequest}>
                     <Trash2 className="mr-2 h-4 w-4" />
