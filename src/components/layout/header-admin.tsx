@@ -17,6 +17,10 @@ export function Header({ user }: HeaderProps) {
         <span>Painel do Administrador</span>
       </Link>
       <nav className="ml-auto flex items-center gap-2">
+        <Link href="/dashboard/products" className="flex items-center gap-2 font-semibold">
+            <PackageSearch className="h-6 w-6" />
+            <span>Consulta de Produtos</span>
+        </Link>
         <ThemeToggle />
         <UserNav user={user} />
       </nav>

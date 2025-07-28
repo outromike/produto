@@ -14,9 +14,8 @@ export default async function AdminLayout({
     redirect('/login');
   }
 
-  if (session.user.role !== 'admin') {
-    redirect('/dashboard/products');
-  }
+  // A verificação de 'admin' será feita na página específica
+  // para evitar loops de redirecionamento e problemas de acesso.
 
   return (
     <div className="flex min-h-screen w-full flex-col">
