@@ -1,3 +1,4 @@
+
 [
   {
     "username": "admin",
@@ -8,6 +9,7 @@
     "permissions": {
       "schedules": true,
       "products": true,
+      "productManagement": true,
       "receiving": true,
       "conference": true,
       "allocation": true,
@@ -19,11 +21,12 @@
     "username": "olga",
     "password": "olga",
     "role": "user",
-    "name": "",
-    "email": "",
+    "name": "Olga",
+    "email": "olga@example.com",
     "permissions": {
-      "schedules": false,
+      "schedules": true,
       "products": true,
+      "productManagement": false,
       "receiving": true,
       "conference": false,
       "allocation": false,
@@ -40,6 +43,7 @@
     "permissions": {
       "schedules": false,
       "products": false,
+      "productManagement": false,
       "receiving": false,
       "conference": false,
       "allocation": false,
@@ -56,6 +60,7 @@
     "permissions": {
       "schedules": false,
       "products": false,
+      "productManagement": false,
       "receiving": false,
       "conference": false,
       "allocation": false,
@@ -72,6 +77,7 @@
     "permissions": {
       "schedules": false,
       "products": false,
+      "productManagement": false,
       "receiving": false,
       "conference": false,
       "allocation": false,
@@ -88,6 +94,7 @@
     "permissions": {
       "schedules": false,
       "products": false,
+      "productManagement": false,
       "receiving": false,
       "conference": false,
       "allocation": false,
@@ -104,6 +111,7 @@
     "permissions": {
       "schedules": false,
       "products": false,
+      "productManagement": false,
       "receiving": false,
       "conference": false,
       "allocation": false,
@@ -120,6 +128,7 @@
     "permissions": {
       "schedules": false,
       "products": false,
+      "productManagement": false,
       "receiving": false,
       "conference": false,
       "allocation": false,
@@ -136,6 +145,7 @@
     "permissions": {
       "schedules": false,
       "products": false,
+      "productManagement": false,
       "receiving": false,
       "conference": false,
       "allocation": false,
@@ -152,6 +162,7 @@
     "permissions": {
       "schedules": false,
       "products": false,
+      "productManagement": false,
       "receiving": false,
       "conference": false,
       "allocation": false,
@@ -168,6 +179,7 @@
     "permissions": {
       "schedules": false,
       "products": false,
+      "productManagement": false,
       "receiving": false,
       "conference": false,
       "allocation": false,
@@ -184,22 +196,7 @@
     "permissions": {
       "schedules": false,
       "products": false,
-      "receiving": false,
-      "conference": false,
-      "allocation": false,
-      "dashboard": false,
-      "reports": false
-    }
-  },
-  {
-    "username": "operacional",
-    "password": "123",
-    "name": "Operacional Itajaí",
-    "email": "",
-    "role": "user",
-    "permissions": {
-      "schedules": false,
-      "products": true,
+      "productManagement": false,
       "receiving": false,
       "conference": false,
       "allocation": false,
