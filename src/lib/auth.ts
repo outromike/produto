@@ -1,4 +1,6 @@
 
+'use server';
+
 import { getIronSession, IronSession } from 'iron-session';
 import { cookies } from 'next/headers';
 import { SessionPayload, User } from '@/types';
@@ -13,17 +15,20 @@ const sessionOptions = {
   },
 };
 
-export async function getSession(): Promise<IronSession<SessionPayload> | null> {
-    try {
-        const session = await getIronSession<SessionPayload>(cookies(), sessionOptions);
-        if (!session.user) {
-            return null;
-        }
-        return session;
-    } catch (error) {
+export async function getSession(): Promise<IronSession<SessionPayload>> {
+    const session = await getIronSession<SessionPayload>(cookies(), sessionOptions);
+    return session;
+}
+
+// This is a server action that can be called from client components.
+export async function getSessionData(): Promise<IronSession<SessionPayload> | null> {
+    const session = await getSession();
+    if (!session.user) {
         return null;
     }
+    return session;
 }
+
 
 export async function setSession(user: User): Promise<IronSession<SessionPayload>> {
   const session = await getIronSession<SessionPayload>(cookies(), sessionOptions);
@@ -54,4 +59,14 @@ export async function findUserByCredentials(credentials: Pick<User, 'username' |
     return users.find(
       (u) => u.username === credentials.username && u.password === credentials.password
     );
+}
+
+export async function verifyAdminPassword(password: string): Promise<{ success: boolean }> {
+    const users = await getUsers();
+    const adminUser = users.find(u => u.username === 'admin');
+
+    if (adminUser && adminUser.password === password) {
+        return { success: true };
+    }
+    return { success: false };
 }
