@@ -2,7 +2,7 @@
 
 import { redirect } from 'next/navigation';
 
-// Ação simplificada para aceitar o upload, sem processamento.
+// Ação simplificada para aceitar o upload de agendamentos, sem processamento.
 export async function uploadReturnSchedules(formData: FormData): Promise<{ error?: string }> {
     const file = formData.get('fileAgendamento') as File | null;
 
@@ -11,9 +11,8 @@ export async function uploadReturnSchedules(formData: FormData): Promise<{ error
     }
 
     try {
-        const buffer = Buffer.from(await file.arrayBuffer());
-        // Apenas para confirmar que o arquivo foi recebido.
-        console.log(`Arquivo ${file.name} recebido com ${buffer.length} bytes. Sem processamento adicional.`);
+        // Apenas para confirmar que o arquivo foi recebido, sem processamento.
+        console.log(`Arquivo ${file.name} recebido. Nenhum processamento será feito por enquanto.`);
         
     } catch (error) {
         console.error('File processing error:', error);
@@ -23,6 +22,7 @@ export async function uploadReturnSchedules(formData: FormData): Promise<{ error
         return { error: 'Ocorreu um erro desconhecido ao processar o arquivo.' };
     }
     
-    // Retorna um objeto vazio em caso de sucesso, o cliente irá tratar a UI.
+    // Não redireciona aqui para que o Dialog possa ser fechado pelo cliente.
+    // Em caso de sucesso, retorna um objeto vazio.
     return {}; 
 }

@@ -1,23 +1,26 @@
-
 "use client";
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Upload, Shield, Users, Loader2, AlertCircle, FileClock } from "lucide-react";
+import { Upload, Shield, Users, Loader2, AlertCircle, FileClock, Info } from "lucide-react";
 import {
   AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
   AlertDialogContent,
   AlertDialogDescription,
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
+  AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { verifyAdminPassword } from "@/lib/auth";
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
+import { DevolucaoUploadForm } from "@/components/upload/devolucao-upload-form";
 
 export default function AdminDashboardPage() {
   const [isAuthorized, setIsAuthorized] = useState(false);
@@ -25,8 +28,11 @@ export default function AdminDashboardPage() {
   const [password, setPassword] = useState("");
   const [authError, setAuthError] = useState("");
   const [isVerifying, setIsVerifying] = useState(false);
+  const [showUploadDialog, setShowUploadDialog] = useState(false);
+
 
   useEffect(() => {
+    // Tenta verificar se a autorização já foi concedida na sessão do navegador.
     if (sessionStorage.getItem("admin-authorized") === "true") {
       setIsAuthorized(true);
       setShowPasswordDialog(false);
@@ -123,23 +129,35 @@ export default function AdminDashboardPage() {
             </Button>
           </CardContent>
         </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle>Agendamento de Devolução</CardTitle>
-            <CardDescription>
-              Faça o upload da planilha de agendamentos de devolução.
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-             <Button asChild>
-              <Link href="/admin/upload/devolucao">
-                <FileClock className="mr-2 h-4 w-4" />
-                Agendar Devoluções
-              </Link>
-            </Button>
-          </CardContent>
-        </Card>
+        
+        {/* Card para Agendamento de Devolução com AlertDialog */}
+        <AlertDialog open={showUploadDialog} onOpenChange={setShowUploadDialog}>
+          <Card>
+            <CardHeader>
+              <CardTitle>Agendamento de Devolução</CardTitle>
+              <CardDescription>
+                Faça o upload da planilha de agendamentos de devolução.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <AlertDialogTrigger asChild>
+                <Button>
+                  <FileClock className="mr-2 h-4 w-4" />
+                  Agendar Devoluções
+                </Button>
+              </AlertDialogTrigger>
+            </CardContent>
+          </Card>
+           <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Upload de Agendamento de Devolução</AlertDialogTitle>
+                <AlertDialogDescription>
+                  Faça o upload do arquivo CSV para agendar as devoluções.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <DevolucaoUploadForm setOpen={setShowUploadDialog} />
+          </AlertDialogContent>
+        </AlertDialog>
         
         <Card>
            <CardHeader>
